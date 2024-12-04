@@ -19,12 +19,20 @@ import Announcements from './components/Announcements';
 import ApprovalWorkflow from "./components/ApprovalWorkflow";
 import RequestPage from "./components/RequestPage";
 import ProfilePage from "./components/ProfilePage";
+import Login from './components/Login';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider, useAuth } from './auth'; // Import AuthProvider and useAuth
+import ProtectedRoute from './ProtectedRoute'; // Custom protected route component
 
 function App() {
   return (
-    <Router>
-      <MainLayout />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <ToastContainer />
+        <MainLayout />
+      </Router>
+    </AuthProvider>
   );
 }
 
@@ -34,30 +42,155 @@ const MainLayout = () => {
       <Navbar />
       <div className="flex-1 overflow-auto">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/courses" element={<CourseManagement />} />
-          <Route path="/courses/:id" element={<CourseDetails />} />
-          <Route path="/students" element={<StudentList />} />
-          <Route path="/students/:id" element={<StudentDetails />} />
-          <Route path="/attendance" element={<Attendance />} />
-          <Route path="/attendance/:id" element={<StudentAttendance />} />
-          <Route path="/edit-attendance/:id" element={<EditAttendance />} />
-          <Route path="/exams" element={<Exam />} />
-          <Route path="/exams/:id" element={<ExamDetails />} />
-          <Route path="/grades" element={<Grades />} />
-          <Route path="/grades/:id" element={<StudentGrades />} />
-          <Route path="/communication" element={<CommunicationPage />} />
-          <Route path="/announcements" element={<Announcements />} />
-          <Route path="/approval" element={<ApprovalWorkflow />} />
-          <Route path='/request' element={<RequestPage />} />
-          <Route path='/profile' element={<ProfilePage />} />
-
-
+          <Route path="/" element={<Login />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courses"
+            element={
+              <ProtectedRoute>
+                <CourseManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/course/:id"
+            element={
+              <ProtectedRoute>
+                <CourseDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/students"
+            element={
+              <ProtectedRoute>
+                <StudentList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/students/:id"
+            element={
+              <ProtectedRoute>
+                <StudentDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/attendance"
+            element={
+              <ProtectedRoute>
+                <Attendance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/attendance/:id"
+            element={
+              <ProtectedRoute>
+                <StudentAttendance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-attendance/:id"
+            element={
+              <ProtectedRoute>
+                <EditAttendance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exams"
+            element={
+              <ProtectedRoute>
+                <Exam />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exams/:id"
+            element={
+              <ProtectedRoute>
+                <ExamDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/grades"
+            element={
+              <ProtectedRoute>
+                <Grades />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/grades/:id"
+            element={
+              <ProtectedRoute>
+                <StudentGrades />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/communication"
+            element={
+              <ProtectedRoute>
+                <CommunicationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/announcements"
+            element={
+              <ProtectedRoute>
+                <Announcements />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/approval"
+            element={
+              <ProtectedRoute>
+                <ApprovalWorkflow />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/request"
+            element={
+              <ProtectedRoute>
+                <RequestPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
     </div>
   );
-}
+};
 
 export default App;

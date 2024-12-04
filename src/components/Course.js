@@ -1,25 +1,91 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-const coursesData = [
-  {
-    id: 1,
-    name: 'Introduction to Computer Science',
-    description: 'Learn the basics of computer science and programming.',
-    credits: 3,
-    schedule: 'Mon-Wed-Fri 10:00 AM - 11:00 AM',
-  },
-  {
-    id: 2,
-    name: 'Advanced Mathematics',
-    description: 'Explore advanced topics in mathematics.',
-    credits: 4,
-    schedule: 'Tue-Thu 1:00 PM - 3:00 PM',
-  },
-  // Add more course objects here
-];
+import React, { useEffect, useState } from "react";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { auth, db } from "../firebase"; // Firebase configuration
+import { onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const FacultyCourseList = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchFacultyCourses = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        onAuthStateChanged(auth, async (user) => {
+          if (!user) {
+            setError("No user is logged in.");
+            setLoading(false);
+            return;
+          }
+
+          const facultyDocRef = doc(db, "faculty", user.uid);
+          const facultyDocSnap = await getDoc(facultyDocRef);
+
+          if (!facultyDocSnap.exists()) {
+            setError("Faculty document not found.");
+            setLoading(false);
+            return;
+          }
+
+          const facultyData = facultyDocSnap.data();
+
+          if (!facultyData.courses || facultyData.courses.length === 0) {
+            setError("No courses assigned to this faculty.");
+            setLoading(false);
+            return;
+          }
+
+          const coursePromises = facultyData.courses.map(async (courseId) => {
+            const coursePath = `/courses/Computer Science & Engineering (Data Science)/years/III/sections/A/courseDetails/${courseId}`;
+            const courseRef = doc(db, coursePath);
+            const courseSnap = await getDoc(courseRef);
+
+            if (courseSnap.exists()) {
+              return { id: courseId, ...courseSnap.data() };
+            } else {
+              return null;
+            }
+          });
+
+          const resolvedCourses = (await Promise.all(coursePromises)).filter(
+            (course) => course !== null
+          );
+
+          if (resolvedCourses.length === 0) {
+            setError("No valid courses found for this faculty.");
+            setCourses([]);
+          } else {
+            setCourses(resolvedCourses);
+          }
+
+          setLoading(false);
+        });
+      } catch (err) {
+        setError("Error fetching faculty courses.");
+        setLoading(false);
+      }
+    };
+
+    fetchFacultyCourses();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center text-gray-600">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-600">{error}</div>;
+  }
+
+  if (courses.length === 0) {
+    return <div className="text-center text-red-600">No courses available for this faculty.</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <header className="mb-8">
@@ -28,23 +94,19 @@ const FacultyCourseList = () => {
       </header>
 
       <section className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {coursesData.map((course) => (
-          <div key={course.id} className="bg-white rounded-lg shadow-md p-6 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
-            <h3 className="text-2xl font-bold text-gray-800">{course.name}</h3>
-            <p className="text-gray-700 mt-2">{course.description}</p>
-            <div className="mt-4">
-              <span className="block text-sm text-gray-600">
-                <strong>Credits:</strong> {course.credits}
-              </span>
-              <span className="block text-sm text-gray-600">
-                <strong>Schedule:</strong> {course.schedule}
-              </span>
-            </div>
-            <div className="mt-4 text-center">
-              <Link to={`/courses/${course.id}`} className="text-blue-500 hover:underline">
-                View Details
-              </Link>
-            </div>
+        {courses.map((course) => (
+          <div
+            key={course.id}
+            className="bg-white rounded-lg shadow-md p-6 transition-transform transform hover:-translate-y-1 hover:shadow-lg"
+          >
+            <h3 className="text-2xl font-bold text-gray-800">{course.courseName}</h3>
+            <p className="text-gray-700 mt-2">{course.courseCode}</p>
+            <button
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => navigate(`/course/${course.id}`, { state: course })}
+            >
+              View
+            </button>
           </div>
         ))}
       </section>

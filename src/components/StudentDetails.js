@@ -1,39 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-
-const studentsData = [
-  {
-    id: 1,
-    name: 'Alice Johnson',
-    email: 'alice.johnson@example.com',
-    course: 'Computer Science',
-    profilePicture: 'https://via.placeholder.com/150',
-    details: {
-      age: 20,
-      address: '123 Main St, Springfield',
-      guardian: 'John Johnson',
-      phone: '123-456-7890',
-    },
-  },
-  {
-    id: 2,
-    name: 'Bob Smith',
-    email: 'bob.smith@example.com',
-    course: 'Mathematics',
-    profilePicture: 'https://via.placeholder.com/150',
-    details: {
-      age: 22,
-      address: '456 Elm St, Springfield',
-      guardian: 'Jane Smith',
-      phone: '098-765-4321',
-    },
-  },
-  // Add more student objects here
-];
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase'; // Firebase configuration
 
 const StudentDetails = () => {
-  const { id } = useParams();
-  const student = studentsData.find(student => student.id === parseInt(id));
+  const { id } = useParams(); // Get student ID from URL
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStudentDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Adjust the path if students are nested in a specific subcollection
+        const studentDocRef = doc(db, `students/III/A/${id}`);
+        const studentDocSnap = await getDoc(studentDocRef);
+
+        if (studentDocSnap.exists()) {
+          setStudent(studentDocSnap.data());
+        } else {
+          setError('Student not found.');
+        }
+      } catch (err) {
+        console.error('Error fetching student details:', err);
+        setError('Failed to fetch student details.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudentDetails();
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-6 bg-white rounded-lg shadow-md">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 bg-white rounded-lg shadow-md">{error}</div>;
+  }
 
   if (!student) {
     return <div className="p-6 bg-white rounded-lg shadow-md">Student not found.</div>;
@@ -43,24 +51,38 @@ const StudentDetails = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex items-center mb-6">
-          <img src={student.profilePicture} alt="Profile" className="w-32 h-32 rounded-full mr-6" />
+          <img
+            src={student.profilePicture || 'https://via.placeholder.com/150'}
+            alt="Profile"
+            className="w-32 h-32 rounded-full mr-6"
+          />
           <div>
             <h2 className="text-4xl font-bold text-gray-800">{student.name}</h2>
             <p className="text-lg text-gray-700 mb-4">{student.email}</p>
           </div>
         </div>
         <div className="mb-4">
-          <h3 className="text-xl font-bold text-gray-800">Course</h3>
-          <p className="text-gray-600">{student.course}</p>
-        </div>
-        <div className="mb-4">
-          <h3 className="text-xl font-bold text-gray-800">Details</h3>
-          <ul className="list-disc pl-5 text-gray-600">
-            <li><strong>Age:</strong> {student.details.age}</li>
-            <li><strong>Address:</strong> {student.details.address}</li>
-            <li><strong>Guardian:</strong> {student.details.guardian}</li>
-            <li><strong>Phone:</strong> {student.details.phone}</li>
-          </ul>
+          <p className="text-gray-600">
+            <strong>Name:</strong> {student.name}
+          </p>
+          <p className="text-gray-600">
+            <strong>Email:</strong> {student.email}
+          </p>
+          <p className="text-gray-600">
+            <strong>Roll No:</strong> {student.rollNo}
+          </p>
+          <p className="text-gray-600">
+            <strong>Mobile:</strong> {student.studentMobile}
+          </p>
+          <p className="text-gray-600">
+            <strong>Father's Name:</strong> {student.fatherName}
+          </p>
+          <p className="text-gray-600">
+            <strong>Mother's Name:</strong> {student.motherName}
+          </p>
+          <p className="text-gray-600">
+            <strong>Father's Mobile:</strong> {student.fatherMobile}
+          </p>
         </div>
         <div className="mt-6 text-center">
           <Link to="/students" className="text-blue-500 hover:underline">
