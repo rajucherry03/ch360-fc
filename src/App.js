@@ -20,10 +20,13 @@ import ApprovalWorkflow from "./components/ApprovalWorkflow";
 import RequestPage from "./components/RequestPage";
 import ProfilePage from "./components/ProfilePage";
 import Login from './components/Login';
+import FacultyCourseApproal from './components/FacultyCourseApproval'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider, useAuth } from './auth'; // Import AuthProvider and useAuth
 import ProtectedRoute from './ProtectedRoute'; // Custom protected route component
+import CoordinatorDashboard from './components/CoordinatorApproval';
+import MentorApproval from './components/MentorApproval';
 
 function App() {
   return (
@@ -184,6 +187,30 @@ const MainLayout = () => {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/courses-approval"
+            element={
+              <ProtectedRoute>
+                <FacultyCourseApproal />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/coordinators-approval"
+            element={
+              <ProtectedRoute>
+                <CoordinatorDashboard />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/mentors-approval"
+            element={
+              <ProtectedRoute>
+                <MentorApproval />
               </ProtectedRoute>
             }
           />
