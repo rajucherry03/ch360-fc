@@ -7,6 +7,7 @@ import {
   getDocs,
   doc,
   getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth"; // Import the useAuth hook
@@ -113,6 +114,7 @@ const FacultyCourseApproval = () => {
             courseName,
             status: courseEntry.status || "Pending",
             studentId: student.id,
+            courseEntry, // Include the original courseEntry object for updates
           };
         })
       );
@@ -125,6 +127,50 @@ const FacultyCourseApproval = () => {
       setCourses([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateStatus = async (studentId, newStatus, courseEntry) => {
+    try {
+      // Fetch the latest `noDues` document
+      const noDuesCollectionRef = collection(db, "noDues", year, section);
+      const latestNoDuesQuery = query(
+        noDuesCollectionRef,
+        orderBy("generatedAt", "desc"),
+        limit(1)
+      );
+      const querySnapshot = await getDocs(latestNoDuesQuery);
+
+      if (querySnapshot.empty) {
+        console.log("NoDues document not found.");
+        return;
+      }
+
+      const latestNoDuesDoc = querySnapshot.docs[0];
+      const docRef = latestNoDuesDoc.ref;
+      const noDuesData = latestNoDuesDoc.data();
+
+      // Update the status in the `courses_faculty` array
+      const updatedStudents = noDuesData.students.map((student) => {
+        if (student.id === studentId) {
+          const updatedCoursesFaculty = student.courses_faculty.map((cf) =>
+            cf.courseId === courseEntry.courseId && cf.facultyId === courseEntry.facultyId
+              ? { ...cf, status: newStatus }
+              : cf
+          );
+          return { ...student, courses_faculty: updatedCoursesFaculty };
+        }
+        return student;
+      });
+
+      // Write the updated data back to Firestore
+      await updateDoc(docRef, { students: updatedStudents });
+      console.log("Status updated successfully!");
+
+      // Refresh the data
+      fetchData();
+    } catch (error) {
+      console.error("Error updating status:", error);
     }
   };
 
@@ -230,7 +276,11 @@ const FacultyCourseApproval = () => {
                         <button
                           className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
                           onClick={() =>
-                            console.log("Accept action for:", course.studentId)
+                            updateStatus(
+                              course.studentId,
+                              "Accepted",
+                              course.courseEntry
+                            )
                           }
                         >
                           Accept
@@ -238,7 +288,11 @@ const FacultyCourseApproval = () => {
                         <button
                           className="bg-red-500 text-white px-3 py-1 rounded-md"
                           onClick={() =>
-                            console.log("Reject action for:", course.studentId)
+                            updateStatus(
+                              course.studentId,
+                              "Rejected",
+                              course.courseEntry
+                            )
                           }
                         >
                           Reject
