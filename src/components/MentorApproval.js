@@ -28,6 +28,12 @@ const MentorApproval = () => {
     }
   }, [loggedInMentorId]);
 
+  const fetchNameById = async (collectionName, id) => {
+    const docRef = doc(db, collectionName, id);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? docSnap.data().name || "Unknown" : "Unknown";
+  };
+
   const fetchData = async () => {
     if (!loggedInMentorId || !year || !section) {
       console.error("Mentor ID, year, or section is required.");
@@ -80,6 +86,21 @@ const MentorApproval = () => {
               if (studentSnap.exists()) {
                 const studentData = studentSnap.data();
 
+                const coordinators = await Promise.all(
+                  student.coordinators.map(async (coordinator) => ({
+                    ...coordinator,
+                    name: await fetchNameById("faculty", coordinator.id),
+                  }))
+                );
+
+                const coursesFaculty = await Promise.all(
+                  student.courses_faculty.map(async (courseFaculty) => ({
+                    ...courseFaculty,
+                    courseName: await fetchNameById(`courses/Computer Science & Engineering (Data Science)/years/${year}/sections/${section}/courseDetails`, courseFaculty.courseId),
+                    facultyName: await fetchNameById("faculty", courseFaculty.facultyId),
+                  }))
+                );
+
                 return {
                   rollNo: studentData.rollNo || "N/A",
                   studentName: studentData.name || "N/A",
@@ -87,6 +108,8 @@ const MentorApproval = () => {
                   status: matchedMentor.status || "Pending",
                   studentId: student.id,
                   mentorIndex: student.mentors.indexOf(matchedMentor),
+                  coordinators,
+                  coursesFaculty,
                 };
               }
             }
@@ -153,17 +176,17 @@ const MentorApproval = () => {
   }, [loggedInMentorId, year, section]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-        Mentor Approval
-      </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 w-full max-w-4xl">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+      <h1 className="text-3xl font-bold text-blue-700 mb-6">Mentor Approval</h1>
+  
+      {/* Filters Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-6">
         <div>
-          <label className="block text-gray-700 font-medium mb-2">Year:</label>
+          <label className="block text-gray-700 font-semibold mb-2">Year:</label>
           <select
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">Select Year</option>
             {years.map((yr) => (
@@ -174,11 +197,11 @@ const MentorApproval = () => {
           </select>
         </div>
         <div>
-          <label className="block text-gray-700 font-medium mb-2">Section:</label>
+          <label className="block text-gray-700 font-semibold mb-2">Section:</label>
           <select
             value={section}
             onChange={(e) => setSection(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">Select Section</option>
             {sections.map((sec) => (
@@ -189,52 +212,116 @@ const MentorApproval = () => {
           </select>
         </div>
       </div>
+  
+      {/* Loading Spinner */}
       {loading ? (
-        <p className="text-center text-blue-600 font-medium">Loading...</p>
+        <div className="flex justify-center items-center">
+          <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+          <p className="ml-4 text-blue-600 font-medium">Loading...</p>
+        </div>
       ) : (
+        /* Table Section */
         <div className="overflow-x-auto w-full max-w-4xl">
-          <table className="table-auto w-full border-collapse border border-gray-300">
+          <table className="table-auto w-full border-collapse border border-gray-300 shadow-sm">
             <thead>
-              <tr className="bg-gray-100">
-                <th className="px-4 py-2 border border-gray-300 text-left">Roll No</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Student Name</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Mentor</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Status</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Action</th>
+              <tr className="bg-blue-100">
+                <th className="px-4 py-2 border text-left font-semibold">Roll No</th>
+                <th className="px-4 py-2 border text-left font-semibold">Student Name</th>
+                <th className="px-4 py-2 border text-left font-semibold">Mentor</th>
+                <th className="px-4 py-2 border text-left font-semibold">Status</th>
+                <th className="px-4 py-2 border text-left font-semibold">Coordinators</th>
+                <th className="px-4 py-2 border text-left font-semibold">Courses Faculty</th>
+                <th className="px-4 py-2 border text-left font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {mentors.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-2 text-center text-gray-500">
+                  <td colSpan="7" className="px-4 py-2 text-center text-gray-500">
                     No data available
                   </td>
                 </tr>
               ) : (
-                mentors
-                  .sort((a, b) => a.rollNo.localeCompare(b.rollNo)) // Sort by roll number
-                  .map((mentor, index) => (
-                    <tr key={index} className="hover:bg-gray-50 transition-all">
-                      <td className="px-4 py-2 border border-gray-300">{mentor.rollNo}</td>
-                      <td className="px-4 py-2 border border-gray-300">{mentor.studentName}</td>
-                      <td className="px-4 py-2 border border-gray-300">{mentor.mentorName}</td>
-                      <td className="px-4 py-2 border border-gray-300">{mentor.status}</td>
-                      <td className="px-4 py-2 border border-gray-300">
+                mentors.map((mentor, index) => {
+                  const allAccepted = mentor.coordinators.every((c) => c.status === "Accepted") &&
+                                      mentor.coursesFaculty.every((cf) => cf.status === "Accepted");
+                  return (
+                    <tr key={index} className="hover:bg-gray-50 transition">
+                      <td className="px-4 py-2 border">{mentor.rollNo}</td>
+                      <td className="px-4 py-2 border">{mentor.studentName}</td>
+                      <td className="px-4 py-2 border">{mentor.mentorName}</td>
+                      <td className="px-4 py-2 border">
+                        <span
+                          className={`px-2 py-1 rounded-full text-sm text-white ${
+                            mentor.status === "Accepted"
+                              ? "bg-green-500"
+                              : mentor.status === "Rejected"
+                              ? "bg-red-500"
+                              : "bg-yellow-500"
+                          }`}
+                        >
+                          {mentor.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 border">
+                        {mentor.coordinators.map((coordinator, i) => (
+                          <span
+                            key={i}
+                            className={`inline-block px-2 py-1 rounded-full text-xs font-medium text-white ${
+                              coordinator.status === "Accepted"
+                                ? "bg-green-500"
+                                : coordinator.status === "Rejected"
+                                ? "bg-red-500"
+                                : "bg-yellow-500"
+                            } mr-1`}
+                          >
+                            {coordinator.name}
+                          </span>
+                        ))}
+                      </td>
+                      <td className="px-4 py-2 border">
+                        {mentor.coursesFaculty.map((courseFaculty, i) => (
+                          <span
+                            key={i}
+                            className={`inline-block px-2 py-1 rounded-full text-xs font-medium text-white ${
+                              courseFaculty.status === "Accepted"
+                                ? "bg-green-500"
+                                : courseFaculty.status === "Rejected"
+                                ? "bg-red-500"
+                                : "bg-yellow-500"
+                            } mr-1`}
+                          >
+                             {courseFaculty.facultyName}
+                          </span>
+                        ))}
+                      </td>
+                      <td className="px-4 py-2 border">
                         <button
-                          className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
-                          onClick={() => updateStatus(mentor.studentId, mentor.mentorIndex, "Accepted")}
+                          className={`bg-green-500 text-white px-3 py-1 rounded-md mr-2 ${
+                            !allAccepted ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                          onClick={() =>
+                            updateStatus(mentor.studentId, mentor.mentorIndex, "Accepted")
+                          }
+                          disabled={!allAccepted}
                         >
                           Accept
                         </button>
                         <button
-                          className="bg-red-500 text-white px-3 py-1 rounded-md"
-                          onClick={() => updateStatus(mentor.studentId, mentor.mentorIndex, "Rejected")}
+                          className={`bg-red-500 text-white px-3 py-1 rounded-md ${
+                            !allAccepted ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                          onClick={() =>
+                            updateStatus(mentor.studentId, mentor.mentorIndex, "Rejected")
+                          }
+                          disabled={!allAccepted}
                         >
                           Reject
                         </button>
                       </td>
                     </tr>
-                  ))
+                  );
+                })
               )}
             </tbody>
           </table>
