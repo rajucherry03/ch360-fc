@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth";
 
@@ -28,17 +37,24 @@ const CoordinatorDashboard = () => {
 
     setLoading(true);
     try {
-      const noDuesDocRef = doc(db, "noDues", year, section, "tDgqwVLD6u4h5LYStOFD");
-      const noDuesSnap = await getDoc(noDuesDocRef);
+      // Query to get the latest noDues document by generatedAt timestamp
+      const noDuesCollectionRef = collection(db, `noDues/${year}/${section}`);
+      const latestNoDuesQuery = query(
+        noDuesCollectionRef,
+        orderBy("generatedAt", "desc"),
+        limit(1)
+      );
+      const querySnapshot = await getDocs(latestNoDuesQuery);
 
-      if (!noDuesSnap.exists()) {
+      if (querySnapshot.empty) {
         console.error("No data found for the specified year and section.");
         setCoordinators([]);
         setLoading(false);
         return;
       }
 
-      const noDuesData = noDuesSnap.data();
+      const noDuesDoc = querySnapshot.docs[0];
+      const noDuesData = noDuesDoc.data();
 
       if (!noDuesData.students || noDuesData.students.length === 0) {
         console.log("No students found in this section.");
@@ -58,7 +74,7 @@ const CoordinatorDashboard = () => {
               const coordinatorRef = doc(db, "faculty", matchedCoordinator.id);
               const coordinatorSnap = await getDoc(coordinatorRef);
 
-              const studentRef = doc(db, "students", year, section, student.id);
+              const studentRef = doc(db, `students/${year}/${section}`, student.id);
               const studentSnap = await getDoc(studentRef);
 
               if (coordinatorSnap.exists() && studentSnap.exists()) {
@@ -96,11 +112,20 @@ const CoordinatorDashboard = () => {
 
   const updateStatus = async (studentId, coordinatorIndex, newStatus) => {
     try {
-      const noDuesDocRef = doc(db, "noDues", year, section, "tDgqwVLD6u4h5LYStOFD");
-      const noDuesSnap = await getDoc(noDuesDocRef);
+      // Query to get the latest noDues document by date and time
+      const noDuesCollectionRef = collection(db, `noDues/${year}/${section}`);
+      const latestNoDuesQuery = query(
+        noDuesCollectionRef,
+        orderBy("generatedAt", "desc"),
+        limit(1)
+      );
+      const querySnapshot = await getDocs(latestNoDuesQuery);
 
-      if (noDuesSnap.exists()) {
-        const noDuesData = noDuesSnap.data();
+      if (!querySnapshot.empty) {
+        const noDuesDoc = querySnapshot.docs[0];
+        const noDuesDocRef = doc(db, `noDues/${year}/${section}`, noDuesDoc.id);
+        const noDuesData = noDuesDoc.data();
+
         const updatedStudents = noDuesData.students.map((student) => {
           if (student.id === studentId) {
             const updatedCoordinators = student.coordinators.map((coordinator, index) => {
@@ -116,7 +141,7 @@ const CoordinatorDashboard = () => {
 
         await updateDoc(noDuesDocRef, { students: updatedStudents });
         console.log("Status updated successfully!");
-        fetchData();
+        fetchData(); // Refresh data
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -124,7 +149,9 @@ const CoordinatorDashboard = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    if (year && section && loggedInFacultyId) {
+      fetchData();
+    }
   }, [year, section, loggedInFacultyId]);
 
   return (

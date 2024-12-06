@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../firebase"; // Firestore configuration
 import { useAuth } from "../auth"; // Authentication hook to get logged-in mentor
 
@@ -7,8 +7,18 @@ const MentorApproval = () => {
   const { user } = useAuth(); // Get the logged-in user
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [year, setYear] = useState("");
+  const [section, setSection] = useState("");
 
   const loggedInMentorId = user?.uid; // Mentor ID from authentication
+
+  const years = [
+    { label: "I", value: "I" },
+    { label: "II", value: "II" },
+    { label: "III", value: "III" },
+    { label: "IV", value: "IV" },
+  ];
+  const sections = ["A", "B", "C", "D"];
 
   useEffect(() => {
     if (loggedInMentorId) {
@@ -19,45 +29,45 @@ const MentorApproval = () => {
   }, [loggedInMentorId]);
 
   const fetchData = async () => {
-    if (!loggedInMentorId) {
-      console.error("Mentor ID is required.");
+    if (!loggedInMentorId || !year || !section) {
+      console.error("Mentor ID, year, or section is required.");
       return;
     }
-  
+
     setLoading(true);
     try {
-      // Fetch the noDues document
-      const noDuesDocRef = doc(db, "noDues", "III", "A", "tDgqwVLD6u4h5LYStOFD"); // Adjust path as needed
-      const noDuesSnap = await getDoc(noDuesDocRef);
-  
-      if (!noDuesSnap.exists()) {
-        console.error("No data found in Firestore for mentors.");
+      // Query to get the latest `noDues` document based on year and section
+      const noDuesCollectionRef = collection(db, "noDues", year, section);
+      const latestNoDuesQuery = query(noDuesCollectionRef, orderBy("generatedAt", "desc"), limit(1));
+      const querySnapshot = await getDocs(latestNoDuesQuery);
+
+      if (querySnapshot.empty) {
+        console.error("No noDues document found.");
         setMentors([]);
         setLoading(false);
         return;
       }
-  
-      const noDuesData = noDuesSnap.data();
+
+      const latestNoDuesDoc = querySnapshot.docs[0];
+      const noDuesData = latestNoDuesDoc.data();
       console.log("Fetched NoDues Data:", noDuesData);
-  
+
       if (!noDuesData.students || noDuesData.students.length === 0) {
         console.log("No students found.");
         setMentors([]);
         setLoading(false);
         return;
       }
-  
+
       const fetchedMentors = await Promise.all(
         noDuesData.students.map(async (student) => {
           if (student.mentors) {
-            const matchedMentor = student.mentors.find(
-              (mentor) => mentor.id === loggedInMentorId
-            );
-  
+            const matchedMentor = student.mentors.find((mentor) => mentor.id === loggedInMentorId);
+
             if (matchedMentor) {
-              const studentRef = doc(db, "students", "III", "A", student.id); // Adjust path
+              const studentRef = doc(db, "students", year, section, student.id);
               const studentSnap = await getDoc(studentRef);
-  
+
               let mentorName = "Unknown";
               if (matchedMentor.id) {
                 const mentorRef = doc(db, "faculty", matchedMentor.id); // Fetch mentor details
@@ -66,10 +76,10 @@ const MentorApproval = () => {
                   ? mentorSnap.data().name || "Unknown"
                   : "Unknown";
               }
-  
+
               if (studentSnap.exists()) {
                 const studentData = studentSnap.data();
-  
+
                 return {
                   rollNo: studentData.rollNo || "N/A",
                   studentName: studentData.name || "N/A",
@@ -84,7 +94,7 @@ const MentorApproval = () => {
           return null;
         })
       );
-  
+
       setMentors(fetchedMentors.filter(Boolean)); // Filter out null values
     } catch (error) {
       console.error("Error fetching mentors:", error);
@@ -93,11 +103,22 @@ const MentorApproval = () => {
       setLoading(false);
     }
   };
-  
 
   const updateStatus = async (studentId, mentorIndex, newStatus) => {
     try {
-      const noDuesDocRef = doc(db, "noDues", "III", "A", "tDgqwVLD6u4h5LYStOFD"); // Adjust path
+      // Query the latest noDues document path dynamically
+      const noDuesCollectionRef = collection(db, "noDues", year, section);
+      const latestNoDuesQuery = query(noDuesCollectionRef, orderBy("generatedAt", "desc"), limit(1));
+      const querySnapshot = await getDocs(latestNoDuesQuery);
+
+      if (querySnapshot.empty) {
+        console.error("No noDues document found for updating.");
+        return;
+      }
+
+      const latestNoDuesDoc = querySnapshot.docs[0];
+      const noDuesDocRef = latestNoDuesDoc.ref;
+
       const noDuesSnap = await getDoc(noDuesDocRef);
 
       if (noDuesSnap.exists()) {
@@ -126,14 +147,48 @@ const MentorApproval = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [loggedInMentorId]);
+    if (loggedInMentorId && year && section) {
+      fetchData();
+    }
+  }, [loggedInMentorId, year, section]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center px-4">
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
         Mentor Approval
       </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 w-full max-w-4xl">
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Year:</label>
+          <select
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select Year</option>
+            {years.map((yr) => (
+              <option key={yr.value} value={yr.value}>
+                {yr.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Section:</label>
+          <select
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select Section</option>
+            {sections.map((sec) => (
+              <option key={sec} value={sec}>
+                {sec}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
       {loading ? (
         <p className="text-center text-blue-600 font-medium">Loading...</p>
       ) : (
@@ -156,28 +211,30 @@ const MentorApproval = () => {
                   </td>
                 </tr>
               ) : (
-                mentors.map((mentor, index) => (
-                  <tr key={index} className="hover:bg-gray-50 transition-all">
-                    <td className="px-4 py-2 border border-gray-300">{mentor.rollNo}</td>
-                    <td className="px-4 py-2 border border-gray-300">{mentor.studentName}</td>
-                    <td className="px-4 py-2 border border-gray-300">{mentor.mentorName}</td>
-                    <td className="px-4 py-2 border border-gray-300">{mentor.status}</td>
-                    <td className="px-4 py-2 border border-gray-300">
-                      <button
-                        className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
-                        onClick={() => updateStatus(mentor.studentId, mentor.mentorIndex, "Accepted")}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        className="bg-red-500 text-white px-3 py-1 rounded-md"
-                        onClick={() => updateStatus(mentor.studentId, mentor.mentorIndex, "Rejected")}
-                      >
-                        Reject
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                mentors
+                  .sort((a, b) => a.rollNo.localeCompare(b.rollNo)) // Sort by roll number
+                  .map((mentor, index) => (
+                    <tr key={index} className="hover:bg-gray-50 transition-all">
+                      <td className="px-4 py-2 border border-gray-300">{mentor.rollNo}</td>
+                      <td className="px-4 py-2 border border-gray-300">{mentor.studentName}</td>
+                      <td className="px-4 py-2 border border-gray-300">{mentor.mentorName}</td>
+                      <td className="px-4 py-2 border border-gray-300">{mentor.status}</td>
+                      <td className="px-4 py-2 border border-gray-300">
+                        <button
+                          className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
+                          onClick={() => updateStatus(mentor.studentId, mentor.mentorIndex, "Accepted")}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-3 py-1 rounded-md"
+                          onClick={() => updateStatus(mentor.studentId, mentor.mentorIndex, "Rejected")}
+                        >
+                          Reject
+                        </button>
+                      </td>
+                    </tr>
+                  ))
               )}
             </tbody>
           </table>

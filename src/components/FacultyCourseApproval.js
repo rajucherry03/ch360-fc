@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth"; // Import the useAuth hook
 
-const FacultyCourseApproval = () => { // Get the user from the AuthContext
+const FacultyCourseApproval = () => {
+  const { user } = useAuth(); // Get the user from the AuthContext
   const [facultyLoginId, setFacultyLoginId] = useState(null);
   const [year, setYear] = useState("");
   const [section, setSection] = useState("");
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user, updateStatus } = useAuth();
 
   const years = [
     { label: "I", value: "I" },
@@ -36,68 +44,82 @@ const FacultyCourseApproval = () => { // Get the user from the AuthContext
 
     setLoading(true);
     try {
-      const noDuesDocRef = doc(db, "noDues", year, section, "tDgqwVLD6u4h5LYStOFD");
-      const noDuesSnap = await getDoc(noDuesDocRef);
+      // Query to fetch the latest `noDues` document for the selected year and section
+      const noDuesCollectionRef = collection(db, "noDues", year, section);
+      const latestNoDuesQuery = query(
+        noDuesCollectionRef,
+        orderBy("generatedAt", "desc"),
+        limit(1)
+      );
 
-      if (noDuesSnap.exists()) {
-        const noDuesData = noDuesSnap.data();
-        console.log("Fetched noDues data:", noDuesData);
+      const querySnapshot = await getDocs(latestNoDuesQuery);
 
-        if (!noDuesData.students || noDuesData.students.length === 0) {
-          console.log("No students found for this section.");
-          setCourses([]);
-          setLoading(false);
-          return;
-        }
-
-        const studentsData = await Promise.all(
-          noDuesData.students.map(async (student) => {
-            const courseId = student.courses_faculty?.[0]?.courseId || null;
-            const facultyId = student.courses_faculty?.[0]?.facultyId || null;
-
-            if (facultyId !== facultyLoginId) {
-              console.log(`Skipping student with facultyId: ${facultyId}`);
-              return null;
-            }
-
-            let courseName = "N/A";
-            if (courseId) {
-              const courseRef = doc(
-                db,
-                "courses",
-                "Computer Science & Engineering (Data Science)",
-                "years",
-                year,
-                "sections",
-                section,
-                "courseDetails",
-                courseId
-              );
-              const courseSnap = await getDoc(courseRef);
-              courseName = courseSnap.exists() ? courseSnap.data()?.courseName || "N/A" : "N/A";
-            }
-
-            const studentRef = doc(db, "students", year, section, student.id);
-            const studentSnap = await getDoc(studentRef);
-            const studentData = studentSnap.exists() ? studentSnap.data() : {};
-
-            return {
-              rollNo: studentData?.rollNo || "N/A",
-              studentName: studentData?.name || "N/A",
-              courseName,
-              status: student.courses_faculty?.[0]?.status || "Pending",
-              studentId: student.id,
-            };
-          })
-        );
-
-        const filteredData = studentsData.filter((student) => student !== null);
-        console.log("Filtered students data:", filteredData);
-        setCourses(filteredData.sort((a, b) => a.rollNo.localeCompare(b.rollNo)));
-      } else {
+      if (querySnapshot.empty) {
         console.log("NoDues document not found for the given year and section.");
         setCourses([]);
+        setLoading(false);
+        return;
       }
+
+      const latestNoDuesDoc = querySnapshot.docs[0];
+      const noDuesData = latestNoDuesDoc.data();
+      console.log("Fetched noDues data:", noDuesData);
+
+      if (!noDuesData.students || noDuesData.students.length === 0) {
+        console.log("No students found for this section.");
+        setCourses([]);
+        setLoading(false);
+        return;
+      }
+
+      // Process students data
+      const studentsData = await Promise.all(
+        noDuesData.students.map(async (student) => {
+          const courseEntry = student.courses_faculty?.find(
+            (cf) => cf.facultyId === facultyLoginId
+          );
+
+          if (!courseEntry) {
+            console.log(`Skipping student without matching facultyId.`);
+            return null;
+          }
+
+          let courseName = "N/A";
+          if (courseEntry.courseId) {
+            const courseRef = doc(
+              db,
+              "courses",
+              "Computer Science & Engineering (Data Science)",
+              "years",
+              year,
+              "sections",
+              section,
+              "courseDetails",
+              courseEntry.courseId
+            );
+            const courseSnap = await getDoc(courseRef);
+            courseName = courseSnap.exists()
+              ? courseSnap.data()?.courseName || "N/A"
+              : "N/A";
+          }
+
+          const studentRef = doc(db, "students", year, section, student.id);
+          const studentSnap = await getDoc(studentRef);
+          const studentData = studentSnap.exists() ? studentSnap.data() : {};
+
+          return {
+            rollNo: studentData?.rollNo || "N/A",
+            studentName: studentData?.name || "N/A",
+            courseName,
+            status: courseEntry.status || "Pending",
+            studentId: student.id,
+          };
+        })
+      );
+
+      const filteredData = studentsData.filter((student) => student !== null);
+      console.log("Filtered students data:", filteredData);
+      setCourses(filteredData.sort((a, b) => a.rollNo.localeCompare(b.rollNo)));
     } catch (error) {
       console.error("Error fetching data:", error);
       setCourses([]);
@@ -107,7 +129,9 @@ const FacultyCourseApproval = () => { // Get the user from the AuthContext
   };
 
   useEffect(() => {
-    fetchData();
+    if (year && section && facultyLoginId) {
+      fetchData();
+    }
   }, [year, section, facultyLoginId]);
 
   return (
@@ -133,7 +157,9 @@ const FacultyCourseApproval = () => { // Get the user from the AuthContext
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Section:</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Section:
+            </label>
             <select
               value={section}
               onChange={(e) => setSection(e.target.value)}
@@ -155,37 +181,65 @@ const FacultyCourseApproval = () => { // Get the user from the AuthContext
             <table className="table-auto w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-4 py-2 border border-gray-300 text-left">Roll No</th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">Student Name</th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">Course Name</th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">Status</th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">Action</th>
+                  <th className="px-4 py-2 border border-gray-300 text-left">
+                    Roll No
+                  </th>
+                  <th className="px-4 py-2 border border-gray-300 text-left">
+                    Student Name
+                  </th>
+                  <th className="px-4 py-2 border border-gray-300 text-left">
+                    Course Name
+                  </th>
+                  <th className="px-4 py-2 border border-gray-300 text-left">
+                    Status
+                  </th>
+                  <th className="px-4 py-2 border border-gray-300 text-left">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {courses.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-4 py-2 text-center text-gray-500">
+                    <td
+                      colSpan="5"
+                      className="px-4 py-2 text-center text-gray-500"
+                    >
                       No data available
                     </td>
                   </tr>
                 ) : (
                   courses.map((course, index) => (
-                    <tr key={index} className="hover:bg-gray-50 transition-all">
-                      <td className="px-4 py-2 border border-gray-300">{course.rollNo}</td>
-                      <td className="px-4 py-2 border border-gray-300">{course.studentName}</td>
-                      <td className="px-4 py-2 border border-gray-300">{course.courseName}</td>
-                      <td className="px-4 py-2 border border-gray-300">{course.status}</td>
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 transition-all"
+                    >
+                      <td className="px-4 py-2 border border-gray-300">
+                        {course.rollNo}
+                      </td>
+                      <td className="px-4 py-2 border border-gray-300">
+                        {course.studentName}
+                      </td>
+                      <td className="px-4 py-2 border border-gray-300">
+                        {course.courseName}
+                      </td>
+                      <td className="px-4 py-2 border border-gray-300">
+                        {course.status}
+                      </td>
                       <td className="px-4 py-2 border border-gray-300">
                         <button
                           className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
-                          onClick={() => updateStatus(course.studentId, "Accepted")}
+                          onClick={() =>
+                            console.log("Accept action for:", course.studentId)
+                          }
                         >
                           Accept
                         </button>
                         <button
                           className="bg-red-500 text-white px-3 py-1 rounded-md"
-                          onClick={() => updateStatus(course.studentId, "Rejected")}
+                          onClick={() =>
+                            console.log("Reject action for:", course.studentId)
+                          }
                         >
                           Reject
                         </button>

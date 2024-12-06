@@ -42,11 +42,11 @@ function App() {
 const MainLayout = () => {
   return (
     <div className="flex flex-col md:flex-row h-screen">
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route
+          {/* <Route
             path="/home"
             element={
               <ProtectedRoute>
@@ -166,13 +166,7 @@ const MainLayout = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/approval"
-            element={
-              <ProtectedRoute>
-                <ApprovalWorkflow />
-              </ProtectedRoute>
-            }
+          
           />
           <Route
             path="/request"
@@ -189,7 +183,14 @@ const MainLayout = () => {
                 <ProfilePage />
               </ProtectedRoute>
             }
-          />
+          /> */}
+          <Route
+            path="/approval"
+            element={
+              <ProtectedRoute>
+                <ApprovalWorkflow />
+              </ProtectedRoute>
+            }/>
            <Route
             path="/courses-approval"
             element={

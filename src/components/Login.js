@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../firebase'; // Import auth from your firebase.js file
 import { toast } from 'react-toastify';
 
@@ -17,18 +17,40 @@ const Login = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Login Successfully!', {
-        position: 'top-right', // Fixed to use a string position
+        position: 'top-right',
         autoClose: 3000,
       });
-      navigate('/dashboard'); // Redirect to dashboard after successful login
+      navigate('/approval');
     } catch (err) {
-      // Display error message using toast
       toast.error(err.message || 'Login Failed! Please try again.', {
-        position: 'top-right', // Fixed to use a string position
+        position: 'top-right',
         autoClose: 3000,
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgetPassword = async () => {
+    if (!email) {
+      toast.error('Please enter your email to reset password.', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success('Password reset email sent! Check your inbox.', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+    } catch (err) {
+      toast.error(err.message || 'Failed to send password reset email.', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -77,6 +99,14 @@ const Login = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+        <div className="mt-4 text-center">
+          <button
+            onClick={handleForgetPassword}
+            className="text-purple-600 hover:underline"
+          >
+            Forgot Password?
+          </button>
+        </div>
         <div className="mt-6 text-center">
           <p className="text-gray-400">
             Don't have an account?{' '}
