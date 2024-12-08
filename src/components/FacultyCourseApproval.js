@@ -19,6 +19,7 @@ const FacultyCourseApproval = () => {
   const [section, setSection] = useState("");
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState([]);
 
   const years = [
     { label: "I", value: "I" },
@@ -130,7 +131,7 @@ const FacultyCourseApproval = () => {
     }
   };
 
-  const updateStatus = async (studentId, newStatus, courseEntry) => {
+  const updateStatus = async (studentIds, newStatus) => {
     try {
       // Fetch the latest `noDues` document
       const noDuesCollectionRef = collection(db, "noDues", year, section);
@@ -152,9 +153,9 @@ const FacultyCourseApproval = () => {
 
       // Update the status in the `courses_faculty` array
       const updatedStudents = noDuesData.students.map((student) => {
-        if (student.id === studentId) {
+        if (studentIds.includes(student.id)) {
           const updatedCoursesFaculty = student.courses_faculty.map((cf) =>
-            cf.courseId === courseEntry.courseId && cf.facultyId === courseEntry.facultyId
+            cf.courseId === student.courseEntry.courseId && cf.facultyId === student.courseEntry.facultyId
               ? { ...cf, status: newStatus }
               : cf
           );
@@ -172,6 +173,19 @@ const FacultyCourseApproval = () => {
     } catch (error) {
       console.error("Error updating status:", error);
     }
+  };
+
+  const handleCheckboxChange = (studentId) => {
+    setSelectedStudents((prevSelected) =>
+      prevSelected.includes(studentId)
+        ? prevSelected.filter((id) => id !== studentId)
+        : [...prevSelected, studentId]
+    );
+  };
+
+  const handleAction = (newStatus) => {
+    updateStatus(selectedStudents, newStatus);
+    setSelectedStudents([]);
   };
 
   useEffect(() => {
@@ -228,6 +242,9 @@ const FacultyCourseApproval = () => {
               <thead>
                 <tr className="bg-gray-100">
                   <th className="px-4 py-2 border border-gray-300 text-left">
+                    Select
+                  </th>
+                  <th className="px-4 py-2 border border-gray-300 text-left">
                     Roll No
                   </th>
                   <th className="px-4 py-2 border border-gray-300 text-left">
@@ -238,9 +255,6 @@ const FacultyCourseApproval = () => {
                   </th>
                   <th className="px-4 py-2 border border-gray-300 text-left">
                     Status
-                  </th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">
-                    Action
                   </th>
                 </tr>
               </thead>
@@ -261,6 +275,13 @@ const FacultyCourseApproval = () => {
                       className="hover:bg-gray-50 transition-all"
                     >
                       <td className="px-4 py-2 border border-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={selectedStudents.includes(course.studentId)}
+                          onChange={() => handleCheckboxChange(course.studentId)}
+                        />
+                      </td>
+                      <td className="px-4 py-2 border border-gray-300">
                         {course.rollNo}
                       </td>
                       <td className="px-4 py-2 border border-gray-300">
@@ -272,32 +293,6 @@ const FacultyCourseApproval = () => {
                       <td className="px-4 py-2 border border-gray-300">
                         {course.status}
                       </td>
-                      <td className="px-4 py-2 border border-gray-300">
-                        <button
-                          className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
-                          onClick={() =>
-                            updateStatus(
-                              course.studentId,
-                              "Accepted",
-                              course.courseEntry
-                            )
-                          }
-                        >
-                          Accept
-                        </button>
-                        <button
-                          className="bg-red-500 text-white px-3 py-1 rounded-md"
-                          onClick={() =>
-                            updateStatus(
-                              course.studentId,
-                              "Rejected",
-                              course.courseEntry
-                            )
-                          }
-                        >
-                          Reject
-                        </button>
-                      </td>
                     </tr>
                   ))
                 )}
@@ -305,6 +300,22 @@ const FacultyCourseApproval = () => {
             </table>
           </div>
         )}
+        <div className="mt-4">
+          <button
+            className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
+            onClick={() => handleAction("Accepted")}
+            disabled={selectedStudents.length === 0}
+          >
+            Accept Selected
+          </button>
+          <button
+            className="bg-red-500 text-white px-3 py-1 rounded-md"
+            onClick={() => handleAction("Rejected")}
+            disabled={selectedStudents.length === 0}
+          >
+            Reject Selected
+          </button>
+        </div>
       </div>
     </div>
   );

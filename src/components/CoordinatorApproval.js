@@ -18,6 +18,7 @@ const CoordinatorDashboard = () => {
   const [section, setSection] = useState("");
   const [coordinators, setCoordinators] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState([]);
 
   const loggedInFacultyId = user?.uid;
 
@@ -37,7 +38,6 @@ const CoordinatorDashboard = () => {
 
     setLoading(true);
     try {
-      // Query to get the latest noDues document by generatedAt timestamp
       const noDuesCollectionRef = collection(db, `noDues/${year}/${section}`);
       const latestNoDuesQuery = query(
         noDuesCollectionRef,
@@ -96,7 +96,6 @@ const CoordinatorDashboard = () => {
         })
       );
 
-      // Sort coordinators by rollNo
       const sortedCoordinators = fetchedCoordinators.filter(Boolean).sort((a, b) =>
         a.rollNo.localeCompare(b.rollNo)
       );
@@ -112,7 +111,6 @@ const CoordinatorDashboard = () => {
 
   const updateStatus = async (studentId, coordinatorIndex, newStatus) => {
     try {
-      // Query to get the latest noDues document by date and time
       const noDuesCollectionRef = collection(db, `noDues/${year}/${section}`);
       const latestNoDuesQuery = query(
         noDuesCollectionRef,
@@ -141,11 +139,29 @@ const CoordinatorDashboard = () => {
 
         await updateDoc(noDuesDocRef, { students: updatedStudents });
         console.log("Status updated successfully!");
-        fetchData(); // Refresh data
+        fetchData();
       }
     } catch (error) {
       console.error("Error updating status:", error);
     }
+  };
+
+  const handleSelectStudent = (studentId) => {
+    setSelectedStudents((prevSelected) =>
+      prevSelected.includes(studentId)
+        ? prevSelected.filter((id) => id !== studentId)
+        : [...prevSelected, studentId]
+    );
+  };
+
+  const handleBulkAction = (newStatus) => {
+    selectedStudents.forEach((studentId) => {
+      const student = coordinators.find((coordinator) => coordinator.studentId === studentId);
+      if (student) {
+        updateStatus(student.studentId, student.coordinatorIndex, newStatus);
+      }
+    });
+    setSelectedStudents([]);
   };
 
   useEffect(() => {
@@ -199,11 +215,21 @@ const CoordinatorDashboard = () => {
             <table className="table-auto w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-100">
+                  <th className="px-4 py-2 border border-gray-300 text-left">
+                    <input
+                      type="checkbox"
+                      onChange={(e) =>
+                        setSelectedStudents(
+                          e.target.checked ? coordinators.map((c) => c.studentId) : []
+                        )
+                      }
+                      checked={selectedStudents.length === coordinators.length}
+                    />
+                  </th>
                   <th className="px-4 py-2 border border-gray-300 text-left">Roll No</th>
                   <th className="px-4 py-2 border border-gray-300 text-left">Student Name</th>
                   <th className="px-4 py-2 border border-gray-300 text-left">Coordinator</th>
                   <th className="px-4 py-2 border border-gray-300 text-left">Status</th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -216,28 +242,17 @@ const CoordinatorDashboard = () => {
                 ) : (
                   coordinators.map((coordinator, index) => (
                     <tr key={index} className="hover:bg-gray-50 transition-all">
+                      <td className="px-4 py-2 border border-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={selectedStudents.includes(coordinator.studentId)}
+                          onChange={() => handleSelectStudent(coordinator.studentId)}
+                        />
+                      </td>
                       <td className="px-4 py-2 border border-gray-300">{coordinator.rollNo}</td>
                       <td className="px-4 py-2 border border-gray-300">{coordinator.studentName}</td>
                       <td className="px-4 py-2 border border-gray-300">{coordinator.coordinatorName}</td>
                       <td className="px-4 py-2 border border-gray-300">{coordinator.status}</td>
-                      <td className="px-4 py-2 border border-gray-300">
-                        <button
-                          className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
-                          onClick={() =>
-                            updateStatus(coordinator.studentId, coordinator.coordinatorIndex, "Accepted")
-                          }
-                        >
-                          Accept
-                        </button>
-                        <button
-                          className="bg-red-500 text-white px-3 py-1 rounded-md"
-                          onClick={() =>
-                            updateStatus(coordinator.studentId, coordinator.coordinatorIndex, "Rejected")
-                          }
-                        >
-                          Reject
-                        </button>
-                      </td>
                     </tr>
                   ))
                 )}
@@ -245,6 +260,22 @@ const CoordinatorDashboard = () => {
             </table>
           </div>
         )}
+        <div className="mt-4 flex justify-end space-x-2">
+          <button
+            className="bg-green-500 text-white px-3 py-1 rounded-md"
+            onClick={() => handleBulkAction("Accepted")}
+            disabled={selectedStudents.length === 0}
+          >
+            Accept Selected
+          </button>
+          <button
+            className="bg-red-500 text-white px-3 py-1 rounded-md"
+            onClick={() => handleBulkAction("Rejected")}
+            disabled={selectedStudents.length === 0}
+          >
+            Reject Selected
+          </button>
+        </div>
       </div>
     </div>
   );
