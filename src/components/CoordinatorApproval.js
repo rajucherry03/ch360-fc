@@ -154,14 +154,16 @@ const CoordinatorDashboard = () => {
     );
   };
 
-  const handleBulkAction = (newStatus) => {
-    selectedStudents.forEach((studentId) => {
-      const student = coordinators.find((coordinator) => coordinator.studentId === studentId);
-      if (student) {
-        updateStatus(student.studentId, student.coordinatorIndex, newStatus);
+  const handleBulkAction = async (newStatus) => {
+    if (selectedStudents.length > 0) {
+      for (const studentId of selectedStudents) {
+        const student = coordinators.find((coordinator) => coordinator.studentId === studentId);
+        if (student) {
+          await updateStatus(student.studentId, student.coordinatorIndex, newStatus);
+        }
       }
-    });
-    setSelectedStudents([]);
+      setSelectedStudents([]);
+    }
   };
 
   useEffect(() => {
