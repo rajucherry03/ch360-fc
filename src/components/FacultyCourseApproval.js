@@ -132,6 +132,10 @@ const FacultyCourseApproval = () => {
   };
 
   const updateStatus = async (studentIds, newStatus) => {
+    if (!facultyLoginId) {
+      console.error("Faculty login ID is missing.");
+      return;
+    }
     try {
       // Fetch the latest `noDues` document
       const noDuesCollectionRef = collection(db, "noDues", year, section);
@@ -141,40 +145,44 @@ const FacultyCourseApproval = () => {
         limit(1)
       );
       const querySnapshot = await getDocs(latestNoDuesQuery);
-
+  
       if (querySnapshot.empty) {
         console.log("NoDues document not found.");
         return;
       }
-
+  
       const latestNoDuesDoc = querySnapshot.docs[0];
       const docRef = latestNoDuesDoc.ref;
       const noDuesData = latestNoDuesDoc.data();
-
+  
       // Update the status in the `courses_faculty` array
       const updatedStudents = noDuesData.students.map((student) => {
         if (studentIds.includes(student.id)) {
-          const updatedCoursesFaculty = student.courses_faculty.map((cf) =>
-            cf.courseId === student.courseEntry.courseId && cf.facultyId === student.courseEntry.facultyId
-              ? { ...cf, status: newStatus }
-              : cf
-          );
+          // Update the status for the matching course entry
+          const updatedCoursesFaculty = student.courses_faculty.map((cf) => {
+            if (cf.facultyId === facultyLoginId && cf.courseId) {
+              return { ...cf, status: newStatus };
+            }
+            return cf;
+          });
+  
           return { ...student, courses_faculty: updatedCoursesFaculty };
         }
         return student;
       });
-
+  
       // Write the updated data back to Firestore
       await updateDoc(docRef, { students: updatedStudents });
+  
       console.log("Status updated successfully!");
-
+  
       // Refresh the data
       fetchData();
     } catch (error) {
       console.error("Error updating status:", error);
     }
   };
-
+  
   const handleCheckboxChange = (studentId) => {
     setSelectedStudents((prevSelected) =>
       prevSelected.includes(studentId)
