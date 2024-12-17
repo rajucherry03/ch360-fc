@@ -12,15 +12,20 @@ import {
 import { db } from "../firebase";
 import { useAuth } from "../auth";
 
+
 const CoordinatorDashboard = () => {
   const { user } = useAuth();
   const [year, setYear] = useState("");
   const [section, setSection] = useState("");
+  const [semester, setSemester] = useState("sem1"); // Added state for semester
   const [coordinators, setCoordinators] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+
 
   const loggedInFacultyId = user?.uid;
+
 
   useEffect(() => {
     if (loggedInFacultyId) {
@@ -30,14 +35,17 @@ const CoordinatorDashboard = () => {
     }
   }, [loggedInFacultyId]);
 
+
   const fetchData = async () => {
     if (!year || !section || !loggedInFacultyId) {
       console.error("Year, Section, and Faculty ID are required.");
       return;
     }
 
+
     setLoading(true);
     try {
+      // Update the collection reference to match the correct structure
       const noDuesCollectionRef = collection(db, `noDues/${year}/${section}`);
       const latestNoDuesQuery = query(
         noDuesCollectionRef,
@@ -46,6 +54,7 @@ const CoordinatorDashboard = () => {
       );
       const querySnapshot = await getDocs(latestNoDuesQuery);
 
+
       if (querySnapshot.empty) {
         console.error("No data found for the specified year and section.");
         setCoordinators([]);
@@ -53,8 +62,10 @@ const CoordinatorDashboard = () => {
         return;
       }
 
+
       const noDuesDoc = querySnapshot.docs[0];
       const noDuesData = noDuesDoc.data();
+
 
       if (!noDuesData.students || noDuesData.students.length === 0) {
         console.log("No students found in this section.");
@@ -63,6 +74,7 @@ const CoordinatorDashboard = () => {
         return;
       }
 
+
       const fetchedCoordinators = await Promise.all(
         noDuesData.students.map(async (student) => {
           if (student.coordinators) {
@@ -70,16 +82,20 @@ const CoordinatorDashboard = () => {
               (coordinator) => coordinator.id === loggedInFacultyId
             );
 
+
             if (matchedCoordinator) {
               const coordinatorRef = doc(db, "faculty", matchedCoordinator.id);
               const coordinatorSnap = await getDoc(coordinatorRef);
 
+
               const studentRef = doc(db, `students/${year}/${section}`, student.id);
               const studentSnap = await getDoc(studentRef);
+
 
               if (coordinatorSnap.exists() && studentSnap.exists()) {
                 const coordinatorData = coordinatorSnap.data();
                 const studentData = studentSnap.data();
+
 
                 return {
                   rollNo: studentData.rollNo || "N/A",
@@ -96,9 +112,11 @@ const CoordinatorDashboard = () => {
         })
       );
 
+
       const sortedCoordinators = fetchedCoordinators.filter(Boolean).sort((a, b) =>
         a.rollNo.localeCompare(b.rollNo)
       );
+
 
       setCoordinators(sortedCoordinators);
     } catch (error) {
@@ -109,8 +127,10 @@ const CoordinatorDashboard = () => {
     }
   };
 
+
   const updateStatus = async (studentId, coordinatorIndex, newStatus) => {
     try {
+      // Query for the latest document within the noDues/{year}/{section} collection
       const noDuesCollectionRef = collection(db, `noDues/${year}/${section}`);
       const latestNoDuesQuery = query(
         noDuesCollectionRef,
@@ -119,11 +139,14 @@ const CoordinatorDashboard = () => {
       );
       const querySnapshot = await getDocs(latestNoDuesQuery);
 
+
       if (!querySnapshot.empty) {
         const noDuesDoc = querySnapshot.docs[0];
         const noDuesDocRef = doc(db, `noDues/${year}/${section}`, noDuesDoc.id);
         const noDuesData = noDuesDoc.data();
 
+
+        // Update the status of the selected student
         const updatedStudents = noDuesData.students.map((student) => {
           if (student.id === studentId) {
             const updatedCoordinators = student.coordinators.map((coordinator, index) => {
@@ -137,14 +160,17 @@ const CoordinatorDashboard = () => {
           return student;
         });
 
+
+        // Update the document with the modified student data
         await updateDoc(noDuesDocRef, { students: updatedStudents });
         console.log("Status updated successfully!");
-        fetchData();
+        fetchData(); // Reload data after status update
       }
     } catch (error) {
       console.error("Error updating status:", error);
     }
   };
+
 
   const handleSelectStudent = (studentId) => {
     setSelectedStudents((prevSelected) =>
@@ -153,6 +179,7 @@ const CoordinatorDashboard = () => {
         : [...prevSelected, studentId]
     );
   };
+
 
   const handleBulkAction = async (newStatus) => {
     if (selectedStudents.length > 0) {
@@ -166,11 +193,27 @@ const CoordinatorDashboard = () => {
     }
   };
 
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+
+  const filteredCoordinators = coordinators.filter((coordinator) => {
+    const searchText = searchQuery.toLowerCase();
+    return (
+      coordinator.rollNo.toLowerCase().includes(searchText) ||
+      coordinator.studentName.toLowerCase().includes(searchText)
+    );
+  });
+
+
   useEffect(() => {
-    if (year && section && loggedInFacultyId) {
+    if (year && section && semester && loggedInFacultyId) {
       fetchData();
     }
-  }, [year, section, loggedInFacultyId]);
+  }, [year, section, semester, loggedInFacultyId]);
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
@@ -178,7 +221,7 @@ const CoordinatorDashboard = () => {
         Coordinator Dashboard
       </h1>
       <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Year:</label>
             <select
@@ -209,7 +252,32 @@ const CoordinatorDashboard = () => {
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Semester:</label>
+            <select
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="sem1">Semester 1</option>
+              <option value="sem2">Semester 2</option>
+            </select>
+          </div>
         </div>
+
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search by Roll No or Name"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+
         {loading ? (
           <p className="text-center text-blue-600 font-medium">Loading...</p>
         ) : (
@@ -222,10 +290,10 @@ const CoordinatorDashboard = () => {
                       type="checkbox"
                       onChange={(e) =>
                         setSelectedStudents(
-                          e.target.checked ? coordinators.map((c) => c.studentId) : []
+                          e.target.checked ? filteredCoordinators.map((c) => c.studentId) : []
                         )
                       }
-                      checked={selectedStudents.length === coordinators.length}
+                      checked={selectedStudents.length === filteredCoordinators.length}
                     />
                   </th>
                   <th className="px-4 py-2 border border-gray-300 text-left">Roll No</th>
@@ -235,14 +303,14 @@ const CoordinatorDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {coordinators.length === 0 ? (
+                {filteredCoordinators.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="px-4 py-2 text-center text-gray-500">
                       No data available
                     </td>
                   </tr>
                 ) : (
-                  coordinators.map((coordinator, index) => (
+                  filteredCoordinators.map((coordinator, index) => (
                     <tr key={index} className="hover:bg-gray-50 transition-all">
                       <td className="px-4 py-2 border border-gray-300">
                         <input
@@ -262,6 +330,8 @@ const CoordinatorDashboard = () => {
             </table>
           </div>
         )}
+
+
         <div className="mt-4 flex justify-end space-x-2">
           <button
             className="bg-green-500 text-white px-3 py-1 rounded-md"
@@ -283,4 +353,9 @@ const CoordinatorDashboard = () => {
   );
 };
 
+
 export default CoordinatorDashboard;
+
+
+
+

@@ -10,16 +10,21 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { useAuth } from "../auth"; // Import the useAuth hook
+import { useAuth } from "../auth";
+
 
 const FacultyCourseApproval = () => {
-  const { user } = useAuth(); // Get the user from the AuthContext
+  const { user } = useAuth();
   const [facultyLoginId, setFacultyLoginId] = useState(null);
   const [year, setYear] = useState("");
   const [section, setSection] = useState("");
+  const [semester, setSemester] = useState("");
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");  // New state for search term
+
 
   const years = [
     { label: "I", value: "I" },
@@ -28,100 +33,112 @@ const FacultyCourseApproval = () => {
     { label: "IV", value: "IV" },
   ];
   const sections = ["A", "B", "C", "D"];
+  const semesters = [
+    { label: "Semester 1", value: "sem1" },
+    { label: "Semester 2", value: "sem2" },
+  ];
 
+
+  // Update the facultyLoginId when user logs in
   useEffect(() => {
     if (user) {
-      setFacultyLoginId(user.uid); // Use the unique user ID from Firebase Authentication
-      console.log("Logged in Faculty ID:", user.uid); // Log the user ID
+      setFacultyLoginId(user.uid);
+      console.log("Logged in Faculty ID:", user.uid);
     } else {
       console.error("No user logged in!");
     }
   }, [user]);
 
+
+  // Fetch course data based on year, section, semester, and facultyLoginId
   const fetchData = async () => {
-    if (!year || !section || !facultyLoginId) {
-      console.log("Year, section, or facultyLoginId is missing.");
+    if (!year || !section || !semester || !facultyLoginId) {
+      console.log("Year, section, semester, or facultyLoginId is missing.");
       return;
     }
 
+
     setLoading(true);
     try {
-      // Query to fetch the latest `noDues` document for the selected year and section
-      const noDuesCollectionRef = collection(db, "noDues", year, section);
-      const latestNoDuesQuery = query(
-        noDuesCollectionRef,
-        orderBy("generatedAt", "desc"),
-        limit(1)
-      );
+      const noDuesDocRef = doc(db, "noDues", year, section, semester);
+      const noDuesDocSnap = await getDoc(noDuesDocRef);
 
-      const querySnapshot = await getDocs(latestNoDuesQuery);
 
-      if (querySnapshot.empty) {
-        console.log("NoDues document not found for the given year and section.");
+      if (!noDuesDocSnap.exists()) {
+        console.log("NoDues document not found for the given year, section, and semester.");
         setCourses([]);
-        setLoading(false);
         return;
       }
 
-      const latestNoDuesDoc = querySnapshot.docs[0];
-      const noDuesData = latestNoDuesDoc.data();
+
+      const noDuesData = noDuesDocSnap.data();
       console.log("Fetched noDues data:", noDuesData);
+
 
       if (!noDuesData.students || noDuesData.students.length === 0) {
         console.log("No students found for this section.");
         setCourses([]);
-        setLoading(false);
         return;
       }
 
-      // Process students data
+
       const studentsData = await Promise.all(
         noDuesData.students.map(async (student) => {
           const courseEntry = student.courses_faculty?.find(
             (cf) => cf.facultyId === facultyLoginId
           );
 
-          if (!courseEntry) {
-            console.log(`Skipping student without matching facultyId.`);
-            return null;
-          }
+
+          if (!courseEntry) return null;
+
 
           let courseName = "N/A";
           if (courseEntry.courseId) {
+            console.log("Fetching course with courseId:", courseEntry.courseId);
+
+
             const courseRef = doc(
               db,
               "courses",
-              "Computer Science & Engineering (Data Science)",
-              "years",
-              year,
-              "sections",
-              section,
+              "III",     // Assuming this is the year/level
+              "A",       // Assuming this is the section
+              "sem1",    // Assuming this is the semester
               "courseDetails",
               courseEntry.courseId
             );
+
+
             const courseSnap = await getDoc(courseRef);
-            courseName = courseSnap.exists()
-              ? courseSnap.data()?.courseName || "N/A"
-              : "N/A";
+
+
+            if (courseSnap.exists()) {
+              courseName = courseSnap.data()?.courseName || "N/A";
+              console.log("Course fetched:", courseName);
+            } else {
+              console.error("Course not found for ID:", courseEntry.courseId);
+              console.log("Courses Collection Path:", "courses", courseEntry.courseId);
+            }
           }
+
 
           const studentRef = doc(db, "students", year, section, student.id);
           const studentSnap = await getDoc(studentRef);
           const studentData = studentSnap.exists() ? studentSnap.data() : {};
 
+
           return {
             rollNo: studentData?.rollNo || "N/A",
             studentName: studentData?.name || "N/A",
-            courseName,
+            courseName, // Now we have the correct course name
             status: courseEntry.status || "Pending",
             studentId: student.id,
-            courseEntry, // Include the original courseEntry object for updates
+            courseEntry,
           };
         })
       );
 
+
       const filteredData = studentsData.filter((student) => student !== null);
-      console.log("Filtered students data:", filteredData);
       setCourses(filteredData.sort((a, b) => a.rollNo.localeCompare(b.rollNo)));
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -131,58 +148,59 @@ const FacultyCourseApproval = () => {
     }
   };
 
+
   const updateStatus = async (studentIds, newStatus) => {
     if (!facultyLoginId) {
       console.error("Faculty login ID is missing.");
       return;
     }
+
+
     try {
-      // Fetch the latest `noDues` document
-      const noDuesCollectionRef = collection(db, "noDues", year, section);
-      const latestNoDuesQuery = query(
-        noDuesCollectionRef,
-        orderBy("generatedAt", "desc"),
-        limit(1)
-      );
-      const querySnapshot = await getDocs(latestNoDuesQuery);
-  
-      if (querySnapshot.empty) {
+      const noDuesDocRef = doc(db, "noDues", year, section, semester);
+      const noDuesDocSnap = await getDoc(noDuesDocRef);
+
+
+      if (!noDuesDocSnap.exists()) {
         console.log("NoDues document not found.");
         return;
       }
-  
-      const latestNoDuesDoc = querySnapshot.docs[0];
-      const docRef = latestNoDuesDoc.ref;
-      const noDuesData = latestNoDuesDoc.data();
-  
-      // Update the status in the `courses_faculty` array
+
+
+      const noDuesData = noDuesDocSnap.data();
+
+
+      if (!noDuesData.students) {
+        console.log("No students data found.");
+        return;
+      }
+
+
       const updatedStudents = noDuesData.students.map((student) => {
         if (studentIds.includes(student.id)) {
-          // Update the status for the matching course entry
           const updatedCoursesFaculty = student.courses_faculty.map((cf) => {
             if (cf.facultyId === facultyLoginId && cf.courseId) {
-              return { ...cf, status: newStatus };
+              return { ...cf, status: newStatus }; // Update status
             }
             return cf;
           });
-  
+
+
           return { ...student, courses_faculty: updatedCoursesFaculty };
         }
         return student;
       });
-  
-      // Write the updated data back to Firestore
-      await updateDoc(docRef, { students: updatedStudents });
-  
+
+
+      await updateDoc(noDuesDocRef, { students: updatedStudents });
       console.log("Status updated successfully!");
-  
-      // Refresh the data
-      fetchData();
+      fetchData(); // Refresh data
     } catch (error) {
       console.error("Error updating status:", error);
     }
   };
-  
+
+
   const handleCheckboxChange = (studentId) => {
     setSelectedStudents((prevSelected) =>
       prevSelected.includes(studentId)
@@ -191,16 +209,33 @@ const FacultyCourseApproval = () => {
     );
   };
 
+
   const handleAction = (newStatus) => {
-    updateStatus(selectedStudents, newStatus);
-    setSelectedStudents([]);
+    if (selectedStudents.length > 0) {
+      updateStatus(selectedStudents, newStatus);
+      setSelectedStudents([]); // Clear selected students after the action
+    } else {
+      console.log("No students selected!");
+    }
   };
 
+
+  // Filter courses based on status and search term
+  const filteredCourses = courses
+    .filter(
+      (student) =>
+        (statusFilter === "All" || student.status === statusFilter) &&
+        (student.rollNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.studentName.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+
   useEffect(() => {
-    if (year && section && facultyLoginId) {
+    if (year && section && semester && facultyLoginId) {
       fetchData();
     }
-  }, [year, section, facultyLoginId]);
+  }, [year, section, semester, facultyLoginId]);
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
@@ -208,7 +243,7 @@ const FacultyCourseApproval = () => {
         Faculty Courses Dashboard
       </h1>
       <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Year:</label>
             <select
@@ -225,9 +260,7 @@ const FacultyCourseApproval = () => {
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Section:
-            </label>
+            <label className="block text-gray-700 font-medium mb-2">Section:</label>
             <select
               value={section}
               onChange={(e) => setSection(e.target.value)}
@@ -241,87 +274,105 @@ const FacultyCourseApproval = () => {
               ))}
             </select>
           </div>
-        </div>
-        {loading ? (
-          <p className="text-center text-blue-600 font-medium">Loading...</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="table-auto w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-4 py-2 border border-gray-300 text-left">
-                    Select
-                  </th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">
-                    Roll No
-                  </th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">
-                    Student Name
-                  </th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">
-                    Course Name
-                  </th>
-                  <th className="px-4 py-2 border border-gray-300 text-left">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {courses.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="px-4 py-2 text-center text-gray-500"
-                    >
-                      No data available
-                    </td>
-                  </tr>
-                ) : (
-                  courses.map((course, index) => (
-                    <tr
-                      key={index}
-                      className="hover:bg-gray-50 transition-all"
-                    >
-                      <td className="px-4 py-2 border border-gray-300">
-                        <input
-                          type="checkbox"
-                          checked={selectedStudents.includes(course.studentId)}
-                          onChange={() => handleCheckboxChange(course.studentId)}
-                        />
-                      </td>
-                      <td className="px-4 py-2 border border-gray-300">
-                        {course.rollNo}
-                      </td>
-                      <td className="px-4 py-2 border border-gray-300">
-                        {course.studentName}
-                      </td>
-                      <td className="px-4 py-2 border border-gray-300">
-                        {course.courseName}
-                      </td>
-                      <td className="px-4 py-2 border border-gray-300">
-                        {course.status}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Semester:</label>
+            <select
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Semester</option>
+              {semesters.map((sem) => (
+                <option key={sem.value} value={sem.value}>
+                  {sem.label}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
+
+
+        {/* Search input */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Search:</label>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by Roll No or Name"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+
+        {/* Status Filter */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Status Filter:</label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">All</option>
+            <option value="Accepted">Accepted</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+
+
+        {/* Table Display */}
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <table className="min-w-full table-auto">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="py-2 px-4 text-left">Action</th>
+                <th className="py-2 px-4 text-left">Roll No</th>
+                <th className="py-2 px-4 text-left">Student Name</th>
+                <th className="py-2 px-4 text-left">Course Name</th>
+                <th className="py-2 px-4 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCourses.map((student, index) => (
+                <tr
+                  key={index}
+                  className={`${
+                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                  } hover:bg-gray-100`}
+                >
+                  <td className="py-2 px-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedStudents.includes(student.studentId)}
+                      onChange={() => handleCheckboxChange(student.studentId)}
+                    />
+                  </td>
+                  <td className="py-2 px-4">{student.rollNo}</td>
+                  <td className="py-2 px-4">{student.studentName}</td>
+                  <td className="py-2 px-4">{student.courseName}</td>
+                  <td className="py-2 px-4">{student.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
+
+
+        {/* Accept/Reject buttons */}
         <div className="mt-4">
           <button
-            className="bg-green-500 text-white px-3 py-1 rounded-md mr-2"
             onClick={() => handleAction("Accepted")}
-            disabled={selectedStudents.length === 0}
+            className="px-6 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
           >
-            Accept Selected
+            Accept
           </button>
           <button
-            className="bg-red-500 text-white px-3 py-1 rounded-md"
             onClick={() => handleAction("Rejected")}
-            disabled={selectedStudents.length === 0}
+            className="ml-4 px-6 py-2 text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
           >
-            Reject Selected
+            Reject
           </button>
         </div>
       </div>
@@ -329,4 +380,9 @@ const FacultyCourseApproval = () => {
   );
 };
 
+
 export default FacultyCourseApproval;
+
+
+
+
