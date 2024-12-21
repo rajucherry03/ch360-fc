@@ -245,7 +245,7 @@ const CoordinatorDashboard = () => {
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Section</option>
-              {["A", "B", "C", "D"].map((sec) => (
+              {["A", "B", "C", "D","E","F"].map((sec) => (
                 <option key={sec} value={sec}>
                   {sec}
                 </option>
