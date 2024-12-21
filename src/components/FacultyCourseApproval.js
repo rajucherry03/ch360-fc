@@ -32,7 +32,7 @@ const FacultyCourseApproval = () => {
     { label: "III", value: "III" },
     { label: "IV", value: "IV" },
   ];
-  const sections = ["A", "B", "C", "D"];
+  const sections = ["A", "B", "C", "D","E","F"];
   const semesters = [
     { label: "Semester 1", value: "sem1" },
     { label: "Semester 2", value: "sem2" },
