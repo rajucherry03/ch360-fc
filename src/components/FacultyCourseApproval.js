@@ -32,7 +32,7 @@ const FacultyCourseApproval = () => {
     { label: "III", value: "III" },
     { label: "IV", value: "IV" },
   ];
-  const sections = ["A", "B", "C", "D","E","F"];
+  const sections = ["A", "B", "C", "D"];
   const semesters = [
     { label: "Semester 1", value: "sem1" },
     { label: "Semester 2", value: "sem2" },
@@ -96,27 +96,24 @@ const FacultyCourseApproval = () => {
           if (courseEntry.courseId) {
             console.log("Fetching course with courseId:", courseEntry.courseId);
 
-
             const courseRef = doc(
               db,
               "courses",
-              "III",     // Assuming this is the year/level
-              "A",       // Assuming this is the section
-              "sem1",    // Assuming this is the semester
+              year,     // Use selected year instead of hardcoded "III"
+              section,  // Use selected section instead of hardcoded "A"
+              semester, // Use selected semester instead of hardcoded "sem1"
               "courseDetails",
               courseEntry.courseId
             );
 
-
             const courseSnap = await getDoc(courseRef);
-
 
             if (courseSnap.exists()) {
               courseName = courseSnap.data()?.courseName || "N/A";
               console.log("Course fetched:", courseName);
             } else {
               console.error("Course not found for ID:", courseEntry.courseId);
-              console.log("Courses Collection Path:", "courses", courseEntry.courseId);
+              console.log("Courses Collection Path:", "courses", year, section, semester, "courseDetails", courseEntry.courseId);
             }
           }
 
@@ -382,7 +379,3 @@ const FacultyCourseApproval = () => {
 
 
 export default FacultyCourseApproval;
-
-
-
-
