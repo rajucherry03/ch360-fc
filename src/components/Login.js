@@ -20,7 +20,7 @@ const Login = () => {
         position: 'top-right',
         autoClose: 3000,
       });
-      navigate('/approval');
+      navigate('/home', { replace: true });
     } catch (err) {
       toast.error(err.message || 'Login Failed! Please try again.', {
         position: 'top-right',

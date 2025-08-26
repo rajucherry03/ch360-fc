@@ -1,50 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../auth';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEnvelope, faPhone, faMapMarkerAlt, faBookOpen, faCode, faProjectDiagram, faUsers, faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
 
 const ProfilePage = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState({
-    personalDetails: {
-      name: 'Jane Doe',
-      email: 'jane.doe@example.com',
-      phone: '123-456-7890',
-      address: '123 Main St, City, Country',
-    },
-    familyDetails: {
-      fatherName: 'John Doe',
-      motherName: 'Jane Smith',
-      siblings: '2',
-    },
-    currentCourses: [
-      { id: 1, name: 'Math 101', progress: 75 },
-      { id: 2, name: 'Science 102', progress: 85 },
-    ],
-    professionalExperience: [
-      {
-        id: 1,
-        jobTitle: 'Software Engineer',
-        company: 'Tech Company',
-        duration: '2020-2023',
-        description: 'Developed web applications using React and Node.js.',
-      },
-    ],
-    skills: ['JavaScript', 'React', 'Node.js'],
-    projects: [
-      {
-        id: 1,
-        title: 'Project One',
-        description: 'Developed a full-stack web application.',
-      },
-    ],
-    education: [
-      {
-        id: 1,
-        degree: 'Bachelor of Computer Science',
-        university: 'XYZ University',
-        year: '2024',
-      },
-    ],
+    personalDetails: { name: '', email: '', phone: '', address: '' },
+    familyDetails: { fatherName: '', motherName: '', siblings: '' },
+    currentCourses: [],
+    professionalExperience: [],
+    skills: [],
+    projects: [],
+    education: [],
+    mentor: { name: '', email: '', phone: '' },
   });
+
+  useEffect(() => {
+    const load = async () => {
+      if (!user?.uid) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const ref = doc(db, 'faculty', user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          setUserInfo({
+            personalDetails: {
+              name: data.name || '',
+              email: data.email || user.email || '',
+              phone: data.phone || '',
+              address: data.address || '',
+            },
+            familyDetails: data.familyDetails || { fatherName: '', motherName: '', siblings: '' },
+            currentCourses: Array.isArray(data.currentCourses) ? data.currentCourses : [],
+            professionalExperience: Array.isArray(data.professionalExperience) ? data.professionalExperience : [],
+            skills: Array.isArray(data.skills) ? data.skills : [],
+            projects: Array.isArray(data.projects) ? data.projects : [],
+            education: Array.isArray(data.education) ? data.education : [],
+            mentor: data.mentor || { name: '', email: '', phone: '' },
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user]);
 
   const [editMode, setEditMode] = useState(false);
   const [newSkill, setNewSkill] = useState('');
@@ -68,52 +75,241 @@ const ProfilePage = () => {
     setNewEducation({ degree: '', university: '', year: '' });
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Loading profile...</p>
+      </div>
+    );
+  }
+
+  const handleSave = async () => {
+    if (!user?.uid) return;
+    const ref = doc(db, 'faculty', user.uid);
+    const payload = {
+      name: userInfo.personalDetails.name,
+      email: userInfo.personalDetails.email,
+      phone: userInfo.personalDetails.phone,
+      address: userInfo.personalDetails.address,
+      familyDetails: userInfo.familyDetails,
+      currentCourses: userInfo.currentCourses,
+      professionalExperience: userInfo.professionalExperience,
+      skills: userInfo.skills,
+      projects: userInfo.projects,
+      education: userInfo.education,
+      mentor: userInfo.mentor,
+    };
+    await updateDoc(ref, payload);
+  };
+
+  const onToggleEdit = async () => {
+    if (editMode) {
+      await handleSave();
+    }
+    setEditMode(!editMode);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
-        <button onClick={() => setEditMode(!editMode)} className="bg-blue-600 text-white py-2 px-4 rounded shadow-md hover:bg-blue-700">
-          {editMode ? 'Save' : 'Edit'}
-        </button>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="max-w-6xl mx-auto py-6 px-4 md:px-6 lg:px-8">
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 animate-fade-in">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+              <FontAwesomeIcon icon={faUser} className="text-indigo-600 animate-pulse"/>
+              {userInfo.personalDetails.name || 'Faculty Profile'}
+            </h1>
+            <p className="text-gray-600 mt-2 flex items-center gap-2">
+              <FontAwesomeIcon icon={faEnvelope} className="text-indigo-400"/>
+              {userInfo.personalDetails.email}
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={onToggleEdit} 
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg shadow-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105"
+            >
+              <FontAwesomeIcon icon={editMode ? faSave : faEdit} />
+              {editMode ? 'Save Profile' : 'Edit Profile'}
+            </button>
+          </div>
+        </header>
+        
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="glass rounded-xl shadow-lg p-6 text-center hover-lift animate-fade-in stagger-1">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FontAwesomeIcon icon={faBookOpen} className="text-white text-xl" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-600">Courses</h3>
+            <p className="mt-2 text-3xl font-bold gradient-text">{userInfo.currentCourses.length}</p>
+          </div>
+          <div className="glass rounded-xl shadow-lg p-6 text-center hover-lift animate-fade-in stagger-2">
+            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FontAwesomeIcon icon={faCode} className="text-white text-xl" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-600">Skills</h3>
+            <p className="mt-2 text-3xl font-bold gradient-text">{userInfo.skills.length}</p>
+          </div>
+          <div className="glass rounded-xl shadow-lg p-6 text-center hover-lift animate-fade-in stagger-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FontAwesomeIcon icon={faProjectDiagram} className="text-white text-xl" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-600">Projects</h3>
+            <p className="mt-2 text-3xl font-bold gradient-text">{userInfo.projects.length}</p>
+          </div>
+        </section>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold mb-4">Personal Details</h2>
-        {editMode ? (
-          <>
-            <input type="text" value={userInfo.personalDetails.name} className="w-full py-2 px-4 rounded bg-gray-200 mb-2" onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, name: e.target.value } })} />
-            <input type="text" value={userInfo.personalDetails.email} className="w-full py-2 px-4 rounded bg-gray-200 mb-2" onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, email: e.target.value } })} />
-            <input type="text" value={userInfo.personalDetails.phone} className="w-full py-2 px-4 rounded bg-gray-200 mb-2" onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, phone: e.target.value } })} />
-            <input type="text" value={userInfo.personalDetails.address} className="w-full py-2 px-4 rounded bg-gray-200 mb-2" onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, address: e.target.value } })} />
-          </>
-        ) : (
-          <>
-            <p className="text-gray-600"><strong>Name:</strong> {userInfo.personalDetails.name}</p>
-            <p className="text-gray-600"><strong>Email:</strong> {userInfo.personalDetails.email}</p>
-            <p className="text-gray-600"><strong>Phone:</strong> {userInfo.personalDetails.phone}</p>
-            <p className="text-gray-600"><strong>Address:</strong> {userInfo.personalDetails.address}</p>
-          </>
-        )}
-      </div>
+        <div className="glass rounded-xl shadow-lg p-6 mb-6 animate-fade-in">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+              <FontAwesomeIcon icon={faUser} className="text-white" />
+            </div>
+            <h2 className="text-2xl font-bold gradient-text">Personal Details</h2>
+          </div>
+          {editMode ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faUser} className="text-indigo-400 w-5" />
+                <input 
+                  type="text" 
+                  value={userInfo.personalDetails.name} 
+                  className="flex-1 py-3 px-4 rounded-lg border border-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm" 
+                  placeholder="Full Name"
+                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, name: e.target.value } })} 
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faEnvelope} className="text-indigo-400 w-5" />
+                <input 
+                  type="email" 
+                  value={userInfo.personalDetails.email} 
+                  className="flex-1 py-3 px-4 rounded-lg border border-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm" 
+                  placeholder="Email Address"
+                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, email: e.target.value } })} 
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faPhone} className="text-indigo-400 w-5" />
+                <input 
+                  type="tel" 
+                  value={userInfo.personalDetails.phone} 
+                  className="flex-1 py-3 px-4 rounded-lg border border-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm" 
+                  placeholder="Phone Number"
+                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, phone: e.target.value } })} 
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-400 w-5" />
+                <input 
+                  type="text" 
+                  value={userInfo.personalDetails.address} 
+                  className="flex-1 py-3 px-4 rounded-lg border border-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm" 
+                  placeholder="Address"
+                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, address: e.target.value } })} 
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                <FontAwesomeIcon icon={faUser} className="text-indigo-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Name</p>
+                  <p className="font-semibold text-gray-700">{userInfo.personalDetails.name || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                <FontAwesomeIcon icon={faEnvelope} className="text-indigo-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-semibold text-gray-700">{userInfo.personalDetails.email || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                <FontAwesomeIcon icon={faPhone} className="text-indigo-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Phone</p>
+                  <p className="font-semibold text-gray-700">{userInfo.personalDetails.phone || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Address</p>
+                  <p className="font-semibold text-gray-700">{userInfo.personalDetails.address || 'Not provided'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold mb-4">Family Details</h2>
-        {editMode ? (
-          <>
-            <input type="text" value={userInfo.familyDetails.fatherName} className="w-full py-2 px-4 rounded bg-gray-200 mb-2" onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, fatherName: e.target.value } })} />
-            <input type="text" value={userInfo.familyDetails.motherName} className="w-full py-2 px-4 rounded bg-gray-200 mb-2" onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, motherName: e.target.value } })} />
-            <input type="text" value={userInfo.familyDetails.siblings} className="w-full py-2 px-4 rounded bg-gray-200 mb-2" onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, siblings: e.target.value } })} />
-          </>
-        ) : (
-          <>
-            <p className="text-gray-600"><strong>Father's Name:</strong> {userInfo.familyDetails.fatherName}</p>
-            <p className="text-gray-600"><strong>Mother's Name:</strong> {userInfo.familyDetails.motherName}</p>
-            <p className="text-gray-600"><strong>Siblings:</strong> {userInfo.familyDetails.siblings}</p>
-          </>
-        )}
-      </div>
+        <div className="glass rounded-xl shadow-lg p-6 mb-6 animate-fade-in">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+              <FontAwesomeIcon icon={faUsers} className="text-white" />
+            </div>
+            <h2 className="text-2xl font-bold gradient-text">Family Details</h2>
+          </div>
+          {editMode ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faUser} className="text-green-400 w-5" />
+                <input 
+                  type="text" 
+                  value={userInfo.familyDetails.fatherName} 
+                  className="flex-1 py-3 px-4 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm" 
+                  placeholder="Father's Name"
+                  onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, fatherName: e.target.value } })} 
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faUser} className="text-green-400 w-5" />
+                <input 
+                  type="text" 
+                  value={userInfo.familyDetails.motherName} 
+                  className="flex-1 py-3 px-4 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm" 
+                  placeholder="Mother's Name"
+                  onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, motherName: e.target.value } })} 
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faUsers} className="text-green-400 w-5" />
+                <input 
+                  type="text" 
+                  value={userInfo.familyDetails.siblings} 
+                  className="flex-1 py-3 px-4 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm" 
+                  placeholder="Siblings"
+                  onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, siblings: e.target.value } })} 
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                <FontAwesomeIcon icon={faUser} className="text-green-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Father's Name</p>
+                  <p className="font-semibold text-gray-700">{userInfo.familyDetails.fatherName || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                <FontAwesomeIcon icon={faUser} className="text-green-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Mother's Name</p>
+                  <p className="font-semibold text-gray-700">{userInfo.familyDetails.motherName || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                <FontAwesomeIcon icon={faUsers} className="text-green-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Siblings</p>
+                  <p className="font-semibold text-gray-700">{userInfo.familyDetails.siblings || 'Not provided'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-2xl font-bold mb-4">Current Courses</h2>
         {userInfo.currentCourses.map(course => (
           <div key={course.id} className="mb-4">
@@ -167,7 +363,7 @@ const ProfilePage = () => {
           )}
         </div>
   
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-2xl font-bold mb-4">Skills</h2>
           <ul className="list-disc list-inside">
             {userInfo.skills.map((skill, index) => (
@@ -182,7 +378,7 @@ const ProfilePage = () => {
           )}
         </div>
   
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-2xl font-bold mb-4">Projects</h2>
           {userInfo.projects.map(project => (
             <div key={project.id} className="mb-4">
@@ -214,7 +410,7 @@ const ProfilePage = () => {
           )}
         </div>
   
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-2xl font-bold mb-4">Education</h2>
           {userInfo.education.map(edu => (
             <div key={edu.id} className="mb-4">
@@ -252,13 +448,14 @@ const ProfilePage = () => {
           )}
         </div>
   
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-2xl font-bold mb-4">Mentor Details</h2>
-          <p className="text-gray-600"><strong>Mentor Name:</strong> Dr. John Smith</p>
-          <p className="text-gray-600"><strong>Email:</strong> john.smith@xyzuniversity.com</p>
-          <p className="text-gray-600"><strong>Phone:</strong> 987-654-3210</p>
+          <p className="text-gray-600"><strong>Mentor Name:</strong> {userInfo.mentor?.name || '—'}</p>
+          <p className="text-gray-600"><strong>Email:</strong> {userInfo.mentor?.email || '—'}</p>
+          <p className="text-gray-600"><strong>Phone:</strong> {userInfo.mentor?.phone || '—'}</p>
         </div>
       </div>
+    </div>
     );
   };
   

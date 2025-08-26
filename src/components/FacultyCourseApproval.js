@@ -1,14 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  getDocs,
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import React, { useState, useEffect, useCallback } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../auth";
 
@@ -51,7 +42,7 @@ const FacultyCourseApproval = () => {
 
 
   // Fetch course data based on year, section, semester, and facultyLoginId
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!year || !section || !semester || !facultyLoginId) {
       console.log("Year, section, semester, or facultyLoginId is missing.");
       return;
@@ -143,7 +134,7 @@ const FacultyCourseApproval = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [year, section, semester, facultyLoginId]);
 
 
   const updateStatus = async (studentIds, newStatus) => {
@@ -231,7 +222,7 @@ const FacultyCourseApproval = () => {
     if (year && section && semester && facultyLoginId) {
       fetchData();
     }
-  }, [year, section, semester, facultyLoginId]);
+  }, [year, section, semester, facultyLoginId, fetchData]);
 
 
   return (

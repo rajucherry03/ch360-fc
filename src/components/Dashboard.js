@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChalkboardTeacher, faUserGraduate, faClipboardList, faCalendarAlt, faFileAlt, faComments, faChartLine, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faComments, faClock } from '@fortawesome/free-solid-svg-icons';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 

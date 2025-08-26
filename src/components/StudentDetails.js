@@ -15,9 +15,11 @@ const StudentDetails = () => {
         setLoading(true);
         setError(null);
 
-        // Adjust the path if students are nested in a specific subcollection
-        const studentDocRef = doc(db, `students/III/A/${id}`);
-        const studentDocSnap = await getDoc(studentDocRef);
+        // Try nested path based on typical structure; fallback to root-level students
+        let studentDocSnap = await getDoc(doc(db, `students/III/A/${id}`));
+        if (!studentDocSnap.exists()) {
+          studentDocSnap = await getDoc(doc(db, `students/${id}`));
+        }
 
         if (studentDocSnap.exists()) {
           setStudent(studentDocSnap.data());

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import React, { useState, useEffect, useCallback } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase"; // Firestore configuration
 import { useAuth } from "../auth"; // Authentication hook to get logged-in mentor
 
@@ -45,7 +45,7 @@ const MentorApproval = () => {
   };
 
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!loggedInMentorId || !year || !section || !semester) {
       console.error("Mentor ID, year, section, or semester is required.");
       return;
@@ -158,7 +158,7 @@ const MentorApproval = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loggedInMentorId, year, section, semester]);
  
     const updateStatus = async (studentId, mentorIndex, newStatus) => {
       try {
@@ -207,7 +207,7 @@ const MentorApproval = () => {
     if (loggedInMentorId && year && section && semester) {
       fetchData();
     }
-  }, [loggedInMentorId, year, section, semester]);
+  }, [loggedInMentorId, year, section, semester, fetchData]);
 
 
   return (

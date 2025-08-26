@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBars, 
@@ -15,8 +15,7 @@ import {
   faUser, 
   faEnvelope, 
   faBell,
-    faTasks,
-  faUsers 
+  faTasks
 } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
@@ -34,54 +33,54 @@ const Navbar = () => {
           <FontAwesomeIcon icon={isOpen ? faTimes : faBars} className="text-xl" />
         </button>
       </div>
-      <aside className={`fixed inset-0 bg-gray-900 text-white z-50 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:relative md:translate-x-0 md:w-64`}>
-        <div className="py-6 px-4 flex justify-between items-center">
+      <aside className={`fixed top-0 left-0 h-screen w-72 bg-gray-900 text-white z-40 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 flex flex-col border-r border-gray-800`}> 
+        <div className="py-6 px-4 flex justify-between items-center sticky top-0 bg-gray-900 border-b border-gray-800 z-10">
           <h2 className="text-2xl font-bold">CampusHub360 Faculty</h2>
           <button onClick={toggleMenu} className="md:hidden">
             <FontAwesomeIcon icon={faTimes} className="text-xl" />
           </button>
         </div>
-        <nav className="flex-1 px-4 space-y-2">
-          <Link to="/" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto pb-6">
+          <NavLink to="/home" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faHome} className="mr-3" /> Home
-          </Link>
-          <Link to="/courses" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/courses" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faChalkboardTeacher} className="mr-3" /> Courses
-          </Link>
-          <Link to="/students" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/students" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faUserGraduate} className="mr-3" /> Students
-          </Link>
-          <Link to="/attendance" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/attendance" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faClipboardList} className="mr-3" /> Attendance
-          </Link>
-          <Link to="/exams" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/exams" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faCalendarAlt} className="mr-3" /> Exams
-          </Link>
-          <Link to="/grades" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/grades" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faFileAlt} className="mr-3" /> Grades
-          </Link>
+          </NavLink>
 
-          <Link to="/approval" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          <NavLink to="/approval" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faTasks} className="mr-3" /> Approval Workflow
-          </Link>
-          <Link to="/communication" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/communication" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faEnvelope} className="mr-3" /> Communication
-          </Link>
-          <Link to="/request" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/request" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faFileAlt} className="mr-3" /> Request
-          </Link>
-          <Link to="/announcements" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/announcements" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faBell} className="mr-3" /> Announcements
-          </Link>
-          <Link to="/profile" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/profile" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faUser} className="mr-3" /> Profile
-          </Link>
-          <Link to="/settings" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/settings" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faCog} className="mr-3" /> Settings
-          </Link>
-          <Link to="/logout" className="block py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center">
+          </NavLink>
+          <NavLink to="/logout" className={({isActive}) => `block py-3 px-4 rounded-lg flex items-center border-l-4 ${isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700'}`}>
             <FontAwesomeIcon icon={faSignOutAlt} className="mr-3" /> Logout
-          </Link>
+          </NavLink>
         </nav>
       </aside>
     </>

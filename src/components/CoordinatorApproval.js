@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   collection,
   query,
@@ -36,7 +36,7 @@ const CoordinatorDashboard = () => {
   }, [loggedInFacultyId]);
 
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!year || !section || !loggedInFacultyId) {
       console.error("Year, Section, and Faculty ID are required.");
       return;
@@ -125,7 +125,7 @@ const CoordinatorDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [year, section, loggedInFacultyId]);
 
 
   const updateStatus = async (studentId, coordinatorIndex, newStatus) => {
@@ -212,7 +212,7 @@ const CoordinatorDashboard = () => {
     if (year && section && semester && loggedInFacultyId) {
       fetchData();
     }
-  }, [year, section, semester, loggedInFacultyId]);
+  }, [year, section, semester, loggedInFacultyId, fetchData]);
 
 
   return (

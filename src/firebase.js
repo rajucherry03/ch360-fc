@@ -1,20 +1,20 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+// import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCQzy04Dy8grTCU0SbuhbdjiyufSg72hHA",
-  authDomain: "nodues-cse.firebaseapp.com",
-  projectId: "nodues-cse",
-  storageBucket: "nodues-cse.firebasestorage.app",
-  messagingSenderId: "1033059355029",
-  appId: "1:1033059355029:web:08c0d462e04fafdb5ace9c",
-  measurementId: "G-17CQLSS4TK"
+  apiKey: "AIzaSyC1ekZDZR1-6dh3E_0rShNa279iwe-JVCY",
+  authDomain: "csd-nodues.firebaseapp.com",
+  projectId: "csd-nodues",
+  storageBucket: "csd-nodues.firebasestorage.app",
+  messagingSenderId: "787881916826",
+  appId: "1:787881916826:web:8a497747a086d010322223",
+  measurementId: "G-YKB417NSXQ"
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// Initialize Analytics only in browser environments if needed
 export const db = getFirestore(app);
 export const auth = getAuth(app);

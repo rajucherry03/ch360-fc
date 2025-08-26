@@ -1,30 +1,31 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './components/Home';
+import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Home from './components/Home';
+import Announcements from './components/Announcements';
 import Dashboard from './components/Dashboard';
-import CourseManagement from './components/Course';
-import CourseDetails from './components/CourseDetails';
 import StudentList from './components/StudentList';
-import StudentDetails from './components/StudentDetails';
 import Attendance from './components/AttendanceList';
-import StudentAttendance from './components/StudentAttendance';
-import EditAttendance from './components/EditAttendance';
-import ExamDetails from './components/ExamDetails';
 import Exam from './components/Exam';
 import Grades from './components/Grades';
-import StudentGrades from './components/StudentGrades';
+import ProfilePage from './components/ProfilePage';
 import CommunicationPage from './components/Communication';
-import Announcements from './components/Announcements';
+import Settings from './components/Settings';
+import Logout from './components/Logout';
+import CourseManagement from './components/Course';
+import RequestPage from './components/RequestPage';
+import Events from './components/Events';
+import Resources from './components/Resources';
+import Help from './components/Help';
+import CourseDetails from './components/CourseDetails';
+import StudentDetails from './components/StudentDetails';
 import ApprovalWorkflow from "./components/ApprovalWorkflow";
-import RequestPage from "./components/RequestPage";
-import ProfilePage from "./components/ProfilePage";
 import Login from './components/Login';
 import FacultyCourseApproal from './components/FacultyCourseApproval'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthProvider, useAuth } from './auth'; // Import AuthProvider and useAuth
-import ProtectedRoute from './ProtectedRoute'; // Custom protected route component
+import { AuthProvider } from './auth';
+import ProtectedRoute from './ProtectedRoute';
 import CoordinatorDashboard from './components/CoordinatorApproval';
 import MentorApproval from './components/MentorApproval';
 
@@ -42,180 +43,73 @@ function App() {
 const MainLayout = () => {
   return (
     <div className="flex flex-col md:flex-row h-screen">
-      {/* <Navbar /> */}
       <div className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Login />} />
-          {/* <Route
-            path="/home"
+          <Route
             element={
               <ProtectedRoute>
-                <Home />
+                <AppLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/courses"
-            element={
-              <ProtectedRoute>
-                <CourseManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/course/:id"
-            element={
-              <ProtectedRoute>
-                <CourseDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/students"
-            element={
-              <ProtectedRoute>
-                <StudentList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/students/:id"
-            element={
-              <ProtectedRoute>
-                <StudentDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/attendance"
-            element={
-              <ProtectedRoute>
-                <Attendance />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/attendance/:id"
-            element={
-              <ProtectedRoute>
-                <StudentAttendance />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/edit-attendance/:id"
-            element={
-              <ProtectedRoute>
-                <EditAttendance />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/exams"
-            element={
-              <ProtectedRoute>
-                <Exam />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/exams/:id"
-            element={
-              <ProtectedRoute>
-                <ExamDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/grades"
-            element={
-              <ProtectedRoute>
-                <Grades />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/grades/:id"
-            element={
-              <ProtectedRoute>
-                <StudentGrades />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/communication"
-            element={
-              <ProtectedRoute>
-                <CommunicationPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/announcements"
-            element={
-              <ProtectedRoute>
-                <Announcements />
-              </ProtectedRoute>
-            }
-          />
-          
-          />
-          <Route
-            path="/request"
-            element={
-              <ProtectedRoute>
-                <RequestPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          /> */}
-          <Route
-            path="/approval"
-            element={
-              <ProtectedRoute>
+          >
+            <Route path="/home" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/courses" element={<CourseManagement />} />
+            <Route path="/course/:year/:section/:semester/:id" element={<CourseDetails />} />
+            <Route path="/students" element={<StudentList />} />
+            <Route path="/students/:id" element={<StudentDetails />} />
+            <Route path="/attendance" element={<Attendance />} />
+            <Route path="/exams" element={<Exam />} />
+            <Route path="/grades" element={<Grades />} />
+            <Route path="/communication" element={<CommunicationPage />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/request" element={<RequestPage />} />
+            <Route path="/announcements" element={<Announcements />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route
+              path="/approval"
+              element={
                 <ApprovalWorkflow />
-              </ProtectedRoute>
-            }/>
-           <Route
-            path="/courses-approval"
-            element={
-              <ProtectedRoute>
+              }
+            />
+            <Route
+              path="/courses-approval"
+              element={
                 <FacultyCourseApproal />
-              </ProtectedRoute>
-            }
-          />
-           <Route
-            path="/coordinators-approval"
-            element={
-              <ProtectedRoute>
+              }
+            />
+            <Route
+              path="/coordinators-approval"
+              element={
                 <CoordinatorDashboard />
-              </ProtectedRoute>
-            }
-          />
-           <Route
-            path="/mentors-approval"
-            element={
-              <ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mentors-approval"
+              element={
                 <MentorApproval />
-              </ProtectedRoute>
-            }
-          />
+              }
+            />
+          </Route>
         </Routes>
+      </div>
+    </div>
+  );
+};
+
+const AppLayout = () => {
+  return (
+    <div className="flex h-screen">
+      <div className="hidden md:block">
+        <Navbar />
+      </div>
+      <div className="flex-1 overflow-auto bg-gray-50 md:ml-72">
+        <Outlet />
       </div>
     </div>
   );
