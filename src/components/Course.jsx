@@ -151,10 +151,6 @@ const FacultyCourseList = () => {
       <div className="page-container">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm text-gray-700 hover:bg-gray-100">
-              <FontAwesomeIcon icon={faArrowRight} className="rotate-180" />
-              Back
-            </button>
             <h1 className="text-2xl font-semibold text-gray-900">My Courses</h1>
             <p className="text-xs text-gray-500 hidden sm:block">Here is the list of courses you are teaching</p>
           </div>

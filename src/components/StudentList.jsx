@@ -384,10 +384,6 @@ const StudentList = () => {
       <div className="page-container">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm text-gray-700 hover:bg-gray-100">
-              <FontAwesomeIcon icon={faArrowLeft} />
-              Back
-            </button>
             <h1 className="text-2xl font-semibold text-gray-900">Students</h1>
             <span className="text-xs text-gray-500">{loadTime > 0 ? `Loaded in ${loadTime}ms` : 'Loading...'}</span>
             {isRefreshing && (

@@ -1,14 +1,12 @@
 import React, { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth } from '../firebase'; // Import auth from your firebase.js file
 import { toast } from 'react-toastify';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [devEmail, setDevEmail] = useState('rantudas@mits.ac.in');
-  const [devPassword, setDevPassword] = useState('Mits@1234');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -81,26 +79,7 @@ const Login = () => {
     }
   };
 
-  const handleDevCreateUser = async () => {
-    try {
-      const trimmedEmail = devEmail.trim().toLowerCase();
-      const pwd = devPassword;
-      await createUserWithEmailAndPassword(auth, trimmedEmail, pwd);
-      toast.success('Test user created. You can now log in.', {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-    } catch (err) {
-      console.error('Create user error:', err?.code, err?.message);
-      const known = err?.code === 'auth/email-already-in-use'
-        ? 'User already exists. Try logging in.'
-        : (err?.message || 'Failed to create user.');
-      toast.error(known, {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-    }
-  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-campus-dark">
@@ -147,34 +126,7 @@ const Login = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        {import.meta?.env?.VITE_ENABLE_DEV_CREATE_USER === 'true' && (
-          <div className="mt-6 p-4 rounded-lg border border-gray-700 bg-black/20">
-            <div className="text-sm text-gray-400 mb-2">Dev-only: Create test user</div>
-            <div className="grid gap-3">
-              <input
-                type="email"
-                className="input-campus w-full p-3 rounded-lg"
-                placeholder="Dev email"
-                value={devEmail}
-                onChange={(e) => setDevEmail(e.target.value)}
-              />
-              <input
-                type="password"
-                className="input-campus w-full p-3 rounded-lg"
-                placeholder="Dev password"
-                value={devPassword}
-                onChange={(e) => setDevPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={handleDevCreateUser}
-                className="w-full py-2 rounded-lg font-semibold border border-gray-600 hover:bg-gray-800 transition"
-              >
-                Create Test User
-              </button>
-            </div>
-          </div>
-        )}
+
         <div className="mt-4 text-center">
           <button
             onClick={handleForgetPassword}
