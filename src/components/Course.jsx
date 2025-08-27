@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, collectionGroup, getDocs, query, where } from "firebase/firestore";
+import { collection, collectionGroup, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase"; // Firebase configuration
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -12,16 +12,20 @@ import {
   faClock, 
   faExclamationTriangle,
   faGraduationCap,
-  faArrowRight
+  faArrowRight,
+  faUser,
+  faIdCard,
+  faBuilding
 } from '@fortawesome/free-solid-svg-icons';
 
 const FacultyCourseList = () => {
   const [courses, setCourses] = useState([]);
+  const [facultyData, setFacultyData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchFacultyCourses = async () => {
       try {
         setLoading(true);
@@ -34,53 +38,184 @@ const FacultyCourseList = () => {
             return;
           }
 
-          // Fast: collection group query across all courseDetails
-          const foundCourses = [];
           try {
-            const cg = collectionGroup(db, "courseDetails");
-            const qy = query(cg, where("instructor", "==", user.uid));
-            const snap = await getDocs(qy);
-            snap.forEach((docSnap) => {
-              const segments = docSnap.ref.path.split("/");
-              const year = segments[1];
-              const section = segments[2];
-              const semester = segments[3];
-              foundCourses.push({ id: docSnap.id, year, section, semester, ...docSnap.data() });
-            });
-          } catch (e) {
-            // Fallback without index: fire all queries in parallel across a constrained set (I–IV, A–F, sem1/sem2)
-            const years = ["I","II","III","IV"];
-            const sections = ["A","B","C","D","E","F"];
-            const semesters = ["sem1","sem2"];
-            const tasks = [];
-            years.forEach((y) => {
-              sections.forEach((sec) => {
-                semesters.forEach((sem) => {
-                  const col = collection(db, "courses", y, sec, sem, "courseDetails");
-                  tasks.push(getDocs(query(col, where("instructor", "==", user.uid))));
-                });
-              });
-            });
-            const results = await Promise.all(tasks);
-            results.forEach((snap2) => {
-              snap2.forEach((d) => {
-                const seg = d.ref.path.split("/");
-                foundCourses.push({ id: d.id, year: seg[1], section: seg[2], semester: seg[3], ...d.data() });
-              });
-            });
-          }
+            console.log("🔍 Starting course fetch for user:", user.uid);
+            
+            // Step 1: Fetch faculty data
+            const facultyRef = doc(db, 'faculty', 'CSE_DS', 'members', user.uid);
+            const facultySnap = await getDoc(facultyRef);
+            
+            if (!facultySnap.exists()) {
+              setError("Faculty profile not found.");
+              setCourses([]);
+              setLoading(false);
+              return;
+            }
 
-          if (foundCourses.length === 0) {
-            setError("No courses assigned to this faculty.");
-            setCourses([]);
-          } else {
+            const facultyData = facultySnap.data();
+            setFacultyData(facultyData);
+            console.log("✅ Faculty data fetched:", facultyData.name);
+
+            // Step 2: Get course IDs from faculty data
+            const allCourseIds = [];
+            
+            if (facultyData.courses && Array.isArray(facultyData.courses)) {
+              allCourseIds.push(...facultyData.courses);
+            }
+            
+            if (facultyData.teaching) {
+              Object.keys(facultyData.teaching).forEach(section => {
+                if (Array.isArray(facultyData.teaching[section])) {
+                  allCourseIds.push(...facultyData.teaching[section]);
+                }
+              });
+            }
+            
+            const uniqueCourseIds = [...new Set(allCourseIds)];
+            console.log("📚 Course IDs from faculty data:", uniqueCourseIds);
+
+                         // DYNAMIC UNIVERSAL FETCH - Works with any Firestore structure
+             let foundCourses = [];
+
+             if (uniqueCourseIds.length > 0) {
+               console.log("🚀 Dynamic course fetch using course IDs:", uniqueCourseIds);
+               
+               // Dynamic course fetching function
+               const fetchCourseDynamically = async (courseId) => {
+                 // Strategy 1: Try exact path first (your current structure)
+                 try {
+                   const coursePath = doc(db, 'courses', 'CSE_DS', 'year_sem', 'III_5', 'courseDetails', courseId);
+                   const courseSnap = await getDoc(coursePath);
+                   if (courseSnap.exists()) {
+                     const courseData = courseSnap.data();
+                     console.log("✅ Found course via exact path:", courseData.courseName);
+                     return {
+                       id: courseId,
+                       year: courseData.displayYear || "III",
+                       section: courseData.displaySection || "A",
+                       semester: courseData.displaySemester || "5",
+                       courseName: courseData.courseName || `Course ${courseId}`,
+                       courseCode: courseData.courseCode || courseId,
+                       instructorName: facultyData.name,
+                       instructor: courseData.instructor,
+                       department: courseData.displayDepartment || "Computer Science & Engineering (Data Science)",
+                       credits: courseData.credits || 3,
+                       description: courseData.description || `Course ${courseId} - ${facultyData.name}`,
+                       studentsBySection: courseData.studentsBySection || {},
+                       masterCoursePath: courseData.masterCoursePath,
+                       semesterKey: courseData.semesterKey || "III_5",
+                       students: courseData.students || []
+                     };
+                   }
+                 } catch (error) {
+                   console.log("❌ Exact path failed for course:", courseId);
+                 }
+
+                 // Strategy 2: Try collectionGroup query (universal)
+                 try {
+                   const cg = collectionGroup(db, "courseDetails");
+                   const q = query(cg, where("__name__", "==", courseId));
+                   const snap = await getDocs(q);
+                   if (!snap.empty) {
+                     const courseData = snap.docs[0].data();
+                     console.log("✅ Found course via collectionGroup:", courseData.courseName);
+                     return {
+                       id: courseId,
+                       year: courseData.displayYear || "III",
+                       section: courseData.displaySection || "A",
+                       semester: courseData.displaySemester || "5",
+                       courseName: courseData.courseName || `Course ${courseId}`,
+                       courseCode: courseData.courseCode || courseId,
+                       instructorName: facultyData.name,
+                       instructor: courseData.instructor,
+                       department: courseData.displayDepartment || "Computer Science & Engineering (Data Science)",
+                       credits: courseData.credits || 3,
+                       description: courseData.description || `Course ${courseId} - ${facultyData.name}`,
+                       studentsBySection: courseData.studentsBySection || {},
+                       masterCoursePath: courseData.masterCoursePath,
+                       semesterKey: courseData.semesterKey || "III_5",
+                       students: courseData.students || []
+                     };
+                   }
+                 } catch (error) {
+                   console.log("❌ CollectionGroup failed for course:", courseId);
+                 }
+
+                 // Strategy 3: Try multiple path variations dynamically
+                 const pathVariations = [
+                   // Your exact structure variations
+                   ['courses', 'CSE_DS', 'year_sem', 'III_5', 'courseDetails', courseId],
+                   ['courses', 'CSE_DS', 'year_sem', 'III_6', 'courseDetails', courseId],
+                   ['courses', 'CSE_DS', 'year_sem', 'III_7', 'courseDetails', courseId],
+                   ['courses', 'CSE_DS', 'year_sem', 'III_8', 'courseDetails', courseId],
+                   // Alternative structures
+                   ['courses', 'III', 'A', '5', 'courseDetails', courseId],
+                   ['courses', 'III', 'B', '5', 'courseDetails', courseId],
+                   ['courses', 'III', 'C', '5', 'courseDetails', courseId],
+                   // Direct course structure
+                   ['courses', courseId],
+                   ['courseDetails', courseId],
+                   // Department variations
+                   ['courses', 'CSE', 'year_sem', 'III_5', 'courseDetails', courseId],
+                   ['courses', 'CSEDS', 'year_sem', 'III_5', 'courseDetails', courseId],
+                 ];
+
+                 for (const pathSegments of pathVariations) {
+                   try {
+                     const coursePath = doc(db, ...pathSegments);
+                     const courseSnap = await getDoc(coursePath);
+                     if (courseSnap.exists()) {
+                       const courseData = courseSnap.data();
+                       console.log("✅ Found course via path variation:", pathSegments.join('/'));
+                       return {
+                         id: courseId,
+                         year: courseData.displayYear || "III",
+                         section: courseData.displaySection || "A",
+                         semester: courseData.displaySemester || "5",
+                         courseName: courseData.courseName || `Course ${courseId}`,
+                         courseCode: courseData.courseCode || courseId,
+                         instructorName: facultyData.name,
+                         instructor: courseData.instructor,
+                         department: courseData.displayDepartment || "Computer Science & Engineering (Data Science)",
+                         credits: courseData.credits || 3,
+                         description: courseData.description || `Course ${courseId} - ${facultyData.name}`,
+                         studentsBySection: courseData.studentsBySection || {},
+                         masterCoursePath: courseData.masterCoursePath,
+                         semesterKey: courseData.semesterKey || "III_5",
+                         students: courseData.students || []
+                       };
+                     }
+                   } catch (error) {
+                     // Continue to next variation
+                   }
+                 }
+
+                 console.log("❌ No course found for ID:", courseId);
+                 return null;
+               };
+
+               // Fetch all courses dynamically
+               const coursePromises = uniqueCourseIds.map(courseId => fetchCourseDynamically(courseId));
+               const results = await Promise.all(coursePromises);
+               foundCourses = results.filter(course => course !== null);
+               console.log("✅ Dynamic fetch found:", foundCourses.length, "courses");
+             }
+
+            // Set the final result
+            console.log("🎉 Final courses to display:", foundCourses.length);
             setCourses(foundCourses);
             setError(null);
+
+          } catch (error) {
+            console.error("❌ Error in course fetching:", error);
+            setError("Error fetching faculty courses.");
+            setCourses([]);
           }
 
           setLoading(false);
         });
       } catch (err) {
+        console.error("❌ Fatal error:", err);
         setError("Error fetching faculty courses.");
         setLoading(false);
       }
@@ -149,6 +284,35 @@ const FacultyCourseList = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="page-container">
+        {/* Faculty Information Header */}
+        {facultyData && (
+          <div className="bg-white border rounded-lg p-6 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faUser} className="text-white text-xl" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-gray-900 mb-1">{facultyData.name}</h2>
+                <p className="text-gray-600 mb-2">{facultyData.designation} • {facultyData.department}</p>
+                <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <FontAwesomeIcon icon={faIdCard} />
+                    {facultyData.empID}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <FontAwesomeIcon icon={faBuilding} />
+                    {facultyData.departmentKey}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <FontAwesomeIcon icon={faClock} />
+                    {facultyData.experience}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold text-gray-900">My Courses</h1>
@@ -169,7 +333,13 @@ const FacultyCourseList = () => {
               key={course.id}
               className="group bg-white rounded-lg border p-4 hover:shadow-sm animate-fade-in cursor-pointer"
               style={{ animationDelay: `${index * 100}ms` }}
-              onClick={() => navigate(`/courses/${course.year}/${course.section}/${course.semester}/courseDetails/${course.id}`)}
+              onClick={() => {
+                // Always try to navigate with the full path structure
+                const courseYear = course.year || "III";
+                const courseSection = course.section || "A";
+                const courseSemester = course.semester || "5";
+                navigate(`/courses/${courseYear}/${courseSection}/${courseSemester}/courseDetails/${course.id}`);
+              }}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-10 h-10 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -180,47 +350,65 @@ const FacultyCourseList = () => {
                 </div>
               </div>
               
-              <h3 className="text-base font-semibold text-gray-900 mb-2">
-                {course.courseName || course.id}
-              </h3>
+                             <h3 className="text-base font-semibold text-gray-900 mb-2">
+                 {course.courseName || course.courseCode || `Course ${course.id}`}
+               </h3>
               
-              <p className="text-gray-600 mb-4 line-clamp-2 text-sm">
-                {course.description || "Course description not available"}
-              </p>
+                             <p className="text-gray-600 mb-4 line-clamp-2 text-sm">
+                 {course.description || course.courseDescription || `Course ${course.id} - ${course.instructorName || facultyData?.name || 'Faculty'}`}
+               </p>
               
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                  <FontAwesomeIcon icon={faGraduationCap} className="mr-2"/>
-                  {course.year}-{course.section}
-                </span>
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
-                  <FontAwesomeIcon icon={faCalendarAlt} className="mr-2"/>
-                  {course.semester?.toUpperCase()}
-                </span>
+                {course.year && course.section && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                    <FontAwesomeIcon icon={faGraduationCap} className="mr-2"/>
+                    {course.year}-{course.section}
+                  </span>
+                )}
+                {course.semester && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
+                    <FontAwesomeIcon icon={faCalendarAlt} className="mr-2"/>
+                    {course.semester?.toUpperCase()}
+                  </span>
+                )}
+                {course.credits && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+                    <FontAwesomeIcon icon={faClock} className="mr-2"/>
+                    {course.credits} Credits
+                  </span>
+                )}
               </div>
               
               <div className="flex items-center justify-between text-xs text-gray-600">
                 <div className="flex items-center gap-2">
                   <FontAwesomeIcon icon={faUsers} className="text-blue-600"/>
-                  <span className="font-medium">{course.students?.length || 0} Students</span>
+                  <span className="font-medium">{course.students?.length || course.enrolledStudents || 0} Students</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faClock} className="text-blue-600"/>
-                  <span className="font-medium">{course.credits || 3} Credits</span>
-                </div>
+                                 <div className="flex items-center gap-2">
+                   <FontAwesomeIcon icon={faChalkboardTeacher} className="text-blue-600"/>
+                   <span className="font-medium">{course.instructorName || course.instructor || facultyData?.name || "Assigned"}</span>
+                 </div>
               </div>
 
               <div className="mt-4 flex gap-2">
+                {course.year && course.section && course.semester && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/attendance/${course.year}/${course.section}/${course.semester}/${course.id}`); }}
+                    className="btn-campus-primary px-3 py-2 rounded-md text-sm"
+                  >
+                    Mark Attendance
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); navigate(`/attendance/${course.year}/${course.section}/${course.semester}/${course.id}`); }}
-                  className="btn-campus-primary px-3 py-2 rounded-md text-sm"
-                >
-                  Mark Attendance
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); navigate(`/courses/${course.year}/${course.section}/${course.semester}/courseDetails/${course.id}`); }}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    const courseYear = course.year || "III";
+                    const courseSection = course.section || "A";
+                    const courseSemester = course.semester || "5";
+                    navigate(`/courses/${courseYear}/${courseSection}/${courseSemester}/courseDetails/${course.id}`);
+                  }}
                   className="px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-100 text-sm"
                 >
                   View Details

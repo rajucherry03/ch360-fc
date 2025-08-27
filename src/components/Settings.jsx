@@ -43,16 +43,26 @@ import {
   faSignOutAlt,
   faHome
 } from '@fortawesome/free-solid-svg-icons';
-import { auth } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../firebase";
+import { onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase";
 import { Link } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 const Settings = () => {
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const [settings, setSettings] = useState({
     profile: {
       displayName: '',
@@ -84,6 +94,7 @@ const Settings = () => {
     }
   });
 
+  // Fetch user data and settings from Firestore
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -97,21 +108,63 @@ const Settings = () => {
             return;
           }
 
-          // Simulate fetching user settings
-          setSettings(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              displayName: user.displayName || 'Faculty Member',
-              email: user.email || 'faculty@university.edu',
-              phone: '+1 (555) 123-4567',
-              department: 'Computer Science & Engineering',
-              designation: 'Assistant Professor',
-              officeLocation: 'Room 205, Block A'
-            }
-          }));
-
           setUser(user);
+
+          // Fetch user settings from Firestore
+          const userSettingsRef = doc(db, 'userSettings', user.uid);
+          const userSettingsDoc = await getDoc(userSettingsRef);
+
+          if (userSettingsDoc.exists()) {
+            // Load existing settings
+            const existingSettings = userSettingsDoc.data();
+            setSettings(prev => ({
+              ...prev,
+              ...existingSettings,
+              profile: {
+                ...prev.profile,
+                ...existingSettings.profile,
+                displayName: existingSettings.profile?.displayName || user.displayName || 'Faculty Member',
+                email: existingSettings.profile?.email || user.email || 'faculty@university.edu',
+              }
+            }));
+          } else {
+            // Create default settings for new user
+            const defaultSettings = {
+              profile: {
+                displayName: user.displayName || 'Faculty Member',
+                email: user.email || 'faculty@university.edu',
+                phone: '+1 (555) 123-4567',
+                department: 'Computer Science & Engineering',
+                designation: 'Assistant Professor',
+                officeLocation: 'Room 205, Block A',
+                profilePicture: null
+              },
+              preferences: {
+                theme: 'light',
+                language: 'en',
+                notifications: {
+                  email: true,
+                  push: true,
+                  sms: false
+                },
+                privacy: {
+                  profileVisibility: 'public',
+                  showEmail: true,
+                  showPhone: false
+                }
+              },
+              security: {
+                twoFactorAuth: false,
+                sessionTimeout: 30,
+                passwordExpiry: 90
+              }
+            };
+
+            // Save default settings to Firestore
+            await setDoc(userSettingsRef, defaultSettings);
+            setSettings(defaultSettings);
+          }
+
           setLoading(false);
         });
       } catch (err) {
@@ -147,21 +200,250 @@ const Settings = () => {
     }));
   };
 
-  const handleSaveSettings = () => {
-    // In a real app, you would save to Firebase here
-    console.log('Saving settings:', settings);
-    // Show success message
-    alert('Settings saved successfully!');
+  const handlePasswordChange = (field, value) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const handleProfilePictureChange = (event) => {
+  const handleSaveSettings = async () => {
+    if (!user) {
+      toast.error('No user logged in');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      
+      // Update settings in Firestore
+      const userSettingsRef = doc(db, 'userSettings', user.uid);
+      await updateDoc(userSettingsRef, settings);
+
+      // Update user profile in Firebase Auth if display name changed
+      if (settings.profile.displayName !== user.displayName) {
+        await user.updateProfile({
+          displayName: settings.profile.displayName
+        });
+      }
+
+      toast.success('Settings saved successfully!');
+    } catch (err) {
+      console.error('Error saving settings:', err);
+      toast.error('Failed to save settings. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!user) {
+      toast.error('No user logged in');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      // Re-authenticate user before changing password
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        passwordData.currentPassword
+      );
+      
+      await reauthenticateWithCredential(user, credential);
+      
+      // Change password
+      await updatePassword(user, passwordData.newPassword);
+
+      // Clear password fields
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+
+      toast.success('Password changed successfully!');
+    } catch (err) {
+      console.error('Error changing password:', err);
+      if (err.code === 'auth/wrong-password') {
+        toast.error('Current password is incorrect');
+      } else if (err.code === 'auth/weak-password') {
+        toast.error('Password is too weak');
+      } else {
+        toast.error('Failed to change password. Please try again.');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleProfilePictureChange = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleInputChange('profile', 'profilePicture', reader.result);
+    if (!file) return;
+
+    if (!user) {
+      toast.error('No user logged in');
+      return;
+    }
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      // Upload image to Firebase Storage
+      const storageRef = ref(storage, `profilePictures/${user.uid}/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      // Update settings with new profile picture URL
+      const updatedSettings = {
+        ...settings,
+        profile: {
+          ...settings.profile,
+          profilePicture: downloadURL
+        }
       };
-      reader.readAsDataURL(file);
+
+      setSettings(updatedSettings);
+
+      // Save to Firestore
+      const userSettingsRef = doc(db, 'userSettings', user.uid);
+      await updateDoc(userSettingsRef, {
+        'profile.profilePicture': downloadURL
+      });
+
+      toast.success('Profile picture updated successfully!');
+    } catch (err) {
+      console.error('Error uploading profile picture:', err);
+      toast.error('Failed to upload profile picture. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleThemeChange = async (theme) => {
+    try {
+      handleInputChange('preferences', 'theme', theme);
+      
+      // Apply theme immediately
+      document.documentElement.classList.remove('light', 'dark');
+      if (theme === 'auto') {
+        // Check system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
+      } else {
+        document.documentElement.classList.add(theme);
+      }
+
+      // Save to database
+      if (user) {
+        const userSettingsRef = doc(db, 'userSettings', user.uid);
+        await updateDoc(userSettingsRef, {
+          'preferences.theme': theme
+        });
+      }
+    } catch (err) {
+      console.error('Error updating theme:', err);
+      toast.error('Failed to update theme');
+    }
+  };
+
+  const handleLanguageChange = async (language) => {
+    try {
+      handleInputChange('preferences', 'language', language);
+      
+      // Save to database
+      if (user) {
+        const userSettingsRef = doc(db, 'userSettings', user.uid);
+        await updateDoc(userSettingsRef, {
+          'preferences.language': language
+        });
+      }
+      
+      toast.success('Language updated successfully!');
+    } catch (err) {
+      console.error('Error updating language:', err);
+      toast.error('Failed to update language');
+    }
+  };
+
+  const handleNotificationToggle = async (type, value) => {
+    try {
+      handleNestedChange('preferences', 'notifications', type, value);
+      
+      // Save to database
+      if (user) {
+        const userSettingsRef = doc(db, 'userSettings', user.uid);
+        await updateDoc(userSettingsRef, {
+          [`preferences.notifications.${type}`]: value
+        });
+      }
+      
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} notifications ${value ? 'enabled' : 'disabled'}`);
+    } catch (err) {
+      console.error('Error updating notifications:', err);
+      toast.error('Failed to update notification settings');
+    }
+  };
+
+  const handlePrivacyToggle = async (field, value) => {
+    try {
+      handleNestedChange('preferences', 'privacy', field, value);
+      
+      // Save to database
+      if (user) {
+        const userSettingsRef = doc(db, 'userSettings', user.uid);
+        await updateDoc(userSettingsRef, {
+          [`preferences.privacy.${field}`]: value
+        });
+      }
+      
+      toast.success('Privacy settings updated');
+    } catch (err) {
+      console.error('Error updating privacy settings:', err);
+      toast.error('Failed to update privacy settings');
+    }
+  };
+
+  const handleSecurityToggle = async (field, value) => {
+    try {
+      handleInputChange('security', field, value);
+      
+      // Save to database
+      if (user) {
+        const userSettingsRef = doc(db, 'userSettings', user.uid);
+        await updateDoc(userSettingsRef, {
+          [`security.${field}`]: value
+        });
+      }
+      
+      if (field === 'twoFactorAuth') {
+        toast.success(`Two-factor authentication ${value ? 'enabled' : 'disabled'}`);
+      }
+    } catch (err) {
+      console.error('Error updating security settings:', err);
+      toast.error('Failed to update security settings');
     }
   };
 
@@ -304,12 +586,14 @@ const Settings = () => {
                           accept="image/*"
                           onChange={handleProfilePictureChange}
                           className="hidden"
+                          disabled={saving}
                         />
                       </label>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-800">Profile Picture</h3>
                       <p className="text-gray-600 text-xs">Upload a new profile picture</p>
+                      {saving && <p className="text-blue-600 text-xs">Uploading...</p>}
                     </div>
                   </div>
 
@@ -404,7 +688,7 @@ const Settings = () => {
                       ].map((theme) => (
                         <button
                           key={theme.id}
-                          onClick={() => handleInputChange('preferences', 'theme', theme.id)}
+                          onClick={() => handleThemeChange(theme.id)}
                           className={`p-3 rounded-md border text-sm ${
                             settings.preferences.theme === theme.id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
                           }`}
@@ -435,7 +719,7 @@ const Settings = () => {
                       ].map((lang) => (
                         <button
                           key={lang.id}
-                          onClick={() => handleInputChange('preferences', 'language', lang.id)}
+                          onClick={() => handleLanguageChange(lang.id)}
                           className={`p-3 rounded-md border text-sm ${
                             settings.preferences.language === lang.id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
                           }`}
@@ -463,7 +747,7 @@ const Settings = () => {
                         </div>
                         <select
                           value={settings.preferences.privacy.profileVisibility}
-                          onChange={(e) => handleNestedChange('preferences', 'privacy', 'profileVisibility', e.target.value)}
+                          onChange={(e) => handlePrivacyToggle('profileVisibility', e.target.value)}
                           className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                         >
                           <option value="public">Public</option>
@@ -478,7 +762,7 @@ const Settings = () => {
                           <div className="text-sm text-gray-600">Display email in your profile</div>
                         </div>
                         <button
-                          onClick={() => handleNestedChange('preferences', 'privacy', 'showEmail', !settings.preferences.privacy.showEmail)}
+                          onClick={() => handlePrivacyToggle('showEmail', !settings.preferences.privacy.showEmail)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
                             settings.preferences.privacy.showEmail ? 'bg-indigo-500' : 'bg-gray-300'
                           }`}
@@ -495,7 +779,7 @@ const Settings = () => {
                           <div className="text-sm text-gray-600">Display phone in your profile</div>
                         </div>
                         <button
-                          onClick={() => handleNestedChange('preferences', 'privacy', 'showPhone', !settings.preferences.privacy.showPhone)}
+                          onClick={() => handlePrivacyToggle('showPhone', !settings.preferences.privacy.showPhone)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
                             settings.preferences.privacy.showPhone ? 'bg-indigo-500' : 'bg-gray-300'
                           }`}
@@ -528,6 +812,8 @@ const Settings = () => {
                         <div className="relative">
                           <input
                             type={showPassword ? 'text' : 'password'}
+                            value={passwordData.currentPassword}
+                            onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
                             className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                             placeholder="Enter current password"
                           />
@@ -544,6 +830,8 @@ const Settings = () => {
                         <label className="block text-sm font-medium text-gray-700">New Password</label>
                         <input
                           type="password"
+                          value={passwordData.newPassword}
+                          onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                           placeholder="Enter new password"
                         />
@@ -553,14 +841,20 @@ const Settings = () => {
                         <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
                         <input
                           type="password"
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                           placeholder="Confirm new password"
                         />
                       </div>
 
-                      <button className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">
+                      <button 
+                        onClick={handleChangePassword}
+                        disabled={saving || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
                         <FontAwesomeIcon icon={faKey} />
-                        Change Password
+                        {saving ? 'Changing Password...' : 'Change Password'}
                       </button>
                     </div>
                   </div>
@@ -573,7 +867,7 @@ const Settings = () => {
                         <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
                       </div>
                       <button
-                        onClick={() => handleInputChange('security', 'twoFactorAuth', !settings.security.twoFactorAuth)}
+                        onClick={() => handleSecurityToggle('twoFactorAuth', !settings.security.twoFactorAuth)}
                         className={`w-12 h-6 rounded-full transition-colors duration-300 ${
                           settings.security.twoFactorAuth ? 'bg-indigo-500' : 'bg-gray-300'
                         }`}
@@ -596,7 +890,7 @@ const Settings = () => {
                         </div>
                         <select
                           value={settings.security.sessionTimeout}
-                          onChange={(e) => handleInputChange('security', 'sessionTimeout', parseInt(e.target.value))}
+                          onChange={(e) => handleSecurityToggle('sessionTimeout', parseInt(e.target.value))}
                           className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                         >
                           <option value={15}>15 minutes</option>
@@ -613,7 +907,7 @@ const Settings = () => {
                         </div>
                         <select
                           value={settings.security.passwordExpiry}
-                          onChange={(e) => handleInputChange('security', 'passwordExpiry', parseInt(e.target.value))}
+                          onChange={(e) => handleSecurityToggle('passwordExpiry', parseInt(e.target.value))}
                           className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
                         >
                           <option value={30}>30 days</option>
@@ -646,7 +940,7 @@ const Settings = () => {
                           <div className="text-sm text-gray-600">Receive notifications via email</div>
                         </div>
                         <button
-                          onClick={() => handleNestedChange('preferences', 'notifications', 'email', !settings.preferences.notifications.email)}
+                          onClick={() => handleNotificationToggle('email', !settings.preferences.notifications.email)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
                             settings.preferences.notifications.email ? 'bg-indigo-500' : 'bg-gray-300'
                           }`}
@@ -663,7 +957,7 @@ const Settings = () => {
                           <div className="text-sm text-gray-600">Receive push notifications</div>
                         </div>
                         <button
-                          onClick={() => handleNestedChange('preferences', 'notifications', 'push', !settings.preferences.notifications.push)}
+                          onClick={() => handleNotificationToggle('push', !settings.preferences.notifications.push)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
                             settings.preferences.notifications.push ? 'bg-indigo-500' : 'bg-gray-300'
                           }`}
@@ -680,7 +974,7 @@ const Settings = () => {
                           <div className="text-sm text-gray-600">Receive SMS notifications</div>
                         </div>
                         <button
-                          onClick={() => handleNestedChange('preferences', 'notifications', 'sms', !settings.preferences.notifications.sms)}
+                          onClick={() => handleNotificationToggle('sms', !settings.preferences.notifications.sms)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
                             settings.preferences.notifications.sms ? 'bg-indigo-500' : 'bg-gray-300'
                           }`}
@@ -699,10 +993,11 @@ const Settings = () => {
               <div className="flex justify-end pt-4 border-t border-gray-200">
                 <button
                   onClick={handleSaveSettings}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <FontAwesomeIcon icon={faSave} />
-                  Save Settings
+                  <FontAwesomeIcon icon={saving ? faSync : faSave} className={saving ? 'animate-spin' : ''} />
+                  {saving ? 'Saving...' : 'Save Settings'}
                 </button>
               </div>
             </div>

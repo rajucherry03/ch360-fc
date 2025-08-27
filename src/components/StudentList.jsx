@@ -67,7 +67,7 @@ const StudentList = () => {
     return null;
   }, []);
 
-  // Ultra-optimized data fetching with parallel execution
+  // DYNAMIC UNIVERSAL FETCH - Works with any Firestore structure
   const fetchDataUltraFast = useCallback(async (user) => {
     if (!user || dataFetched.current) return;
     
@@ -75,52 +75,151 @@ const StudentList = () => {
     const fetchStart = Date.now();
     
     try {
-      // Step 1: Try collectionGroup query first (fastest if index exists)
-      let foundCourses = [];
+      console.log("🚀 Dynamic course fetch starting for user:", user.uid);
+      
+      // Step 1: Fetch faculty data to get course IDs
+      let facultyData = null;
       try {
-        const cg = collectionGroup(db, "courseDetails");
-        const qy = query(cg, where("instructor", "==", user.uid));
-        const snap = await getDocs(qy);
-        
-        foundCourses = snap.docs.map(d => {
-          const seg = d.ref.path.split("/");
-          return {
-            id: d.id,
-            year: seg[1],
-            section: seg[2],
-            semester: seg[3],
-            ...d.data(),
-          };
-        });
-      } catch (error) {
-        // Step 2: Ultra-parallel fallback - all queries at once
-        const years = ["I","II","III","IV"];
-        const sections = ["A","B","C","D","E","F"];
-        const semesters = ["sem1","sem2"];
-        
-        const allQueries = [];
-        for (const y of years) {
-          for (const sec of sections) {
-            for (const sem of semesters) {
-              const col = collection(db, "courses", y, sec, sem, "courseDetails");
-              const qy = query(col, where("instructor", "==", user.uid));
-              allQueries.push(
-                getDocs(qy).then(snap => 
-                  snap.docs.map(d => ({ 
-                    id: d.id, 
-                    year: y, 
-                    section: sec, 
-                    semester: sem, 
-                    ...d.data() 
-                  }))
-                ).catch(() => []) // Ignore errors for speed
-              );
+        // Try multiple faculty paths dynamically
+        const facultyPathVariations = [
+          ['faculty', facultyData?.departmentKey || 'CSE_DS', 'members', user.uid],
+          ['faculty', 'CSE_DS', 'members', user.uid],
+          ['faculty', 'CSEDS', 'members', user.uid],
+          ['faculty', 'CSE', 'members', user.uid],
+          ['faculty', user.uid],
+          ['users', 'faculty', user.uid],
+        ];
+
+        for (const pathSegments of facultyPathVariations) {
+          try {
+            const facultyRef = doc(db, ...pathSegments);
+            const facultySnap = await getDoc(facultyRef);
+            if (facultySnap.exists()) {
+              facultyData = facultySnap.data();
+              console.log("✅ Faculty data fetched:", facultyData.name);
+              break;
             }
+          } catch (error) {
+            // Continue to next variation
           }
         }
+      } catch (error) {
+        console.log("❌ Could not fetch faculty data:", error);
+      }
+
+      // Step 2: Get course IDs from faculty data
+      const allCourseIds = [];
+      
+      if (facultyData?.courses && Array.isArray(facultyData.courses)) {
+        allCourseIds.push(...facultyData.courses);
+      }
+      
+      if (facultyData?.teaching) {
+        Object.keys(facultyData.teaching).forEach(section => {
+          if (Array.isArray(facultyData.teaching[section])) {
+            allCourseIds.push(...facultyData.teaching[section]);
+          }
+        });
+      }
+      
+      const uniqueCourseIds = [...new Set(allCourseIds)];
+      console.log("📚 Course IDs from faculty data:", uniqueCourseIds);
+
+      // Step 3: Dynamic course fetching
+      let foundCourses = [];
+
+      if (uniqueCourseIds.length > 0) {
+        console.log("🚀 Dynamic course fetch using course IDs:", uniqueCourseIds);
         
-        const results = await Promise.all(allQueries);
-        results.forEach(courses => foundCourses.push(...courses));
+        // Dynamic course fetching function
+        const fetchCourseDynamically = async (courseId) => {
+                  // Strategy 1: Try collectionGroup query first (universal)
+        try {
+          const cg = collectionGroup(db, "courseDetails");
+          const q = query(cg, where(documentId(), "==", courseId));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const courseData = snap.docs[0].data();
+            console.log("✅ Found course via collectionGroup:", courseData.courseName);
+            return {
+              id: courseId,
+              year: courseData.displayYear || "III",
+              section: courseData.displaySection || "A",
+              semester: courseData.displaySemester || "5",
+              courseName: courseData.courseName || `Course ${courseId}`,
+              courseCode: courseData.courseCode || courseId,
+              instructorName: facultyData?.name,
+              instructor: courseData.instructor,
+              department: courseData.displayDepartment || "Computer Science & Engineering (Data Science)",
+              credits: courseData.credits || 3,
+              description: courseData.description || `Course ${courseId} - ${facultyData?.name}`,
+              studentsBySection: courseData.studentsBySection || {},
+              masterCoursePath: courseData.masterCoursePath,
+              semesterKey: courseData.semesterKey || "III_5",
+              students: courseData.students || []
+            };
+          }
+        } catch (error) {
+          console.log("❌ CollectionGroup failed for course:", courseId);
+        }
+
+                  // Strategy 2: Try multiple path variations dynamically
+        const pathVariations = [
+          // Dynamic department-based paths
+          ['courses', facultyData?.departmentKey || 'CSE_DS', 'year_sem', 'III_5', 'courseDetails', courseId],
+          ['courses', facultyData?.departmentKey || 'CSE_DS', 'year_sem', 'III_6', 'courseDetails', courseId],
+          ['courses', facultyData?.departmentKey || 'CSE_DS', 'year_sem', 'III_7', 'courseDetails', courseId],
+          ['courses', facultyData?.departmentKey || 'CSE_DS', 'year_sem', 'III_8', 'courseDetails', courseId],
+          // Generic department variations
+          ['courses', 'CSE_DS', 'year_sem', 'III_5', 'courseDetails', courseId],
+          ['courses', 'CSEDS', 'year_sem', 'III_5', 'courseDetails', courseId],
+          ['courses', 'CSE', 'year_sem', 'III_5', 'courseDetails', courseId],
+          // Direct course structure
+          ['courses', courseId],
+          ['courseDetails', courseId],
+        ];
+
+          
+
+          for (const pathSegments of pathVariations) {
+            try {
+              const coursePath = doc(db, ...pathSegments);
+              const courseSnap = await getDoc(coursePath);
+              if (courseSnap.exists()) {
+                const courseData = courseSnap.data();
+                console.log("✅ Found course via path variation:", pathSegments.join('/'));
+                return {
+                  id: courseId,
+                  year: courseData.displayYear || "III",
+                  section: courseData.displaySection || "A",
+                  semester: courseData.displaySemester || "5",
+                  courseName: courseData.courseName || `Course ${courseId}`,
+                  courseCode: courseData.courseCode || courseId,
+                  instructorName: facultyData?.name,
+                  instructor: courseData.instructor,
+                  department: courseData.displayDepartment || "Computer Science & Engineering (Data Science)",
+                  credits: courseData.credits || 3,
+                  description: courseData.description || `Course ${courseId} - ${facultyData?.name}`,
+                  studentsBySection: courseData.studentsBySection || {},
+                  masterCoursePath: courseData.masterCoursePath,
+                  semesterKey: courseData.semesterKey || "III_5",
+                  students: courseData.students || []
+                };
+              }
+            } catch (error) {
+              // Continue to next variation
+            }
+          }
+
+          console.log("❌ No course found for ID:", courseId);
+          return null;
+        };
+
+        // Fetch all courses dynamically
+        const coursePromises = uniqueCourseIds.map(courseId => fetchCourseDynamically(courseId));
+        const results = await Promise.all(coursePromises);
+        foundCourses = results.filter(course => course !== null);
+        console.log("✅ Dynamic fetch found:", foundCourses.length, "courses");
       }
 
       // Step 3: Extract all student IDs and group by year/section
@@ -136,65 +235,121 @@ const StudentList = () => {
           semester: course.semester
         });
         
-        (course.students || []).forEach(student => {
-          const sid = typeof student === 'string' ? student : (student?.id || student?.studentId || student);
-          if (sid) {
-            const key = `${course.year}|${course.section}`;
-            if (!studentIdGroups.has(key)) {
-              studentIdGroups.set(key, new Set());
+        // Handle different student data structures
+        if (course.studentsBySection && typeof course.studentsBySection === 'object') {
+          console.log("📚 Found studentsBySection structure for course:", course.courseName);
+          Object.keys(course.studentsBySection).forEach(sectionKey => {
+            if (Array.isArray(course.studentsBySection[sectionKey])) {
+              course.studentsBySection[sectionKey].forEach(studentId => {
+                const key = `${course.year}|${sectionKey}`;
+                if (!studentIdGroups.has(key)) {
+                  studentIdGroups.set(key, new Set());
+                }
+                studentIdGroups.get(key).add(studentId);
+              });
             }
-            studentIdGroups.get(key).add(sid);
-          }
-        });
+          });
+        } else if (course.students && Array.isArray(course.students)) {
+          console.log("📚 Found students array structure for course:", course.courseName);
+          course.students.forEach(student => {
+            const sid = typeof student === 'string' ? student : (student?.id || student?.studentId || student);
+            if (sid) {
+              const key = `${course.year}|${course.section}`;
+              if (!studentIdGroups.has(key)) {
+                studentIdGroups.set(key, new Set());
+              }
+              studentIdGroups.get(key).add(sid);
+            }
+          });
+        }
       });
 
       setCoursesMeta(courseMeta);
 
-      // Step 4: Ultra-parallel student fetching with batching
+      // Step 4: Dynamic student fetching
       const allStudentQueries = [];
       const courseToStudentMap = {};
 
       // Build course to student mapping
       foundCourses.forEach(course => {
         courseToStudentMap[course.id] = [];
-        (course.students || []).forEach(student => {
-          const sid = typeof student === 'string' ? student : (student?.id || student?.studentId || student);
-          if (sid) courseToStudentMap[course.id].push(sid);
-        });
+        
+        if (course.studentsBySection && typeof course.studentsBySection === 'object') {
+          Object.keys(course.studentsBySection).forEach(sectionKey => {
+            if (Array.isArray(course.studentsBySection[sectionKey])) {
+              course.studentsBySection[sectionKey].forEach(studentId => {
+                courseToStudentMap[course.id].push(studentId);
+              });
+            }
+          });
+        } else if (course.students && Array.isArray(course.students)) {
+          course.students.forEach(student => {
+            const sid = typeof student === 'string' ? student : (student?.id || student?.studentId || student);
+            if (sid) courseToStudentMap[course.id].push(sid);
+          });
+        }
       });
 
       setCourseToStudentIds(courseToStudentMap);
 
-      // Fetch students in parallel batches
+      // Dynamic student fetching with multiple path variations
       for (const [key, idSet] of studentIdGroups.entries()) {
         const [year, section] = key.split('|');
         const ids = Array.from(idSet);
         
-        // Batch in chunks of 10 for optimal performance
-        for (let i = 0; i < ids.length; i += 10) {
-          const chunk = ids.slice(i, i + 10);
-          const col = collection(db, `students/${year}/${section}`);
-          
-          allStudentQueries.push(
-            getDocs(query(col, where(documentId(), 'in', chunk)))
-              .then(snap => snap.docs.map(d => ({ 
-                id: d.id, 
-                year, 
-                section, 
-                ...d.data() 
-              })))
-              .catch(async () => {
-                // Fallback: individual fetches in parallel
-                const individualQueries = chunk.map(sid => 
-                  getDoc(doc(db, `students/${year}/${section}/${sid}`))
-                    .then(snap => snap.exists() ? { id: snap.id, year, section, ...snap.data() } : null)
-                    .catch(() => null)
-                );
-                const results = await Promise.all(individualQueries);
-                return results.filter(Boolean);
-              })
-          );
-        }
+        console.log(`📚 Fetching ${ids.length} students for ${year}-${section}`);
+        
+        // Dynamic student detail fetching
+        const studentPromises = ids.map(async (studentId) => {
+          const studentPathVariations = [
+            // Dynamic department-based paths
+            ['students', facultyData?.departmentKey || 'CSEDS', `${year}-${section}`, studentId],
+            ['students', facultyData?.departmentKey || 'CSE_DS', `${year}_${section}`, studentId],
+            // Generic department variations
+            ['students', 'CSEDS', `${year}-${section}`, studentId],
+            ['students', 'CSE_DS', `${year}_${section}`, studentId],
+            ['students', 'CSE', `${year}-${section}`, studentId],
+            // Common section variations
+            ['students', 'CSEDS', 'III-A', studentId],
+            ['students', 'CSE_DS', 'III_A', studentId],
+            ['students', 'CSE', 'III-A', studentId],
+            ['students', 'CSEDS', 'III-B', studentId],
+            ['students', 'CSE_DS', 'III_B', studentId],
+            ['students', 'CSEDS', 'III-C', studentId],
+            ['students', 'CSE_DS', 'III_C', studentId],
+            // Direct student structure
+            ['students', studentId],
+            ['studentDetails', studentId],
+          ];
+
+          for (const pathSegments of studentPathVariations) {
+            try {
+              const studentPath = doc(db, ...pathSegments);
+              const studentSnap = await getDoc(studentPath);
+              if (studentSnap.exists()) {
+                return { 
+                  id: studentId, 
+                  year, 
+                  section,
+                  ...studentSnap.data() 
+                };
+              }
+            } catch (error) {
+              // Continue to next variation
+            }
+          }
+
+          // Fallback student data
+          return { 
+            id: studentId, 
+            name: `Student ${studentId}`, 
+            rollNo: studentId,
+            year,
+            section
+          };
+        });
+
+        allStudentQueries.push(Promise.all(studentPromises));
       }
 
       // Step 5: Execute all queries simultaneously

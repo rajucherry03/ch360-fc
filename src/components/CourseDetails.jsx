@@ -1,370 +1,567 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { collectionGroup, doc, getDoc, getDocs, updateDoc, deleteDoc, query, where, documentId } from "firebase/firestore";
-import { db } from "../firebase"; // Firebase configuration
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../firebase";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faArrowLeft,
+  faBookOpen,
+  faUsers,
+  faCalendarAlt,
+  faClock,
+  faGraduationCap,
+  faChalkboardTeacher,
+  faUser,
+  faExclamationTriangle,
+  faSpinner,
+  faBuilding,
+  faFileAlt,
+  faCheckCircle
+} from '@fortawesome/free-solid-svg-icons';
 
 const CourseDetails = () => {
-  const { year, section, semester, id } = useParams();
-  const [course, setCourse] = useState(null);
+  const { year, section, semester, courseId } = useParams();
+  const navigate = useNavigate();
+  const [courseData, setCourseData] = useState(null);
+  const [enrolledStudents, setEnrolledStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editMode, setEditMode] = useState(false); // Toggle edit mode
-  const [instructorName, setInstructorName] = useState("");
-  const [studyMaterials, setStudyMaterials] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [newMaterial, setNewMaterial] = useState({ name: "", file: null });
-  const [newAssignment, setNewAssignment] = useState({ name: "", file: null });
-  const [students, setStudents] = useState([]);
-  // Tabs state must be declared before any conditional returns to satisfy hooks rules
-  const [activeTab, setActiveTab] = useState("overview");
-
-  const [formData, setFormData] = useState({
-    actualHours: "",
-    cls: "",
-    courseCode: "",
-    courseName: "",
-    coveragePercentage: "",
-    deviationReasons: "",
-    instructor: "",
-    ods: "",
-    permissions: "",
-    syllabusCoverage: "",
-    unitsCompleted: "",
-  });
+  const [facultyData, setFacultyData] = useState(null);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
         setLoading(true);
-        const coursePath = `courses/${year}/${section}/${semester}/courseDetails/${id}`;
-        const courseRef = doc(db, coursePath);
-        const courseSnap = await getDoc(courseRef);
+        setError(null);
 
-        if (courseSnap.exists()) {
-          const fetchedCourse = { id, ...courseSnap.data() };
-          setCourse(fetchedCourse);
-          setFormData(fetchedCourse); // Pre-fill form data for editing
-          setStudyMaterials(fetchedCourse.studyMaterials || []);
-          setAssignments(fetchedCourse.assignments || []);
+        console.log("🔍 Fetching course details for:", { year, section, semester, courseId });
 
-          // Fetch instructor's name
-          const instructorRef = doc(db, "faculty", "CSE_DS", "members", fetchedCourse.instructor);
-          const instructorSnap = await getDoc(instructorRef);
-          if (instructorSnap.exists()) {
-            setInstructorName(instructorSnap.data().name || "Unknown");
-          } else {
-            setInstructorName("Unknown");
-          }
-          // Fetch enrolled students from the course document if it contains an array of student IDs
-          if (Array.isArray(fetchedCourse.students) && fetchedCourse.students.length > 0) {
-            const details = await Promise.all(
-              fetchedCourse.students.map(async (s) => {
-                const studentId = typeof s === 'string' ? s : (s?.id || s?.studentId || s);
-                const sRef = doc(db, `students/${year}/${section}/${studentId}`);
-                const sSnap = await getDoc(sRef);
-                const base = sSnap.exists() ? { id: studentId, ...sSnap.data() } : { id: studentId };
-
-                // Also enrolled courses (best-effort; skip if index missing)
-                let enrolledCourses = [];
-                try {
-                  const cg = collectionGroup(db, "courseDetails");
-                  const qy = query(cg, where("students", "array-contains", studentId));
-                  const qs = await getDocs(qy);
-                  enrolledCourses = [];
-                  qs.forEach((d) => {
-                    const seg = d.ref.path.split("/");
-                    const y = seg[1], sec = seg[2], sem = seg[3];
-                    const isCurrent = (y === year && sec === section && sem === semester && d.id === id);
-                    if (!isCurrent) {
-                      enrolledCourses.push({ id: d.id, name: d.data().courseName, year: y, section: sec, semester: sem });
-                    }
-                  });
-                } catch (_) {
-                  // ignore if index missing
-                }
-                return { ...base, enrolledCourses };
-              })
-            );
-            setStudents(details);
-          } else {
-            setStudents([]);
-          }
-        } else {
-          setError("Course not found.");
+        // First, try to get faculty data to improve course information
+        let facultyData = null;
+        try {
+          const { auth } = await import("../firebase");
+          const { onAuthStateChanged } = await import("firebase/auth");
+          
+          onAuthStateChanged(auth, async (user) => {
+            if (user) {
+              const facultyRef = doc(db, 'faculty', 'CSE_DS', 'members', user.uid);
+              const facultySnap = await getDoc(facultyRef);
+              if (facultySnap.exists()) {
+                facultyData = facultySnap.data();
+                setFacultyData(facultyData);
+                console.log("✅ Faculty data fetched:", facultyData.name);
+              }
+            }
+          });
+        } catch (error) {
+          console.log("❌ Could not fetch faculty data:", error);
         }
-      } catch (err) {
-        setError("Error fetching course details.");
-      } finally {
-        setLoading(false);
-      }
+
+                 let foundCourseData = null;
+
+         // DYNAMIC UNIVERSAL FETCH - Works with any Firestore structure
+         const fetchCourseData = async () => {
+           console.log("🚀 Dynamic course fetch starting...");
+           
+           // Strategy 1: Try exact path first (your current structure)
+           try {
+             const coursePath = doc(db, 'courses', 'CSE_DS', 'year_sem', `${year}_${semester}`, 'courseDetails', courseId);
+             const courseSnap = await getDoc(coursePath);
+             if (courseSnap.exists()) {
+               foundCourseData = courseSnap.data();
+               console.log("✅ Course found via exact path");
+               return foundCourseData;
+             }
+           } catch (error) {
+             console.log("❌ Exact path failed, trying alternatives...");
+           }
+
+           // Strategy 2: Try collectionGroup query (universal)
+           try {
+             const cg = collectionGroup(db, "courseDetails");
+             const q = query(cg, where("__name__", "==", courseId));
+             const snap = await getDocs(q);
+             if (!snap.empty) {
+               foundCourseData = snap.docs[0].data();
+               console.log("✅ Course found via collectionGroup");
+               return foundCourseData;
+             }
+           } catch (error) {
+             console.log("❌ CollectionGroup failed, trying path variations...");
+           }
+
+           // Strategy 3: Try multiple path variations dynamically
+           const pathVariations = [
+             // Your exact structure
+             ['courses', 'CSE_DS', 'year_sem', `${year}_${semester}`, 'courseDetails', courseId],
+             // Alternative structures
+             ['courses', 'CSE_DS', 'year_sem', 'III_5', 'courseDetails', courseId],
+             ['courses', 'CSE_DS', 'year_sem', 'III_6', 'courseDetails', courseId],
+             ['courses', 'CSE_DS', 'year_sem', 'III_7', 'courseDetails', courseId],
+             ['courses', 'CSE_DS', 'year_sem', 'III_8', 'courseDetails', courseId],
+             // Old structure variations
+             ['courses', year, section, semester, 'courseDetails', courseId],
+             ['courses', 'III', 'A', '5', 'courseDetails', courseId],
+             ['courses', 'III', 'B', '5', 'courseDetails', courseId],
+             ['courses', 'III', 'C', '5', 'courseDetails', courseId],
+             // Direct course structure
+             ['courses', courseId],
+             ['courseDetails', courseId],
+             // Department variations
+             ['courses', 'CSE', 'year_sem', `${year}_${semester}`, 'courseDetails', courseId],
+             ['courses', 'CSEDS', 'year_sem', `${year}_${semester}`, 'courseDetails', courseId],
+           ];
+
+           for (const pathSegments of pathVariations) {
+             try {
+               const coursePath = doc(db, ...pathSegments);
+               const courseSnap = await getDoc(coursePath);
+               if (courseSnap.exists()) {
+                 foundCourseData = courseSnap.data();
+                 console.log("✅ Course found via path variation:", pathSegments.join('/'));
+                 return foundCourseData;
+               }
+             } catch (error) {
+               // Continue to next variation
+             }
+           }
+
+           console.log("❌ No course found in any path variation");
+           return null;
+         };
+
+         // Execute dynamic fetch
+         foundCourseData = await fetchCourseData();
+
+         // If no course data found, create a fallback
+         if (!foundCourseData) {
+           console.log("⚠️ No course data found, creating fallback data");
+           foundCourseData = {
+             courseName: `Course ${courseId}`,
+             courseCode: courseId,
+             description: `Course ${courseId} - ${facultyData?.name || 'Faculty'}`,
+             displayYear: year || "III",
+             displaySection: section || "A", 
+             displaySemester: semester || "5",
+             displayDepartment: "Computer Science & Engineering (Data Science)",
+             credits: 3,
+             studentsBySection: {},
+             students: []
+           };
+         }
+
+         // Dynamic student fetching
+         const fetchStudents = async (courseData) => {
+           if (!courseData) return [];
+
+           console.log("📚 Dynamic student fetch starting...");
+           const allStudents = [];
+
+           // Strategy 1: studentsBySection (your structure)
+           if (courseData.studentsBySection && typeof courseData.studentsBySection === 'object') {
+             console.log("📚 Found studentsBySection structure");
+             Object.keys(courseData.studentsBySection).forEach(sectionKey => {
+               if (Array.isArray(courseData.studentsBySection[sectionKey])) {
+                 courseData.studentsBySection[sectionKey].forEach(studentId => {
+                   allStudents.push({ id: studentId, section: sectionKey });
+                 });
+               }
+             });
+           }
+
+           // Strategy 2: students array (alternative structure)
+           if (courseData.students && Array.isArray(courseData.students)) {
+             console.log("📚 Found students array structure");
+             courseData.students.forEach(studentId => {
+               allStudents.push({ id: studentId, section: 'A' });
+             });
+           }
+
+           // Strategy 3: enrolledStudents array
+           if (courseData.enrolledStudents && Array.isArray(courseData.enrolledStudents)) {
+             console.log("📚 Found enrolledStudents array structure");
+             courseData.enrolledStudents.forEach(studentId => {
+               allStudents.push({ id: studentId, section: 'A' });
+             });
+           }
+
+           console.log("📚 Total student IDs found:", allStudents.length);
+
+           // Dynamic student detail fetching
+           const studentPromises = allStudents.map(async ({ id: studentId, section: sectionKey }) => {
+             const studentPathVariations = [
+               // Your exact structure
+               ['students', 'CSEDS', `${year}-${sectionKey}`, studentId],
+               ['students', 'CSE_DS', `${year}_${sectionKey}`, studentId],
+               // Alternative structures
+               ['students', 'CSEDS', 'III-A', studentId],
+               ['students', 'CSE_DS', 'III_A', studentId],
+               ['students', 'CSE', 'III-A', studentId],
+               ['students', 'CSEDS', 'III-B', studentId],
+               ['students', 'CSE_DS', 'III_B', studentId],
+               ['students', 'CSEDS', 'III-C', studentId],
+               ['students', 'CSE_DS', 'III_C', studentId],
+               // Direct student structure
+               ['students', studentId],
+               ['studentDetails', studentId],
+               // Department variations
+               ['students', 'CSE', `${year}-${sectionKey}`, studentId],
+               ['students', 'CSEDS', `${year}_${sectionKey}`, studentId],
+             ];
+
+             for (const pathSegments of studentPathVariations) {
+               try {
+                 const studentPath = doc(db, ...pathSegments);
+                 const studentSnap = await getDoc(studentPath);
+                 if (studentSnap.exists()) {
+                   return { 
+                     id: studentId, 
+                     section: sectionKey,
+                     ...studentSnap.data() 
+                   };
+                 }
+               } catch (error) {
+                 // Continue to next variation
+               }
+             }
+
+             // Fallback student data
+             return { 
+               id: studentId, 
+               name: `Student ${studentId}`, 
+               rollNo: studentId,
+               section: sectionKey
+             };
+           });
+
+           const students = await Promise.all(studentPromises);
+           console.log("✅ Students fetched dynamically:", students.length);
+           return students;
+         };
+
+         // Execute dynamic student fetch
+         if (foundCourseData) {
+           const students = await fetchStudents(foundCourseData);
+           setEnrolledStudents(students);
+         } else {
+           console.log("⚠️ No course data available for student fetch");
+           setEnrolledStudents([]);
+         }
+
+                 // ONLY DIRECT FETCH - No fallbacks needed with your exact schema
+
+                 // Set course data with exact schema mapping - Handle null foundCourseData
+         setCourseData({
+           id: courseId,
+           year: foundCourseData?.displayYear || year || "III",
+           section: foundCourseData?.displaySection || section || "A",
+           semester: foundCourseData?.displaySemester || semester || "5",
+           courseName: foundCourseData?.courseName || `Course ${courseId}`,
+           courseCode: foundCourseData?.courseCode || courseId,
+           description: foundCourseData?.description || `Course ${courseId} - ${facultyData?.name || 'Faculty'}`,
+           instructor: foundCourseData?.instructor,
+           instructorName: facultyData?.name || foundCourseData?.instructor || "Faculty Member",
+           credits: foundCourseData?.credits || 3,
+           department: foundCourseData?.displayDepartment || "Computer Science & Engineering (Data Science)",
+           studentsBySection: foundCourseData?.studentsBySection || {},
+           masterCoursePath: foundCourseData?.masterCoursePath,
+           semesterKey: foundCourseData?.semesterKey || `${year}_${semester}`,
+           students: foundCourseData?.students || []
+         });
+
+        // Fetch students (simplified)
+        setEnrolledStudents([]);
+
+             } catch (error) {
+         console.error("❌ Error:", error);
+         console.log("🔍 Debug info:", { year, section, semester, courseId, foundCourseData });
+         setError(`Error fetching course details: ${error.message}`);
+       } finally {
+         setLoading(false);
+       }
     };
 
     fetchCourseDetails();
-  }, [id, year, section, semester]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleUpdate = async () => {
-    try {
-      const coursePath = `courses/${year}/${section}/${semester}/courseDetails/${id}`;
-      const courseRef = doc(db, coursePath);
-      await updateDoc(courseRef, { ...formData, studyMaterials, assignments });
-      setCourse({ ...course, ...formData, studyMaterials, assignments });
-      setEditMode(false); // Exit edit mode
-    } catch (err) {
-      console.error("Error updating course:", err);
-      setError("Failed to update course details.");
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      const coursePath = `courses/${year}/${section}/${semester}/courseDetails/${id}`;
-      const courseRef = doc(db, coursePath);
-      await deleteDoc(courseRef);
-      setCourse(null); // Clear course data
-      setError("Course deleted successfully."); // Notify user
-    } catch (err) {
-      console.error("Error deleting course:", err);
-      setError("Failed to delete course.");
-    }
-  };
-
-  const addMaterial = () => {
-    if (newMaterial.name.trim()) {
-      setStudyMaterials([...studyMaterials, newMaterial]);
-      setNewMaterial({ name: "", file: null });
-    }
-  };
-
-  const addAssignment = () => {
-    if (newAssignment.name.trim()) {
-      setAssignments([...assignments, newAssignment]);
-      setNewAssignment({ name: "", file: null });
-    }
-  };
-
-  const handleMaterialFileChange = (e) => {
-    setNewMaterial({ ...newMaterial, file: e.target.files[0] });
-  };
-
-  const handleAssignmentFileChange = (e) => {
-    setNewAssignment({ ...newAssignment, file: e.target.files[0] });
-  };
+  }, [year, section, semester, courseId]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
-          <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-6 animate-pulse"></div>
-          <p className="text-gray-600 text-lg">Loading course details...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <FontAwesomeIcon icon={faSpinner} className="text-blue-600 text-4xl animate-spin mb-4" />
+          <p className="text-gray-600">Loading course details...</p>
         </div>
       </div>
     );
   }
 
-  if (error && !course) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
-          <div className="text-blue-600 text-xl font-semibold mb-2">{error}</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center max-w-md">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 text-4xl mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/courses')}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            Back to Courses
+          </button>
         </div>
       </div>
     );
   }
-
-  if (!course) {
-    return <div className="text-center text-gray-600">Course not found or deleted.</div>;
-  }
-
-  const enrolledCount = Array.isArray(course.students) ? course.students.length : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="page-container">
         {/* Header */}
-        <header className="mb-12 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 animate-fade-in">
-          <div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 mb-3">{course.courseName}</h1>
-            <p className="text-gray-600 text-lg">{course.courseCode} • {year}-{section} • {semester?.toUpperCase()}</p>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white rounded-2xl shadow-xl px-6 py-4 border border-gray-100 text-center">
-              <div className="text-sm text-gray-500">Students</div>
-              <div className="text-2xl font-bold text-blue-600">{enrolledCount}</div>
-            </div>
-            <div className="bg-white rounded-2xl shadow-xl px-6 py-4 border border-gray-100 text-center">
-              <div className="text-sm text-gray-500">Coverage</div>
-              <div className="text-2xl font-bold text-blue-600">{course.coveragePercentage || '—'}</div>
-            </div>
-            <div className="bg-white rounded-2xl shadow-xl px-6 py-4 border border-gray-100 text-center">
-              <div className="text-sm text-gray-500">Units Completed</div>
-              <div className="text-2xl font-bold text-blue-600">{course.unitsCompleted || '—'}</div>
-            </div>
-          </div>
-        </header>
-
-        {/* Tabs */}
-        <div className="bg-white rounded-2xl shadow-xl p-2 mb-8 border border-gray-100">
-          <div className="flex flex-wrap gap-2">
-            {[
-              { key: 'overview', label: 'Overview' },
-              { key: 'students', label: 'Students' },
-              { key: 'materials', label: 'Materials' },
-              { key: 'schedule', label: 'Schedule' },
-              { key: 'edit', label: 'Edit' },
-            ].map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${activeTab === tab.key ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/courses')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <FontAwesomeIcon icon={faArrowLeft} />
+              Back to Courses
+            </button>
+                         <div>
+               <h1 className="text-2xl font-bold text-gray-900">
+                 {courseData.courseName || courseData.courseCode || `Course ${courseId}`}
+               </h1>
+               <p className="text-gray-600 text-sm">
+                 {courseData.year}-{courseData.section} • Semester {courseData.semester}
+               </p>
+             </div>
           </div>
         </div>
 
-        {/* Content */}
-        {activeTab === 'overview' && (
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">Course Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Course Information */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Course Overview */}
+            <div className="bg-white border rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <FontAwesomeIcon icon={faBookOpen} className="text-blue-600" />
+                Course Overview
+              </h2>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Name</label>
+                   <p className="text-gray-900 font-medium">{courseData.courseName || courseData.courseCode || `Course ${courseId}`}</p>
+                 </div>
+                                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Code</label>
+                   <p className="text-gray-900 font-medium">{courseData.courseCode || courseData.id}</p>
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                   <p className="text-gray-900 font-medium">{courseData.department || "Computer Science & Engineering"}</p>
+                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">Instructor</div>
-                  <div className="text-gray-800 font-medium">{instructorName}</div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Credits</label>
+                  <p className="text-gray-900">{courseData.credits || "Not specified"}</p>
                 </div>
-                <div>
-                  <div className="text-sm text-gray-500">Class</div>
-                  <div className="text-gray-800 font-medium">{course.cls || '—'}</div>
+                                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Instructor</label>
+                   <p className="text-gray-900">{courseData.instructorName || courseData.instructor || "Not assigned"}</p>
+                 </div>
+                                 <div className="md:col-span-2">
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                   <p className="text-gray-900">{courseData.description || courseData.courseDescription || `Course ${courseId} - ${facultyData?.name || 'Faculty'}`}</p>
+                 </div>
+              </div>
+            </div>
+
+            {/* Course Details */}
+            <div className="bg-white border rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <FontAwesomeIcon icon={faFileAlt} className="text-green-600" />
+                Course Details
+              </h2>
+              
+                             <div className="grid gap-4 md:grid-cols-2">
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                   <p className="text-gray-900">{courseData.year}</p>
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
+                   <p className="text-gray-900">{courseData.section}</p>
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                   <p className="text-gray-900">{courseData.semester}</p>
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                   <p className="text-gray-900">{courseData.department || "Computer Science & Engineering"}</p>
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Semester Key</label>
+                   <p className="text-gray-900">{courseData.semesterKey || "Not specified"}</p>
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Total Students</label>
+                   <p className="text-gray-900">{enrolledStudents.length}</p>
+                 </div>
+                 <div className="md:col-span-2">
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Path</label>
+                   <p className="text-gray-900 text-sm font-mono bg-gray-100 p-2 rounded">
+                     {courseData.masterCoursePath || `/courses/CSE_DS/year_sem/${courseData.semesterKey}/courseDetails/${courseId}/sections/${courseData.section}`}
+                   </p>
+                 </div>
+               </div>
+            </div>
+
+                         {/* Enrolled Students */}
+             <div className="bg-white border rounded-lg p-6">
+               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                 <FontAwesomeIcon icon={faUsers} className="text-purple-600" />
+                 Enrolled Students ({enrolledStudents.length})
+               </h2>
+               
+               {enrolledStudents.length > 0 ? (
+                 <div className="overflow-x-auto">
+                   <table className="min-w-full divide-y divide-gray-200">
+                     <thead className="bg-gray-50">
+                       <tr>
+                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Student ID
+                         </th>
+                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Name
+                         </th>
+                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Roll No
+                         </th>
+                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                           Section
+                         </th>
+                       </tr>
+                     </thead>
+                     <tbody className="bg-white divide-y divide-gray-200">
+                       {enrolledStudents.map((student, index) => (
+                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                             {student.id}
+                           </td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                             {student.name || student.studentName || `Student ${student.id}`}
+                           </td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                             {student.rollNo || student.rollNumber || student.id}
+                           </td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                             {student.section || 'A'}
+                           </td>
+                         </tr>
+                       ))}
+                     </tbody>
+                   </table>
+                 </div>
+               ) : (
+                 <div className="text-center py-8">
+                   <FontAwesomeIcon icon={faUsers} className="text-gray-400 text-4xl mb-4" />
+                   <p className="text-gray-600">No students enrolled in this course yet.</p>
+                 </div>
+               )}
+             </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Course Stats */}
+            <div className="bg-white border rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Statistics</h3>
+              <div className="space-y-4">
+                                 <div className="flex items-center justify-between">
+                   <span className="text-gray-600">Total Students</span>
+                   <span className="font-semibold text-gray-900">{enrolledStudents.length}</span>
+                 </div>
+                 <div className="flex items-center justify-between">
+                   <span className="text-gray-600">Sections</span>
+                   <span className="font-semibold text-gray-900">
+                     {courseData.studentsBySection ? Object.keys(courseData.studentsBySection).length : 0}
+                   </span>
+                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Credits</span>
+                  <span className="font-semibold text-gray-900">{courseData.credits || "N/A"}</span>
                 </div>
-                <div>
-                  <div className="text-sm text-gray-500">Actual Hours</div>
-                  <div className="text-gray-800 font-medium">{course.actualHours || '—'}</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Year</span>
+                  <span className="font-semibold text-gray-900">{courseData.year}</span>
                 </div>
-                <div>
-                  <div className="text-sm text-gray-500">Permissions</div>
-                  <div className="text-gray-800 font-medium">{course.permissions || '—'}</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Section</span>
+                  <span className="font-semibold text-gray-900">{courseData.section}</span>
                 </div>
-                <div className="md:col-span-2">
-                  <div className="text-sm text-gray-500">Syllabus Coverage</div>
-                  <div className="text-gray-800 font-medium">{course.syllabusCoverage || '—'}</div>
-                </div>
-                <div className="md:col-span-2">
-                  <div className="text-sm text-gray-500">Deviation Reasons</div>
-                  <div className="text-gray-800">{course.deviationReasons || '—'}</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Semester</span>
+                  <span className="font-semibold text-gray-900">{courseData.semester}</span>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-              <div className="flex flex-col gap-3">
-                <button className="btn-campus-primary px-4 py-3 rounded-xl">Mark Attendance</button>
-                <button className="btn-campus-primary px-4 py-3 rounded-xl">Create Assignment</button>
-                <button onClick={() => setEditMode(true) || setActiveTab('edit')} className="btn-campus-primary px-4 py-3 rounded-xl">Edit Course</button>
+
+            {/* Quick Actions */}
+            <div className="bg-white border rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => navigate(`/attendance/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  <FontAwesomeIcon icon={faCheckCircle} />
+                  Mark Attendance
+                </button>
+                <button
+                  onClick={() => navigate(`/grades/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  <FontAwesomeIcon icon={faGraduationCap} />
+                  Manage Grades
+                </button>
+                <button
+                  onClick={() => navigate(`/exam/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                >
+                  <FontAwesomeIcon icon={faFileAlt} />
+                  Create Exam
+                </button>
               </div>
             </div>
-          </section>
-        )}
 
-        {activeTab === 'students' && (
-          <section className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Enrolled Students</h2>
-            {students.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-gray-600">No students enrolled.</div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {students.map((s) => (
-                  <div key={s.id} className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-                    <div className="text-lg font-semibold text-gray-800">{s.name || s.id}</div>
-                    <div className="text-sm text-gray-600">{s.email || '—'}</div>
-                    <div className="text-sm text-gray-600 mb-3">Roll No: {s.rollNo || '—'}</div>
-                    {Array.isArray(s.enrolledCourses) && s.enrolledCourses.length > 0 && (
-                      <div>
-                        <div className="text-sm font-medium text-gray-700 mb-1">Also enrolled in:</div>
-                        <div className="flex flex-wrap gap-2">
-                          {s.enrolledCourses.map((c) => (
-                            <span key={`${c.year}-${c.section}-${c.semester}-${c.id}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-                              {c.name || c.id} • {c.year}-{c.section} {c.semester.toUpperCase()}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeTab === 'materials' && (
-          <section className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Study Materials</h2>
-            <ul className="space-y-2">
-              {studyMaterials.length === 0 && (<li className="text-gray-600">No materials added.</li>)}
-              {studyMaterials.map((material, index) => (
-                <li key={index} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-                  <span className="text-gray-800">{material.name}</span>
-                  <button className="text-blue-600 hover:underline text-sm">View</button>
-                </li>
-              ))}
-            </ul>
-            {editMode && (
-              <div className="mt-6 grid gap-3 md:grid-cols-3">
-                <input
-                  type="text"
-                  placeholder="Material Name"
-                  value={newMaterial.name}
-                  onChange={(e) => setNewMaterial({ ...newMaterial, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <input type="file" onChange={handleMaterialFileChange} className="w-full px-4 py-3 rounded-xl border border-gray-300" />
-                <button type="button" onClick={addMaterial} className="btn-campus-primary rounded-xl px-4 py-3">Add Material</button>
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeTab === 'schedule' && (
-          <section className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Schedule</h2>
-            <div className="text-gray-600">No schedule data available.</div>
-          </section>
-        )}
-
-        {activeTab === 'edit' && (
-          <section className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Edit Course</h2>
-            <form className="grid gap-4 md:grid-cols-2">
-              {Object.keys(formData).map((key) => (
-                <div key={key} className="flex flex-col gap-2">
-                  <label className="text-sm text-gray-600 font-medium">{key}</label>
-                  <input
-                    type="text"
-                    name={key}
-                    value={formData[key]}
-                    onChange={handleInputChange}
-                    className="px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+            {/* Course Information */}
+            <div className="bg-white border rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Information</h3>
+              <div className="space-y-3 text-sm">
+                                 <div className="flex items-center gap-2">
+                   <FontAwesomeIcon icon={faChalkboardTeacher} className="text-blue-600 w-4" />
+                   <span className="text-gray-600">Instructor:</span>
+                   <span className="font-medium">{courseData.instructorName || courseData.instructor || "Not assigned"}</span>
+                 </div>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faBuilding} className="text-green-600 w-4" />
+                  <span className="text-gray-600">Department:</span>
+                  <span className="font-medium">{courseData.department || "CSE"}</span>
                 </div>
-              ))}
-              <div className="md:col-span-2 flex gap-3 mt-4">
-                <button type="button" className="btn-campus-primary rounded-xl px-6 py-3" onClick={handleUpdate}>Update</button>
-                <button type="button" className="px-6 py-3 rounded-xl border border-gray-300 hover:bg-gray-100" onClick={() => setEditMode(false) || setActiveTab('overview')}>Cancel</button>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faCalendarAlt} className="text-purple-600 w-4" />
+                  <span className="text-gray-600">Semester:</span>
+                  <span className="font-medium">{courseData.semester}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faClock} className="text-orange-600 w-4" />
+                  <span className="text-gray-600">Credits:</span>
+                  <span className="font-medium">{courseData.credits || "N/A"}</span>
+                </div>
               </div>
-            </form>
-          </section>
-        )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

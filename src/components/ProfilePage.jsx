@@ -1,493 +1,659 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faPhone, faMapMarkerAlt, faBookOpen, faCode, faProjectDiagram, faUsers, faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faUser, 
+  faEnvelope, 
+  faPhone, 
+  faMapMarkerAlt, 
+  faBookOpen, 
+  faCode, 
+  faProjectDiagram, 
+  faUsers, 
+  faEdit, 
+  faSave,
+  faGraduationCap,
+  faBriefcase,
+  faCalendarAlt,
+  faIdCard,
+  faUniversity,
+  faBuilding,
+  faAward,
+  faStar,
+  faClock,
+  faCertificate,
+  faChalkboardTeacher,
+  faUserGraduate,
+  faHome,
+  faBank,
+  faCreditCard,
+  faShieldAlt,
+  faHeart,
+  faVenusMars,
+  faGlobe,
+  faFlag
+} from '@fortawesome/free-solid-svg-icons';
 
 const ProfilePage = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [userInfo, setUserInfo] = useState({
-    personalDetails: { name: '', email: '', phone: '', address: '' },
-    familyDetails: { fatherName: '', motherName: '', siblings: '' },
-    currentCourses: [],
-    professionalExperience: [],
-    skills: [],
-    projects: [],
-    education: [],
-    mentor: { name: '', email: '', phone: '' },
-  });
+  const [facultyData, setFacultyData] = useState(null);
+  const [coursesData, setCoursesData] = useState([]);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
-    const load = async () => {
+    const loadFacultyData = async () => {
       if (!user?.uid) {
         setLoading(false);
         return;
       }
+      
       try {
-        const ref = doc(db, 'faculty', 'CSE_DS', 'members', user.uid);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          const data = snap.data();
-          setUserInfo({
-    personalDetails: {
-              name: data.name || '',
-              email: data.email || user.email || '',
-              phone: data.phone || '',
-              address: data.address || '',
-            },
-            familyDetails: data.familyDetails || { fatherName: '', motherName: '', siblings: '' },
-            currentCourses: Array.isArray(data.currentCourses) ? data.currentCourses : [],
-            professionalExperience: Array.isArray(data.professionalExperience) ? data.professionalExperience : [],
-            skills: Array.isArray(data.skills) ? data.skills : [],
-            projects: Array.isArray(data.projects) ? data.projects : [],
-            education: Array.isArray(data.education) ? data.education : [],
-            mentor: data.mentor || { name: '', email: '', phone: '' },
-          });
+        setLoading(true);
+        
+        // Fetch faculty data from the correct path
+        const facultyRef = doc(db, 'faculty', 'CSE_DS', 'members', user.uid);
+        const facultySnap = await getDoc(facultyRef);
+        
+        if (facultySnap.exists()) {
+          const data = facultySnap.data();
+          setFacultyData(data);
+          
+          // Fetch courses taught by this faculty
+          const allCourseIds = [];
+          
+          // Add courses from the 'courses' array
+          if (data.courses && Array.isArray(data.courses)) {
+            allCourseIds.push(...data.courses);
+          }
+          
+          // Add courses from the 'teaching' field
+          if (data.teaching) {
+            // Handle different teaching structures
+            if (data.teaching.III_A && Array.isArray(data.teaching.III_A)) {
+              allCourseIds.push(...data.teaching.III_A);
+            }
+            // Add other sections if they exist
+            Object.keys(data.teaching).forEach(section => {
+              if (section !== 'III_A' && Array.isArray(data.teaching[section])) {
+                allCourseIds.push(...data.teaching[section]);
+              }
+            });
+          }
+          
+          // Remove duplicates
+          const uniqueCourseIds = [...new Set(allCourseIds)];
+          const courses = [];
+          
+                    // Fast course fetching with multiple strategies
+          console.log("📚 Course IDs from faculty data:", uniqueCourseIds);
+          
+          let fetchedCourses = [];
+
+          // Strategy 1: Direct collectionGroup query (fastest)
+          try {
+            console.log("🚀 Strategy 1: CollectionGroup query...");
+            const cg = collectionGroup(db, "courseDetails");
+            const qy = query(cg, where("instructor", "==", user.uid));
+            const snap = await getDocs(qy);
+            
+            snap.forEach((docSnap) => {
+              const path = docSnap.ref.path;
+              console.log("📍 Found course at:", path);
+              
+              const segments = path.split("/");
+              let year, section, semester;
+              
+              // Parse path to extract year, section, semester
+              if (path.includes('year_sem')) {
+                const yearSemIndex = segments.indexOf('year_sem');
+                if (yearSemIndex + 1 < segments.length) {
+                  const yearSem = segments[yearSemIndex + 1];
+                  const [yearPart, semesterPart] = yearSem.split('_');
+                  year = yearPart;
+                  semester = semesterPart;
+                  section = 'A';
+                }
+              } else if (path.includes('courses/')) {
+                // Old structure: /courses/{year}/{section}/{semester}/courseDetails/{courseId}
+                year = segments[1];
+                section = segments[2];
+                semester = segments[3];
+              }
+              
+              fetchedCourses.push({ 
+                id: docSnap.id, 
+                year, 
+                section, 
+                semester, 
+                ...docSnap.data() 
+              });
+            });
+            
+            console.log("✅ Strategy 1 found:", fetchedCourses.length, "courses");
+          } catch (error) {
+            console.error("❌ Strategy 1 failed:", error);
+          }
+
+          // Strategy 2: If no courses found, try direct path lookup
+          if (fetchedCourses.length === 0 && uniqueCourseIds.length > 0) {
+            console.log("🚀 Strategy 2: Direct path lookup...");
+            
+            // Create all possible paths to check
+            const pathsToCheck = [];
+            
+            // New structure paths
+            ['III_1', 'III_2', 'III_3', 'III_4', 'III_5', 'III_6', 'III_7', 'III_8'].forEach(yearSem => {
+              uniqueCourseIds.forEach(courseId => {
+                pathsToCheck.push({
+                  path: doc(db, 'courses', 'CSE_DS', 'year_sem', yearSem, 'courseDetails', courseId),
+                  yearSem,
+                  courseId
+                });
+              });
+            });
+            
+            // Old structure paths
+            ['III', 'II', 'I', 'IV'].forEach(year => {
+              ['A', 'B', 'C', 'D', 'E', 'F'].forEach(section => {
+                ['sem1', 'sem2'].forEach(semester => {
+                  uniqueCourseIds.forEach(courseId => {
+                    pathsToCheck.push({
+                      path: doc(db, 'courses', year, section, semester, 'courseDetails', courseId),
+                      year,
+                      section,
+                      semester,
+                      courseId
+                    });
+                  });
+                });
+              });
+            });
+
+            // Check all paths in parallel (fast)
+            const pathChecks = pathsToCheck.map(async ({ path, yearSem, year, section, semester, courseId }) => {
+              try {
+                const snap = await getDoc(path);
+                if (snap.exists()) {
+                  const courseData = snap.data();
+                  console.log("📍 Found course at path:", path.path);
+                  
+                  if (yearSem) {
+                    const [yearPart, semesterPart] = yearSem.split('_');
+                    return {
+                      id: courseId,
+                      year: yearPart,
+                      section: 'A',
+                      semester: semesterPart,
+                      ...courseData
+                    };
+                  } else {
+                    return {
+                      id: courseId,
+                      year,
+                      section,
+                      semester,
+                      ...courseData
+                    };
+                  }
+                }
+                return null;
+              } catch (error) {
+                return null;
+              }
+            });
+
+            const results = await Promise.all(pathChecks);
+            fetchedCourses = results.filter(course => course !== null);
+            console.log("✅ Strategy 2 found:", fetchedCourses.length, "courses");
+          }
+
+          // Strategy 3: If still no courses, create meaningful placeholders
+          if (fetchedCourses.length === 0) {
+            console.log("🚀 Strategy 3: Creating placeholder courses...");
+            fetchedCourses = uniqueCourseIds.map((courseId, index) => ({
+              id: courseId,
+              courseName: `Course ${index + 1}`,
+              courseCode: courseId,
+              description: `Course assigned to ${data.name}`,
+              instructor: data.name,
+              credits: 3,
+              enrolledStudents: 0,
+              year: "III",
+              section: "A",
+              semester: "5"
+            }));
+            console.log("✅ Strategy 3 created:", fetchedCourses.length, "placeholder courses");
+          }
+
+          // Set the final result
+          console.log("🎉 Final courses to display:", fetchedCourses.length);
+          setCoursesData(fetchedCourses);
         }
+      } catch (error) {
+        console.error('Error loading faculty data:', error);
       } finally {
         setLoading(false);
       }
     };
-    load();
+    
+    loadFacultyData();
   }, [user]);
-
-  const [editMode, setEditMode] = useState(false);
-  const [newSkill, setNewSkill] = useState('');
-  const [newProject, setNewProject] = useState({ title: '', description: '' });
-  const [newEducation, setNewEducation] = useState({ degree: '', university: '', year: '' });
-
-  const handleAddSkill = () => {
-    setUserInfo({ ...userInfo, skills: [...userInfo.skills, newSkill] });
-    setNewSkill('');
-  };
-
-  const handleAddProject = () => {
-    const newProjectEntry = { ...newProject, id: userInfo.projects.length + 1 };
-    setUserInfo({ ...userInfo, projects: [...userInfo.projects, newProjectEntry] });
-    setNewProject({ title: '', description: '' });
-  };
-
-  const handleAddEducation = () => {
-    const newEducationEntry = { ...newEducation, id: userInfo.education.length + 1 };
-    setUserInfo({ ...userInfo, education: [...userInfo.education, newEducationEntry] });
-    setNewEducation({ degree: '', university: '', year: '' });
-  };
 
   if (loading) {
     return (
       <div className="compact-ui min-h-screen bg-gray-50 p-6">
-        <div className="max-w-5xl mx-auto space-y-4">
-          <div className="bg-white border rounded-md p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shimmer rounded-full" />
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header Skeleton */}
+          <div className="bg-white border rounded-lg p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 shimmer rounded-full" />
               <div className="flex-1">
-                <div className="h-4 shimmer rounded w-1/3 mb-2" />
-                <div className="h-3 shimmer rounded w-1/4" />
+                <div className="h-6 shimmer rounded w-1/3 mb-2" />
+                <div className="h-4 shimmer rounded w-1/4 mb-1" />
+                <div className="h-4 shimmer rounded w-1/5" />
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white border rounded-md p-4">
-                <div className="w-8 h-8 shimmer rounded-full mx-auto mb-3" />
-                <div className="h-4 shimmer rounded w-1/3 mx-auto mb-2" />
-                <div className="h-3 shimmer rounded w-1/4 mx-auto" />
+          
+          {/* KPI Cards Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white border rounded-lg p-4">
+                <div className="w-10 h-10 shimmer rounded-full mx-auto mb-3" />
+                <div className="h-4 shimmer rounded w-1/2 mx-auto mb-2" />
+                <div className="h-6 shimmer rounded w-1/3 mx-auto" />
               </div>
             ))}
           </div>
-          <div className="bg-white border rounded-md p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 shimmer rounded-full" />
-              <div className="h-4 shimmer rounded w-1/4" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-10 shimmer rounded" />
-              ))}
-            </div>
+          
+          {/* Content Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white border rounded-lg p-6">
+                <div className="h-5 shimmer rounded w-1/4 mb-4" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, j) => (
+                    <div key={j} className="space-y-2">
+                      <div className="h-4 shimmer rounded w-1/3" />
+                      <div className="h-10 shimmer rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     );
   }
 
-  const handleSave = async () => {
-    if (!user?.uid) return;
-    const ref = doc(db, 'faculty', 'CSE_DS', 'members', user.uid);
-    const payload = {
-      name: userInfo.personalDetails.name,
-      email: userInfo.personalDetails.email,
-      phone: userInfo.personalDetails.phone,
-      address: userInfo.personalDetails.address,
-      familyDetails: userInfo.familyDetails,
-      currentCourses: userInfo.currentCourses,
-      professionalExperience: userInfo.professionalExperience,
-      skills: userInfo.skills,
-      projects: userInfo.projects,
-      education: userInfo.education,
-      mentor: userInfo.mentor,
-    };
-    await updateDoc(ref, payload);
-  };
-
-  const onToggleEdit = async () => {
-    if (editMode) {
-      await handleSave();
-    }
-    setEditMode(!editMode);
-  };
-
-  return (
-    <div className="compact-ui min-h-screen bg-gray-50">
-      <div className="max-w-5xl mx-auto py-6 px-4">
-        <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3 mb-1">
-              <FontAwesomeIcon icon={faUser} className="text-blue-600"/>
-              {userInfo.personalDetails.name || 'Faculty Profile'}
-            </h1>
-            <p className="text-gray-600 text-sm flex items-center gap-2">
-              <FontAwesomeIcon icon={faEnvelope} className="text-blue-600"/>
-              {userInfo.personalDetails.email}
-            </p>
+  if (!facultyData) {
+    return (
+      <div className="compact-ui min-h-screen bg-gray-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white border rounded-lg p-6 text-center">
+            <FontAwesomeIcon icon={faUser} className="text-gray-400 text-6xl mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Profile Not Found</h2>
+            <p className="text-gray-600">No faculty profile found for this user.</p>
           </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={onToggleEdit} 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-md border bg-white hover:bg-gray-50 text-sm"
-            >
-              <FontAwesomeIcon icon={editMode ? faSave : faEdit} />
-              {editMode ? 'Save Profile' : 'Edit Profile'}
-            </button>
-          </div>
-        </header>
-
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white border rounded-md p-4 text-center">
-            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-              <FontAwesomeIcon icon={faBookOpen} className="text-white" />
-            </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">Courses</h3>
-            <p className="text-2xl font-semibold text-blue-600">{userInfo.currentCourses.length}</p>
-          </div>
-          <div className="bg-white border rounded-md p-4 text-center">
-            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-              <FontAwesomeIcon icon={faCode} className="text-white" />
-            </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">Skills</h3>
-            <p className="text-2xl font-semibold text-green-600">{userInfo.skills.length}</p>
-          </div>
-          <div className="bg-white border rounded-md p-4 text-center">
-            <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-3">
-              <FontAwesomeIcon icon={faProjectDiagram} className="text-white" />
-            </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">Projects</h3>
-            <p className="text-2xl font-semibold text-pink-600">{userInfo.projects.length}</p>
-          </div>
-        </section>
-
-        <div className="bg-white border rounded-md p-4 mb-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-              <FontAwesomeIcon icon={faUser} className="text-white text-xs" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900">Personal Details</h2>
-          </div>
-        {editMode ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faUser} className="text-indigo-500 w-4" />
-                <input 
-                  type="text" 
-                  value={userInfo.personalDetails.name} 
-                  className="flex-1 py-2 px-3 rounded-md border focus:ring-2 focus:ring-indigo-500 text-sm" 
-                  placeholder="Full Name"
-                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, name: e.target.value } })} 
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faEnvelope} className="text-indigo-500 w-4" />
-                <input 
-                  type="email" 
-                  value={userInfo.personalDetails.email} 
-                  className="flex-1 py-2 px-3 rounded-md border focus:ring-2 focus:ring-indigo-500 text-sm" 
-                  placeholder="Email Address"
-                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, email: e.target.value } })} 
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faPhone} className="text-indigo-500 w-4" />
-                <input 
-                  type="tel" 
-                  value={userInfo.personalDetails.phone} 
-                  className="flex-1 py-2 px-3 rounded-md border focus:ring-2 focus:ring-indigo-500 text-sm" 
-                  placeholder="Phone Number"
-                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, phone: e.target.value } })} 
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-500 w-4" />
-                <input 
-                  type="text" 
-                  value={userInfo.personalDetails.address} 
-                  className="flex-1 py-2 px-3 rounded-md border focus:ring-2 focus:ring-indigo-500 text-sm" 
-                  placeholder="Address"
-                  onChange={(e) => setUserInfo({ ...userInfo, personalDetails: { ...userInfo.personalDetails, address: e.target.value } })} 
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="flex items-center gap-3 p-3 bg-white rounded-md border">
-                <FontAwesomeIcon icon={faUser} className="text-indigo-500" />
-                <div>
-                  <p className="text-xs text-gray-500">Name</p>
-                  <p className="font-medium text-gray-700 text-sm">{userInfo.personalDetails.name || 'Not provided'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-md border">
-                <FontAwesomeIcon icon={faEnvelope} className="text-indigo-500" />
-                <div>
-                  <p className="text-xs text-gray-500">Email</p>
-                  <p className="font-medium text-gray-700 text-sm">{userInfo.personalDetails.email || 'Not provided'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-md border">
-                <FontAwesomeIcon icon={faPhone} className="text-indigo-500" />
-                <div>
-                  <p className="text-xs text-gray-500">Phone</p>
-                  <p className="font-medium text-gray-700 text-sm">{userInfo.personalDetails.phone || 'Not provided'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-md border">
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-500" />
-                <div>
-                  <p className="text-xs text-gray-500">Address</p>
-                  <p className="font-medium text-gray-700 text-sm">{userInfo.personalDetails.address || 'Not provided'}</p>
-                </div>
-              </div>
-            </div>
-        )}
-      </div>
-
-        <div className="bg-white border rounded-md p-4 mb-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
-              <FontAwesomeIcon icon={faUsers} className="text-white text-xs" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900">Family Details</h2>
-          </div>
-        {editMode ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faUser} className="text-emerald-600 w-4" />
-                <input 
-                  type="text" 
-                  value={userInfo.familyDetails.fatherName} 
-                  className="flex-1 py-2 px-3 rounded-md border focus:ring-2 focus:ring-emerald-500 text-sm" 
-                  placeholder="Father's Name"
-                  onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, fatherName: e.target.value } })} 
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faUser} className="text-emerald-600 w-4" />
-                <input 
-                  type="text" 
-                  value={userInfo.familyDetails.motherName} 
-                  className="flex-1 py-2 px-3 rounded-md border focus:ring-2 focus:ring-emerald-500 text-sm" 
-                  placeholder="Mother's Name"
-                  onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, motherName: e.target.value } })} 
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faUsers} className="text-emerald-600 w-4" />
-                <input 
-                  type="text" 
-                  value={userInfo.familyDetails.siblings} 
-                  className="flex-1 py-2 px-3 rounded-md border focus:ring-2 focus:ring-emerald-500 text-sm" 
-                  placeholder="Siblings"
-                  onChange={(e) => setUserInfo({ ...userInfo, familyDetails: { ...userInfo.familyDetails, siblings: e.target.value } })} 
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="flex items-center gap-3 p-3 bg-white rounded-md border">
-                <FontAwesomeIcon icon={faUser} className="text-emerald-600" />
-                <div>
-                  <p className="text-xs text-gray-500">Father's Name</p>
-                  <p className="font-medium text-gray-700 text-sm">{userInfo.familyDetails.fatherName || 'Not provided'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-md border">
-                <FontAwesomeIcon icon={faUser} className="text-emerald-600" />
-                <div>
-                  <p className="text-xs text-gray-500">Mother's Name</p>
-                  <p className="font-medium text-gray-700 text-sm">{userInfo.familyDetails.motherName || 'Not provided'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-md border">
-                <FontAwesomeIcon icon={faUsers} className="text-emerald-600" />
-                <div>
-                  <p className="text-xs text-gray-500">Siblings</p>
-                  <p className="font-medium text-gray-700 text-sm">{userInfo.familyDetails.siblings || 'Not provided'}</p>
-                </div>
-              </div>
-            </div>
-        )}
-      </div>
-
-      <div className="bg-white border rounded-md p-4 mb-4">
-        <h2 className="text-lg font-semibold mb-2 text-gray-900">Current Courses</h2>
-        {userInfo.currentCourses.map(course => (
-          <div key={course.id} className="mb-4">
-            <h3 className="text-sm font-medium text-gray-800">{course.name}</h3>
-            <p className="text-gray-600 text-sm">Progress: {course.progress}%</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-white border rounded-md p-4 mb-4">
-        <h2 className="text-lg font-semibold mb-2 text-gray-900">Professional Experience</h2>
-        {userInfo.professionalExperience.map(experience => (
-          <div key={experience.id} className="mb-4">
-            {editMode ? (
-              <>
-                <input type="text" value={experience.jobTitle} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                  ...userInfo,
-                  professionalExperience: userInfo.professionalExperience.map(exp => exp.id === experience.id ? { ...exp, jobTitle: e.target.value } : exp)
-                })} />
-                <input type="text" value={experience.company} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                  ...userInfo,
-                  professionalExperience: userInfo.professionalExperience.map(exp => exp.id === experience.id ? { ...exp, company: e.target.value } : exp)
-                })} />
-                <input type="text" value={experience.duration} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                  ...userInfo,
-                  professionalExperience: userInfo.professionalExperience.map(exp => exp.id === experience.id ? { ...exp, duration: e.target.value } : exp)
-                })} />
-                <textarea value={experience.description} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                  ...userInfo,
-                  professionalExperience: userInfo.professionalExperience.map(exp => exp.id === experience.id ? { ...exp, description: e.target.value } : exp)
-                })}></textarea>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-sm font-medium text-gray-800">{experience.jobTitle}</h3>
-                  <p className="text-gray-600 text-sm"><strong>Company:</strong> {experience.company}</p>
-                  <p className="text-gray-600 text-sm"><strong>Duration:</strong> {experience.duration}</p>
-                  <p className="text-gray-600 text-sm"><strong>Description:</strong> {experience.description}</p>
-                </>
-              )}
-            </div>
-          ))}
-          {editMode && (
-            <div className="flex flex-col space-y-2">
-              <input type="text" placeholder="Job Title" className="w-full py-2 px-3 rounded border mb-2 text-sm" />
-              <input type="text" placeholder="Company" className="w-full py-2 px-3 rounded border mb-2 text-sm" />
-              <input type="text" placeholder="Duration" className="w-full py-2 px-3 rounded border mb-2 text-sm" />
-              <textarea placeholder="Description" className="w-full py-2 px-3 rounded border mb-2 text-sm"></textarea>
-              <button className="bg-green-600 text-white py-2 px-3 rounded-md text-sm">Add Experience</button>
-            </div>
-          )}
-        </div>
-  
-        <div className="bg-white border rounded-md p-4 mb-4">
-          <h2 className="text-lg font-semibold mb-2 text-gray-900">Skills</h2>
-          <ul className="list-disc list-inside">
-            {userInfo.skills.map((skill, index) => (
-              <li key={index} className="text-gray-600 text-sm">{skill}</li>
-            ))}
-          </ul>
-          {editMode && (
-            <div className="flex items-center space-x-2 mt-4">
-              <input type="text" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} className="w-full py-2 px-3 rounded border mb-2 text-sm" placeholder="Add new skill" />
-              <button onClick={handleAddSkill} className="bg-blue-600 text-white py-2 px-3 rounded-md text-sm">Add</button>
-            </div>
-          )}
-        </div>
-  
-        <div className="bg-white border rounded-md p-4 mb-4">
-          <h2 className="text-lg font-semibold mb-2 text-gray-900">Projects</h2>
-          {userInfo.projects.map(project => (
-            <div key={project.id} className="mb-4">
-              {editMode ? (
-                <>
-                  <input type="text" value={project.title} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                    ...userInfo,
-                    projects: userInfo.projects.map(proj => proj.id === project.id ? { ...proj, title: e.target.value } : proj)
-                  })} />
-                  <textarea value={project.description} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                    ...userInfo,
-                    projects: userInfo.projects.map(proj => proj.id === project.id ? { ...proj, description: e.target.value } : proj)
-                  })}></textarea>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-sm font-medium text-gray-800">{project.title}</h3>
-                  <p className="text-gray-600 text-sm">{project.description}</p>
-                </>
-              )}
-            </div>
-          ))}
-          {editMode && (
-            <div className="flex flex-col space-y-2">
-              <input type="text" value={newProject.title} onChange={(e) => setNewProject({ ...newProject, title: e.target.value })} placeholder="Project Title" className="w-full py-2 px-3 rounded border mb-2 text-sm" />
-              <textarea value={newProject.description} onChange={(e) => setNewProject({ ...newProject, description: e.target.value })} placeholder="Project Description" className="w-full py-2 px-3 rounded border mb-2 text-sm"></textarea>
-              <button onClick={handleAddProject} className="bg-green-600 text-white py-2 px-3 rounded-md text-sm">Add Project</button>
-            </div>
-          )}
-        </div>
-  
-        <div className="bg-white border rounded-md p-4 mb-4">
-          <h2 className="text-lg font-semibold mb-2 text-gray-900">Education</h2>
-          {userInfo.education.map(edu => (
-            <div key={edu.id} className="mb-4">
-              {editMode ? (
-                <>
-                  <input type="text" value={edu.degree} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                    ...userInfo,
-                    education: userInfo.education.map(education => education.id === edu.id ? { ...education, degree: e.target.value } : education)
-                  })} />
-                  <input type="text" value={edu.university} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                    ...userInfo,
-                    education: userInfo.education.map(education => education.id === edu.id ? { ...education, university: e.target.value } : education)
-                  })} />
-                  <input type="text" value={edu.year} className="w-full py-2 px-3 rounded border mb-2 text-sm" onChange={(e) => setUserInfo({
-                    ...userInfo,
-                    education: userInfo.education.map(education => education.id === edu.id ? { ...education, year: e.target.value } : education)
-                  })} />
-                </>
-              ) : (
-                <>
-                  <h3 className="text-sm font-medium text-gray-800">{edu.degree}</h3>
-                  <p className="text-gray-600 text-sm"><strong>University:</strong> {edu.university}</p>
-                  <p className="text-gray-600 text-sm"><strong>Year:</strong> {edu.year}</p>
-                </>
-              )}
-            </div>
-          ))}
-          {editMode && (
-            <div className="flex flex-col space-y-2">
-              <input type="text" value={newEducation.degree} onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })} placeholder="Degree" className="w-full py-2 px-3 rounded border mb-2 text-sm" />
-              <input type="text" value={newEducation.university} onChange={(e) => setNewEducation({ ...newEducation, university: e.target.value })} placeholder="University" className="w-full py-2 px-3 rounded border mb-2 text-sm" />
-              <input type="text" value={newEducation.year} onChange={(e) => setNewEducation({ ...newEducation, year: e.target.value })} placeholder="Year" className="w-full py-2 px-3 rounded border mb-2 text-sm" />
-              <button onClick={handleAddEducation} className="bg-green-600 text-white py-2 px-3 rounded-md text-sm">Add Education</button>
-            </div>
-          )}
-        </div>
-  
-        <div className="bg-white border rounded-md p-4 mb-4">
-          <h2 className="text-lg font-semibold mb-2 text-gray-900">Mentor Details</h2>
-          <p className="text-gray-600 text-sm"><strong>Mentor Name:</strong> {userInfo.mentor?.name || '—'}</p>
-          <p className="text-gray-600 text-sm"><strong>Email:</strong> {userInfo.mentor?.email || '—'}</p>
-          <p className="text-gray-600 text-sm"><strong>Phone:</strong> {userInfo.mentor?.phone || '—'}</p>
-        </div>
         </div>
       </div>
     );
-  };
-  
-  export default ProfilePage;
+  }
+
+  return (
+    <div className="compact-ui min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-white border rounded-lg p-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+              <FontAwesomeIcon icon={faUser} className="text-white text-2xl" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{facultyData.name}</h1>
+              <p className="text-gray-600 mb-1">{facultyData.designation}</p>
+              <p className="text-gray-600 mb-3">{facultyData.department}</p>
+              <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  <FontAwesomeIcon icon={faEnvelope} />
+                  {facultyData.emailID}
+                </span>
+                <span className="flex items-center gap-1">
+                  <FontAwesomeIcon icon={faPhone} />
+                  {facultyData.contactNo}
+                </span>
+                <span className="flex items-center gap-1">
+                  <FontAwesomeIcon icon={faIdCard} />
+                  {facultyData.empID}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setEditMode(!editMode)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              <FontAwesomeIcon icon={editMode ? faSave : faEdit} />
+              {editMode ? 'Save' : 'Edit Profile'}
+            </button>
+          </div>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white border rounded-lg p-4 text-center">
+            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <FontAwesomeIcon icon={faChalkboardTeacher} />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{coursesData.length}</div>
+            <div className="text-sm text-gray-600">Courses Teaching</div>
+          </div>
+          
+          <div className="bg-white border rounded-lg p-4 text-center">
+            <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <FontAwesomeIcon icon={faClock} />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{facultyData.experience}</div>
+            <div className="text-sm text-gray-600">Experience</div>
+          </div>
+          
+          <div className="bg-white border rounded-lg p-4 text-center">
+            <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <FontAwesomeIcon icon={faAward} />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{facultyData.qualifications}</div>
+            <div className="text-sm text-gray-600">Qualification</div>
+          </div>
+          
+          <div className="bg-white border rounded-lg p-4 text-center">
+            <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <FontAwesomeIcon icon={faStar} />
+            </div>
+            <div className="text-2xl font-bold text-gray-900">{facultyData.acadExperience}</div>
+            <div className="text-sm text-gray-600">Academic Exp.</div>
+          </div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Personal Information */}
+          <div className="bg-white border rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faUser} className="text-blue-600" />
+              Personal Information
+            </h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                  <p className="text-gray-900">{facultyData.dob}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
+                  <p className="text-gray-900">{facultyData.bloodGroup}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Religion</label>
+                  <p className="text-gray-900">{facultyData.religion}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Caste</label>
+                  <p className="text-gray-900">{facultyData.caste}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sub Caste</label>
+                  <p className="text-gray-900">{facultyData.subCaste}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Origin</label>
+                  <p className="text-gray-900">{facultyData.origin}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Local Address</label>
+                <p className="text-gray-900">{facultyData.localAddress}</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Permanent Address</label>
+                <p className="text-gray-900">{facultyData.permAddress}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Family Information */}
+          <div className="bg-white border rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faUsers} className="text-green-600" />
+              Family Information
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Father's Name</label>
+                <p className="text-gray-900">{facultyData.fatherName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mother's Name</label>
+                <p className="text-gray-900">{facultyData.motherName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Spouse Name</label>
+                <p className="text-gray-900">{facultyData.spouseName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Relationship with Spouse</label>
+                <p className="text-gray-900">{facultyData.relationshipWithSpouse}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Professional Information */}
+          <div className="bg-white border rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faBriefcase} className="text-purple-600" />
+              Professional Information
+            </h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+                  <p className="text-gray-900">{facultyData.empID}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Joining</label>
+                  <p className="text-gray-900">{facultyData.dateOfJoining}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                  <p className="text-gray-900">{facultyData.department}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                  <p className="text-gray-900">{facultyData.designation}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Department Role</label>
+                  <p className="text-gray-900">{facultyData.depRole}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role Level</label>
+                  <p className="text-gray-900">{facultyData.roleLevel}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Area of Specialization</label>
+                <p className="text-gray-900">{facultyData.areaOfSpecialization}</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+                <p className="text-gray-900">{facultyData.specialization}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Educational Information */}
+          <div className="bg-white border rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faGraduationCap} className="text-orange-600" />
+              Educational Information
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Qualification</label>
+                <p className="text-gray-900">{facultyData.qualifications}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Degree</label>
+                <p className="text-gray-900">{facultyData.degr}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Degree Date</label>
+                <p className="text-gray-900">{facultyData.degrDate}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Academic Experience</label>
+                <p className="text-gray-900">{facultyData.acadExperience}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Industry Experience</label>
+                <p className="text-gray-900">{facultyData.industryExperience} years</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Banking Information */}
+          <div className="bg-white border rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faBank} className="text-green-600" />
+              Banking Information
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+                <p className="text-gray-900">{facultyData.bankName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                <p className="text-gray-900">{facultyData.branch}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                <p className="text-gray-900">{facultyData.bankAccountNumber}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">IFSC Code</label>
+                <p className="text-gray-900">{facultyData.ifsc}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bank Address</label>
+                <p className="text-gray-900 text-sm">{facultyData.bankAddr}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Government Documents */}
+          <div className="bg-white border rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faIdCard} className="text-red-600" />
+              Government Documents
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Aadhaar Number</label>
+                <p className="text-gray-900">{facultyData.aadhaar}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">PAN Number</label>
+                <p className="text-gray-900">{facultyData.pan}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Courses Teaching */}
+        <div className="bg-white border rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FontAwesomeIcon icon={faChalkboardTeacher} className="text-blue-600" />
+            Courses Currently Teaching
+          </h2>
+          {coursesData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {coursesData.map((course, index) => (
+                <div key={course.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                      <FontAwesomeIcon icon={faBookOpen} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{course.courseName || `Course ${index + 1}`}</h3>
+                      <p className="text-sm text-gray-600">{course.courseCode || course.id}</p>
+                    </div>
+                  </div>
+                  {course.description && (
+                    <p className="text-sm text-gray-600 mb-2">{course.description}</p>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {course.credits && (
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                        {course.credits} Credits
+                      </span>
+                    )}
+                    {course.semester && (
+                      <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
+                        Semester {course.semester}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <FontAwesomeIcon icon={faBookOpen} className="text-gray-400 text-4xl mb-4" />
+              <p className="text-gray-600">No courses assigned yet.</p>
+            </div>
+          )}
+        </div>
+
+        {/* System Information */}
+        <div className="bg-white border rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FontAwesomeIcon icon={faShieldAlt} className="text-gray-600" />
+            System Information
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                facultyData.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
+                {facultyData.status}
+              </span>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Profile Complete</label>
+              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                facultyData.profileComplete ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {facultyData.profileComplete ? 'Complete' : 'Incomplete'}
+              </span>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Department Key</label>
+              <p className="text-gray-900">{facultyData.departmentKey}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfilePage;
   
