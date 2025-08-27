@@ -23,8 +23,8 @@ const Home = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 px-6">
         {/* Header */}
-        <header className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8">
-          <div className="mb-4 lg:mb-0">
+        <header className="mb-8">
+          <div>
             <h1 className="text-2xl lg:text-3xl font-semibold text-gray-900 flex items-center gap-3">
               <FontAwesomeIcon icon={faHome} className="text-blue-600"/>
               Faculty Dashboard
@@ -33,13 +33,6 @@ const Home = () => {
               <FontAwesomeIcon icon={faUser} className="text-blue-600"/>
               Manage your classes, communicate with students, and more
             </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <img src="/avatar.jpg" alt="Profile" className="w-12 h-12 rounded-full border" />
-            <div className="text-sm">
-              <div className="font-medium text-gray-900">Dr. Jane Doe</div>
-              <div className="text-gray-500">Faculty</div>
-            </div>
           </div>
         </header>
 

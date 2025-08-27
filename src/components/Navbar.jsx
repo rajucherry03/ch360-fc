@@ -17,6 +17,7 @@ import {
   faBell,
   faTasks
 } from '@fortawesome/free-solid-svg-icons';
+import { preloadOnHover } from '../utils/preload.js';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,6 +101,7 @@ const Navbar = () => {
           <NavLink 
             to="/home" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Home.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -110,6 +112,7 @@ const Navbar = () => {
           <NavLink 
             to="/courses" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Course.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -120,6 +123,7 @@ const Navbar = () => {
           <NavLink 
             to="/students" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/StudentList.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -130,6 +134,7 @@ const Navbar = () => {
           <NavLink 
             to="/attendance" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/AttendanceList.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -140,6 +145,7 @@ const Navbar = () => {
           <NavLink 
             to="/attendance/take" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/TakeAttendance.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -150,6 +156,7 @@ const Navbar = () => {
           <NavLink 
             to="/exams" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Exam.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -160,6 +167,7 @@ const Navbar = () => {
           <NavLink 
             to="/grades" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Grades.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -170,6 +178,7 @@ const Navbar = () => {
           <NavLink 
             to="/approval" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/ApprovalWorkflow.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -180,6 +189,7 @@ const Navbar = () => {
           <NavLink 
             to="/communication" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Communication.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -190,6 +200,7 @@ const Navbar = () => {
           <NavLink 
             to="/request" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/RequestPage.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -200,6 +211,7 @@ const Navbar = () => {
           <NavLink 
             to="/announcements" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Announcements.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -210,6 +222,7 @@ const Navbar = () => {
           <NavLink 
             to="/profile" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/ProfilePage.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -220,6 +233,7 @@ const Navbar = () => {
           <NavLink 
             to="/settings" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Settings.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}
@@ -230,6 +244,7 @@ const Navbar = () => {
           <NavLink 
             to="/logout" 
             onClick={closeMenu}
+            {...preloadOnHover(() => import('../components/Logout.jsx'))}
             className={({isActive}) => `block py-2.5 px-3 rounded-lg flex items-center border-l-4 transition-all duration-300 text-sm ${
               isActive ? 'bg-gray-800 text-white border-blue-500 pl-3' : 'border-transparent hover:bg-gray-700 text-gray-300'
             }`}

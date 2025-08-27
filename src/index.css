@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/inter/800.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,18 +28,20 @@
   --border-color: #2d3748;
 }
 
-html, body, #root { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
+html, body, #root { 
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; 
+}
 
 /* Compact UI globals to standardize spacing/typography across pages */
 .compact-ui { background-color: #f9fafb; }
-.compact-ui .page-container { max-width: 80rem; margin-left: auto; margin-right: auto; padding: 1rem; }
-.compact-ui h1 { font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; color: #111827; }
+.compact-ui .page-container { max-width: 80rem; margin-left: auto; margin-right: auto; padding: 1rem; } /* Adjusted padding */
+.compact-ui h1 { font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; color: #111827; } /* Adjusted font size */
 .compact-ui h2 { font-size: 1rem; line-height: 1.5rem; font-weight: 600; color: #111827; }
 .compact-ui p, .compact-ui li, .compact-ui span, .compact-ui label { font-size: 0.875rem; line-height: 1.25rem; color: #374151; }
-.compact-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; }
-.compact-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 0.75rem; }
-.compact-kpi { display: flex; align-items: center; gap: 0.5rem; }
-.compact-kpi .icon { width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: #eff6ff; color: #2563eb; }
+.compact-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; } /* Adjusted padding and border-radius */
+.compact-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 0.75rem; } /* Adjusted gap */
+.compact-kpi { display: flex; align-items: center; gap: 0.5rem; } /* Adjusted gap */
+.compact-kpi .icon { width: 1.75rem; height: 1.75rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: #eff6ff; color: #2563eb; } /* Adjusted width/height */
 
 /* Custom animations for StudentList */
 @keyframes fadeInUp {
@@ -103,13 +109,14 @@ html, body, #root { font-family: 'Inter', ui-sans-serif, system-ui, -apple-syste
   animation: glow 2s ease-in-out infinite;
 }
 
-.shimmer {
+/* Unified light shimmer for loading states */
+.shimmer, .loading-campus {
   background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* CampusHub360 Dark Theme Glass morphism effect */
+/* CampusHub360 Dark Theme Glass morphism effect (retained for specific uses or removed in components) */
 .glass {
   background: rgba(26, 26, 46, 0.8);
   backdrop-filter: blur(10px);
@@ -267,13 +274,6 @@ html, body, #root { font-family: 'Inter', ui-sans-serif, system-ui, -apple-syste
   background: var(--primary-purple);
 }
 
-/* CampusHub360 Loading animations */
-.loading-campus {
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-  background-size: 200px 100%;
-  animation: shimmer 1.5s infinite;
-}
-
 /* CampusHub360 Professional Glow effects */
 .glow-blue {
   box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
@@ -281,4 +281,25 @@ html, body, #root { font-family: 'Inter', ui-sans-serif, system-ui, -apple-syste
 
 .glow-blue:hover {
   box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+}
+
+/* Smooth route transitions */
+.route-transition {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.route-transition-enter {
+  opacity: 0;
+}
+
+.route-transition-enter-active {
+  opacity: 1;
+}
+
+.route-transition-exit {
+  opacity: 1;
+}
+
+.route-transition-exit-active {
+  opacity: 0;
 }

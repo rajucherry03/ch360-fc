@@ -5,13 +5,13 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC1ekZDZR1-6dh3E_0rShNa279iwe-JVCY",
-  authDomain: "csd-nodues.firebaseapp.com",
-  projectId: "csd-nodues",
-  storageBucket: "csd-nodues.firebasestorage.app",
-  messagingSenderId: "787881916826",
-  appId: "1:787881916826:web:8a497747a086d010322223",
-  measurementId: "G-YKB417NSXQ"
+  apiKey: "AIzaSyC2w0vh_kiAGXTmRDx69iMgPcqObi_-Zw0",
+  authDomain: "ch360-d-erp.firebaseapp.com",
+  projectId: "ch360-d-erp",
+  storageBucket: "ch360-d-erp.firebasestorage.app",
+  messagingSenderId: "119584645450",
+  appId: "1:119584645450:web:de17d423561eb9524e61b3",
+  measurementId: "G-51YTY1SYYK"
 };
 
 const app = initializeApp(firebaseConfig);
