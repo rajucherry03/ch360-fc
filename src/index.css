@@ -1,6 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* CampusHub360 Professional Theme Colors */
+:root {
+  --primary-blue: #2563eb;
+  --primary-purple: #7c3aed;
+  --secondary-blue: #3b82f6;
+  --secondary-purple: #8b5cf6;
+  --accent-teal: #06b6d4;
+  --accent-emerald: #10b981;
+  --dark-bg: #1a1a2e;
+  --dark-card: #16213e;
+  --gradient-purple: #0f3460;
+  --gradient-blue: #533483;
+  --text-white: #ffffff;
+  --text-gray: #a0a0a0;
+  --card-green: #10b981;
+  --card-blue: #3b82f6;
+  --card-purple: #8b5cf6;
+  --card-teal: #06b6d4;
+  --border-color: #2d3748;
+}
+
+html, body, #root { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
+
+/* Compact UI globals to standardize spacing/typography across pages */
+.compact-ui { background-color: #f9fafb; }
+.compact-ui .page-container { max-width: 80rem; margin-left: auto; margin-right: auto; padding: 1rem; }
+.compact-ui h1 { font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; color: #111827; }
+.compact-ui h2 { font-size: 1rem; line-height: 1.5rem; font-weight: 600; color: #111827; }
+.compact-ui p, .compact-ui li, .compact-ui span, .compact-ui label { font-size: 0.875rem; line-height: 1.25rem; color: #374151; }
+.compact-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; }
+.compact-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 0.75rem; }
+.compact-kpi { display: flex; align-items: center; gap: 0.5rem; }
+.compact-kpi .icon { width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: #eff6ff; color: #2563eb; }
 
 /* Custom animations for StudentList */
 @keyframes fadeInUp {
@@ -43,6 +78,15 @@
   }
 }
 
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.8);
+  }
+}
+
 .animate-fade-in {
   animation: fadeInUp 0.6s ease-out forwards;
 }
@@ -55,35 +99,147 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
 .shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* Glass morphism effect */
+/* CampusHub360 Dark Theme Glass morphism effect */
 .glass {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(26, 26, 46, 0.8);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-/* Gradient text */
+/* CampusHub360 Professional gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Hover effects */
+/* CampusHub360 Professional hover effects */
 .hover-lift {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  border-color: rgba(37, 99, 235, 0.5);
+}
+
+/* CampusHub360 Professional Card colors */
+.card-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.card-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.card-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.card-teal {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+/* CampusHub360 Dark theme backgrounds */
+.bg-campus-dark {
+  background: linear-gradient(135deg, var(--dark-bg) 0%, var(--gradient-purple) 50%, var(--gradient-blue) 100%);
+}
+
+.bg-campus-card {
+  background: var(--dark-card);
+  border: 1px solid var(--border-color);
+}
+
+/* CampusHub360 Professional Navigation styling */
+.nav-campus {
+  background: var(--dark-card);
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+.nav-campus-link {
+  color: var(--text-white);
+  transition: all 0.3s ease;
+}
+
+.nav-campus-link:hover {
+  color: var(--primary-blue);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.nav-campus-link.active {
+  color: var(--primary-blue);
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+/* CampusHub360 Professional Button styling */
+.btn-campus-primary {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+  color: var(--text-white);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-campus-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+}
+
+.btn-campus-secondary {
+  background: var(--dark-card);
+  color: var(--text-white);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.btn-campus-secondary:hover {
+  border-color: var(--primary-orange);
+  color: var(--primary-orange);
+}
+
+/* CampusHub360 Professional Input styling */
+.input-campus {
+  background: var(--dark-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-white);
+  transition: all 0.3s ease;
+}
+
+.input-campus:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-campus::placeholder {
+  color: var(--text-gray);
+}
+
+/* CampusHub360 Status indicators */
+.status-active {
+  background: var(--card-green);
+  color: var(--text-white);
+}
+
+.status-pending {
+  background: var(--card-pink);
+  color: var(--text-white);
+}
+
+.status-completed {
+  background: var(--card-blue);
+  color: var(--text-white);
 }
 
 /* Staggered animation delays */
@@ -92,3 +248,37 @@
 .stagger-3 { animation-delay: 0.3s; }
 .stagger-4 { animation-delay: 0.4s; }
 .stagger-5 { animation-delay: 0.5s; }
+
+/* CampusHub360 Professional Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-card);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-purple);
+}
+
+/* CampusHub360 Loading animations */
+.loading-campus {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* CampusHub360 Professional Glow effects */
+.glow-blue {
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+}
+
+.glow-blue:hover {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+}
