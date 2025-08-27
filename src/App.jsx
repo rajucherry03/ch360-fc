@@ -109,10 +109,8 @@ const MainLayout = () => {
 const AppLayout = () => {
   return (
     <div className="flex h-screen bg-white">
-      <div className="hidden md:block">
-        <Navbar />
-      </div>
-      <div className="flex-1 overflow-auto bg-white md:ml-72 compact-ui">
+      <Navbar />
+      <div className="flex-1 overflow-auto bg-white compact-ui pt-16 md:pt-0">
         <Outlet />
       </div>
     </div>
