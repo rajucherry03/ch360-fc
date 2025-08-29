@@ -92,11 +92,11 @@ const CommunicationPage = () => {
   };
 
   return (
-    <div className="compact-ui min-h-screen flex flex-col lg:flex-row bg-gray-50 overflow-hidden">
-      <div className={`fixed lg:relative top-0 left-0 w-full lg:w-1/4 bg-white border-r flex flex-col transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="flex items-center justify-between p-3 border-b">
-          <h2 className="text-base font-semibold text-gray-900">Chats</h2>
-          <button className="lg:hidden" onClick={toggleSidebar}>
+    <div className="compact-ui min-h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
+      <div className={`fixed lg:relative top-0 left-0 w-full lg:w-1/4 bg-surface border-r border-border-theme flex flex-col transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="flex items-center justify-between p-3 border-b border-border-theme">
+          <h2 className="text-base font-semibold text-primary">Chats</h2>
+          <button className="lg:hidden text-primary hover:text-accent" onClick={toggleSidebar}>
             <FontAwesomeIcon icon={faBars} />
           </button>
         </div>
@@ -105,13 +105,13 @@ const CommunicationPage = () => {
             <div
               key={chat.id}
               onClick={() => handleChatClick(chat.id)}
-              className={`cursor-pointer p-3 border-b hover:bg-gray-50 transition ${activeChat === chat.id ? 'bg-gray-50' : ''}`}
+              className={`cursor-pointer p-3 border-b border-border-theme hover:bg-background transition ${activeChat === chat.id ? 'bg-background' : ''}`}
             >
               <div className="flex items-center space-x-4">
                 <img src={chat.profileImage} alt={`${chat.sender} profile`} className="w-10 h-10 rounded-full" />
                 <div>
-                  <div className="font-medium text-gray-900 text-sm">{chat.sender}</div>
-                  <div className="text-xs text-gray-600 truncate">{chat.message}</div>
+                  <div className="font-medium text-primary text-sm">{chat.sender}</div>
+                  <div className="text-xs text-secondary truncate">{chat.message}</div>
                 </div>
               </div>
             </div>
@@ -124,31 +124,31 @@ const CommunicationPage = () => {
           {messages
             .filter((msg) => msg.id === activeChat)
             .map((msg) => (
-              <div key={msg.id} className={`mb-2 p-3 max-w-md ${msg.sender === 'You' ? 'self-end bg-blue-50' : 'self-start bg-white'} rounded-md border text-sm`}>
+              <div key={msg.id} className={`mb-2 p-3 max-w-md ${msg.sender === 'You' ? 'self-end bg-accent/10' : 'self-start bg-surface'} rounded-md border border-border-theme text-sm`}>
                 <div className="flex items-center space-x-3">
                   <img src={msg.profileImage} alt={`${msg.sender} profile`} className="w-7 h-7 rounded-full" />
-                  <p className="font-medium text-gray-900">{msg.sender} <span className="text-xs text-gray-500">{msg.timestamp}</span></p>
+                  <p className="font-medium text-primary">{msg.sender} <span className="text-xs text-secondary">{msg.timestamp}</span></p>
                 </div>
                 {msg.type === 'image' ? (
                   <img src={msg.message} alt="Sent" className="w-full h-auto mt-2 rounded-md" />
                 ) : (
-                  <p className="mt-2 text-gray-800">{msg.message}</p>
+                  <p className="mt-2 text-primary">{msg.message}</p>
                 )}
               </div>
             ))}
           <div ref={messagesEndRef} />
         </div>
-        <div className="p-3 border-t bg-white flex items-center space-x-2">
+        <div className="p-3 border-t border-border-theme bg-surface flex items-center space-x-2">
           <input
             type="text"
             placeholder="Type a message"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-grow px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-grow px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-accent"
           />
           <button
             onClick={handleSendMessage}
-            className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 text-sm"
+            className="btn-primary px-3 py-2 rounded-md hover:bg-accent/90 text-sm"
           >
             <FontAwesomeIcon icon={faPaperPlane} />
           </button>
@@ -158,7 +158,7 @@ const CommunicationPage = () => {
             className="hidden"
             id="file-input"
           />
-          <label htmlFor="file-input" onClick={handleSendFile} className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 text-sm cursor-pointer">
+          <label htmlFor="file-input" onClick={handleSendFile} className="btn-secondary px-3 py-2 rounded-md hover:bg-secondary/90 text-sm cursor-pointer">
             <FontAwesomeIcon icon={faImage} />
           </label>
         </div>

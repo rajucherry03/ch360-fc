@@ -21,7 +21,10 @@ import {
   faUserGraduate,
   faIdCard,
   faEnvelope,
-  faPhone
+  faPhone,
+  faPlay,
+  faStop,
+  faSignOutAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { auth, db } from "../firebase";
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
@@ -70,6 +73,7 @@ const ExamDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [enrolledStudents, setEnrolledStudents] = useState([]);
+  const [username, setUsername] = useState(null);
 
   useEffect(() => {
     const fetchExamDetails = async () => {
@@ -121,25 +125,24 @@ const ExamDetails = () => {
     fetchExamDetails();
   }, [id]);
 
-  const getExamStatus = (examDate) => {
-    const today = new Date();
-    const examDateObj = new Date(examDate);
-    
-    if (examDateObj < today) {
-      return { status: 'Completed', color: 'text-green-600', bg: 'bg-green-100', icon: faCheckCircle };
-    } else if (examDateObj.toDateString() === today.toDateString()) {
-      return { status: 'Today', color: 'text-orange-600', bg: 'bg-orange-100', icon: faClock };
-    } else {
-      return { status: 'Upcoming', color: 'text-blue-600', bg: 'bg-blue-100', icon: faCalendarAlt };
-    }
+  const getStatusColor = (status) => {
+    if (status === 'Completed') return { status: 'Completed', color: 'text-secondary', bg: 'bg-secondary/10', icon: faCheckCircle };
+    if (status === 'Ongoing') return { status: 'Ongoing', color: 'text-accent', bg: 'bg-accent/10', icon: faClock };
+    if (status === 'Upcoming') return { status: 'Upcoming', color: 'text-accent', bg: 'bg-accent/10', icon: faCalendarAlt };
+    return { status: 'Draft', color: 'text-secondary', bg: 'bg-secondary/10', icon: faEdit };
   };
 
-  const getDaysUntilExam = (examDate) => {
-    const today = new Date();
-    const examDateObj = new Date(examDate);
-    const diffTime = examDateObj - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  const handleLogout = () => {
+    auth.signOut();
+    window.location.href = '/login';
+  };
+
+  const handleStartExam = () => {
+    alert('Start Exam functionality not yet implemented.');
+  };
+
+  const handleEndExam = () => {
+    alert('End Exam functionality not yet implemented.');
   };
 
   if (loading) {
@@ -172,328 +175,228 @@ const ExamDetails = () => {
     );
   }
 
-  if (error || !exam) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="text-center">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 text-6xl mb-4 animate-bounce" />
-          <div className="text-red-600 text-xl font-semibold">{error || "Exam not found."}</div>
-          <Link 
-            to="/exams"
-            className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg shadow-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-            Back to Exams
-          </Link>
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-accent text-6xl mb-4 animate-bounce" />
+          <div className="text-primary text-xl font-semibold">{error || "Exam not found."}</div>
         </div>
       </div>
     );
   }
 
-  const examStatus = getExamStatus(exam.date);
-  const daysUntilExam = getDaysUntilExam(exam.date);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <header className="mb-8 flex items-center justify-between animate-fade-in">
-          <div className="flex items-center gap-4">
-            <Link 
-              to="/exams"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white transition-all duration-200 border border-white/20"
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-surface border-b border-border-theme">
+        <div className="max-w-6xl mx-auto px-6 py-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+                <FontAwesomeIcon icon={faFileAlt} className="text-sm" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold text-primary">Exam Details</h1>
+                <p className="text-secondary text-xs">Welcome back, {username || 'Faculty'}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="btn-primary inline-flex items-center gap-2 px-3 py-2 text-sm"
             >
-              <FontAwesomeIcon icon={faArrowLeft} className="text-indigo-600" />
-              <span className="text-gray-700 font-medium">Back to Exams</span>
-            </Link>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-                <FontAwesomeIcon icon={faFileAlt} className="text-indigo-600 animate-pulse"/>
-                {exam.courseName}
-              </h1>
-              <p className="text-gray-600 mt-2 flex items-center gap-2">
-                <FontAwesomeIcon icon={faGraduationCap} className="text-indigo-400"/>
-                {exam.examType} Examination
-              </p>
-            </div>
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              Logout
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            <div className={`px-4 py-2 rounded-full text-sm font-medium ${examStatus.bg} ${examStatus.color} flex items-center gap-2`}>
-              <FontAwesomeIcon icon={examStatus.icon} />
-              {examStatus.status}
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto p-6">
+        {/* Exam Information */}
+        <div className="bg-surface border border-border-theme rounded-md p-6 mb-6 animate-fade-in">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+              <FontAwesomeIcon icon={faFileAlt} className="text-sm" />
             </div>
-            {examStatus.status === 'Upcoming' && (
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 text-gray-700 border border-white/20">
-                <span className="text-sm font-medium">In {daysUntilExam} days</span>
-              </div>
-            )}
+            <h2 className="text-lg font-semibold text-primary">Exam Information</h2>
           </div>
-        </header>
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Exam Overview */}
-            <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faFileAlt} className="text-white" />
-                </div>
-                <h2 className="text-xl font-bold gradient-text">Exam Overview</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Exam Name</label>
+                <p className="text-primary">{exam?.courseName || 'Loading...'}</p>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                    <FontAwesomeIcon icon={faCalendarAlt} className="text-indigo-500 w-5" />
-                    <div>
-                      <p className="text-sm text-gray-600">Date</p>
-                      <p className="font-semibold text-gray-800">{exam.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                    <FontAwesomeIcon icon={faClock} className="text-indigo-500 w-5" />
-                    <div>
-                      <p className="text-sm text-gray-600">Time</p>
-                      <p className="font-semibold text-gray-800">{exam.time}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-500 w-5" />
-                    <div>
-                      <p className="text-sm text-gray-600">Location</p>
-                      <p className="font-semibold text-gray-800">{exam.location}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                    <FontAwesomeIcon icon={faClock} className="text-indigo-500 w-5" />
-                    <div>
-                      <p className="text-sm text-gray-600">Duration</p>
-                      <p className="font-semibold text-gray-800">{exam.duration}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                    <FontAwesomeIcon icon={faChartBar} className="text-indigo-500 w-5" />
-                    <div>
-                      <p className="text-sm text-gray-600">Total Marks</p>
-                      <p className="font-semibold text-gray-800">{exam.totalMarks}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                    <FontAwesomeIcon icon={faUsers} className="text-indigo-500 w-5" />
-                    <div>
-                      <p className="text-sm text-gray-600">Enrolled Students</p>
-                      <p className="font-semibold text-gray-800">{exam.students?.length || 0}</p>
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Course</label>
+                <p className="text-primary">{exam?.examType || 'Loading...'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Duration</label>
+                <p className="text-primary">{exam?.duration || 'Loading...'} minutes</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Total Marks</label>
+                <p className="text-primary">{exam?.totalMarks || 'Loading...'} marks</p>
               </div>
             </div>
-
-            {/* Exam Details */}
-            <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faBookOpen} className="text-white" />
-                </div>
-                <h2 className="text-xl font-bold gradient-text">Exam Details</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Date & Time</label>
+                <p className="text-primary">{exam?.date || 'Loading...'}</p>
               </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faBookOpen} className="text-indigo-500" />
-                    Syllabus Coverage
-                  </h3>
-                  <p className="text-gray-600 bg-white/50 p-3 rounded-lg">{exam.syllabus}</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faFileAlt} className="text-indigo-500" />
-                    Exam Pattern
-                  </h3>
-                  <p className="text-gray-600 bg-white/50 p-3 rounded-lg">{exam.examPattern}</p>
-                </div>
-                
-                {exam.instructions && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <FontAwesomeIcon icon={faClipboardList} className="text-indigo-500" />
-                      Instructions
-                    </h3>
-                    <p className="text-gray-600 bg-white/50 p-3 rounded-lg">{exam.instructions}</p>
-                  </div>
-                )}
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Venue</label>
+                <p className="text-primary">{exam?.location || 'Loading...'}</p>
               </div>
-            </div>
-
-            {/* Enrolled Students */}
-            <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <FontAwesomeIcon icon={faUserGraduate} className="text-white" />
-                  </div>
-                  <h2 className="text-xl font-bold gradient-text">Enrolled Students</h2>
-                </div>
-                <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 text-gray-700 border border-white/20">
-                  <span className="text-sm font-medium">{exam.students?.length || 0} Students</span>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Status</label>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(exam?.examType).bg} ${getStatusColor(exam?.examType).color}`}>
+                  {exam?.examType || 'Loading...'}
+                </span>
               </div>
-              
-              <div className="grid gap-4">
-                {exam.students?.map((student, index) => (
-                  <div 
-                    key={student.id} 
-                    className="bg-white/50 rounded-lg p-4 animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <img 
-                          src={`https://ui-avatars.com/api/?name=${student.name}&background=6366f1&color=fff&size=40`}
-                          alt={student.name}
-                          className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-100"
-                        />
-                        <div>
-                          <h4 className="font-semibold text-gray-800">{student.name}</h4>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <FontAwesomeIcon icon={faIdCard} className="text-indigo-400" />
-                              {student.rollNo}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <FontAwesomeIcon icon={faEnvelope} className="text-indigo-400" />
-                              {student.email}
-                            </span>
-                            {student.phone && (
-                              <span className="flex items-center gap-1">
-                                <FontAwesomeIcon icon={faPhone} className="text-indigo-400" />
-                                {student.phone}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-        </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <button className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium hover:bg-green-200 transition-colors">
-                          <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                          Present
-                        </button>
-                        <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium hover:bg-gray-200 transition-colors">
-                          <FontAwesomeIcon icon={faTimesCircle} className="mr-1" />
-                          Absent
-                        </button>
-        </div>
-        </div>
-        </div>
-                ))}
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Enrolled Students</label>
+                <p className="text-primary">{exam?.students?.length || 0} students</p>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faClipboardList} className="text-white" />
-                </div>
-                <h2 className="text-xl font-bold gradient-text">Quick Actions</h2>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <button
+            onClick={() => handleStartExam()}
+            className="bg-surface border border-border-theme rounded-md p-6 hover:shadow transition cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faPlay} className="text-white text-sm" />
               </div>
-              
-              <div className="space-y-3">
-                <button className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105">
-                  <FontAwesomeIcon icon={faEdit} />
-                  Edit Exam
-                </button>
-                <button className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105">
-                  <FontAwesomeIcon icon={faChartBar} />
-                  View Results
-                </button>
-                <button className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105">
-                  <FontAwesomeIcon icon={faUsers} />
-                  Manage Students
-                </button>
-                <button className="w-full flex items-center gap-3 p-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-300 transform hover:scale-105">
-                  <FontAwesomeIcon icon={faTrash} />
-                  Delete Exam
-                </button>
-              </div>
+              <h3 className="text-lg font-semibold text-primary">Start Exam</h3>
             </div>
-
-            {/* Exam Statistics */}
-            <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faChartBar} className="text-white" />
-                </div>
-                <h2 className="text-xl font-bold gradient-text">Statistics</h2>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="bg-white/50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-indigo-600">{exam.students?.length || 0}</div>
-                  <div className="text-sm text-gray-600">Total Students</div>
-                </div>
-                <div className="bg-green-50 rounded-lg p-4 text-center border border-green-200">
-                  <div className="text-2xl font-bold text-green-600">0</div>
-                  <div className="text-sm text-gray-600">Present</div>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4 text-center border border-red-200">
-                  <div className="text-2xl font-bold text-red-600">0</div>
-                  <div className="text-sm text-gray-600">Absent</div>
-                </div>
-              </div>
+            <p className="text-secondary mb-4">
+              Begin the examination session for all enrolled students.
+            </p>
+            <div className="inline-flex items-center gap-2 w-full justify-center px-4 py-2 bg-accent text-white rounded-md hover:bg-accent/90">
+              <FontAwesomeIcon icon={faPlay} />
+              Start Exam
             </div>
+          </button>
 
-            {/* Navigation */}
-            <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faHome} className="text-white" />
-                </div>
-                <h2 className="text-xl font-bold gradient-text">Navigation</h2>
+          <button
+            onClick={() => handleEndExam()}
+            className="bg-surface border border-border-theme rounded-md p-6 hover:shadow transition cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faStop} className="text-white text-sm" />
               </div>
-              
-              <div className="space-y-3">
-                <Link 
-                  to="/exams"
-                  className="w-full flex items-center gap-3 p-3 bg-white/50 rounded-lg hover:bg-white/70 transition-all duration-200"
-                >
-                  <FontAwesomeIcon icon={faFileAlt} className="text-indigo-500" />
-                  All Exams
-                </Link>
-                <Link 
-                  to="/courses"
-                  className="w-full flex items-center gap-3 p-3 bg-white/50 rounded-lg hover:bg-white/70 transition-all duration-200"
-                >
-                  <FontAwesomeIcon icon={faBookOpen} className="text-indigo-500" />
-                  My Courses
-                </Link>
-                <Link 
-                  to="/grades"
-                  className="w-full flex items-center gap-3 p-3 bg-white/50 rounded-lg hover:bg-white/70 transition-all duration-200"
-                >
-                  <FontAwesomeIcon icon={faChartBar} className="text-indigo-500" />
-                  Grades
-                </Link>
-                <Link 
-                  to="/home"
-                  className="w-full flex items-center gap-3 p-3 bg-white/50 rounded-lg hover:bg-white/70 transition-all duration-200"
-                >
-                  <FontAwesomeIcon icon={faHome} className="text-indigo-500" />
-                  Dashboard
-                </Link>
-              </div>
+              <h3 className="text-lg font-semibold text-primary">End Exam</h3>
+            </div>
+            <p className="text-secondary mb-4">
+              End the examination session and collect all submissions.
+            </p>
+            <div className="inline-flex items-center gap-2 w-full justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
+              <FontAwesomeIcon icon={faStop} />
+              End Exam
+            </div>
+          </button>
+        </div>
+
+        {/* Exam Statistics */}
+        <div className="bg-surface border border-border-theme rounded-md p-6 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+              <FontAwesomeIcon icon={faChartBar} className="text-sm" />
+            </div>
+            <h2 className="text-lg font-semibold text-primary">Exam Statistics</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-accent">{exam?.students?.length || 0}</div>
+              <div className="text-sm text-secondary">Enrolled Students</div>
+            </div>
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-secondary">85%</div>
+              <div className="text-sm text-secondary">Attendance Rate</div>
+            </div>
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-primary">78%</div>
+              <div className="text-sm text-secondary">Average Score</div>
+            </div>
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-accent">12</div>
+              <div className="text-sm text-secondary">Questions</div>
             </div>
           </div>
+        </div>
+
+        {/* Student List */}
+        <div className="bg-surface border border-border-theme rounded-md p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+              <FontAwesomeIcon icon={faUsers} className="text-sm" />
+            </div>
+            <h2 className="text-lg font-semibold text-primary">Enrolled Students</h2>
+          </div>
+          
+          {exam?.students && exam.students.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-border-theme">
+                <thead className="bg-background">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Student ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Roll No
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Score
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-surface divide-y divide-border-theme">
+                  {exam.students.map((student, index) => (
+                    <tr key={student.id} className={index % 2 === 0 ? 'bg-surface' : 'bg-background'}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                        {student.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
+                        {student.name || student.studentName || `Student ${student.id}`}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
+                        {student.rollNo || student.rollNumber || student.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary`}>
+                          {student.status || 'Enrolled'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-primary">
+                        {student.score || 'N/A'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <FontAwesomeIcon icon={faUsers} className="text-secondary text-4xl mb-4" />
+              <p className="text-secondary">No students enrolled in this exam yet.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

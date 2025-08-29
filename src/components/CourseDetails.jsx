@@ -297,268 +297,205 @@ const CourseDetails = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center max-w-md">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 text-4xl mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => navigate('/courses')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          >
-            Back to Courses
-          </button>
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="text-center">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-accent text-4xl mb-4" />
+          <div className="text-primary text-xl font-semibold">{error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="page-container">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-surface border-b border-border-theme">
+        <div className="max-w-6xl mx-auto px-6 py-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+                <FontAwesomeIcon icon={faBookOpen} className="text-sm" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold text-primary">Course Details</h1>
+                <p className="text-secondary text-xs">Welcome back, {facultyData?.name || 'Faculty'}</p>
+              </div>
+            </div>
             <button
-              onClick={() => navigate('/courses')}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              onClick={() => navigate('/logout')}
+              className="btn-primary inline-flex items-center gap-2 px-3 py-2 text-sm"
             >
-              <FontAwesomeIcon icon={faArrowLeft} />
-              Back to Courses
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              Logout
             </button>
-                         <div>
-               <h1 className="text-2xl font-bold text-gray-900">
-                 {courseData.courseName || courseData.courseCode || `Course ${courseId}`}
-               </h1>
-               <p className="text-gray-600 text-sm">
-                 {courseData.year}-{courseData.section} • Semester {courseData.semester}
-               </p>
-             </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto p-6">
+        {/* Course Information */}
+        <div className="bg-surface border border-border-theme rounded-md p-6 mb-6 animate-fade-in">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+              <FontAwesomeIcon icon={faFileAlt} className="text-sm" />
+            </div>
+            <h2 className="text-lg font-semibold text-primary">Course Information</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Course Name</label>
+                <p className="text-primary">{courseData?.courseName || 'Loading...'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Course Code</label>
+                <p className="text-primary">{courseData?.courseCode || 'Loading...'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Credits</label>
+                <p className="text-primary">{courseData?.credits || 'Loading...'} credits</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Description</label>
+                <p className="text-primary">{courseData?.description || 'No description available'}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Instructor</label>
+                <p className="text-primary">{courseData?.instructorName || courseData?.instructor || 'Loading...'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Semester</label>
+                <p className="text-primary">{courseData?.semester || 'Loading...'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Enrolled Students</label>
+                <p className="text-primary">{enrolledStudents.length || 0} students</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-secondary mb-1">Status</label>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary`}>
+                  Active
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Course Information */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Course Overview */}
-            <div className="bg-white border rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FontAwesomeIcon icon={faBookOpen} className="text-blue-600" />
-                Course Overview
-              </h2>
-              
-              <div className="grid gap-4 md:grid-cols-2">
-                                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Name</label>
-                   <p className="text-gray-900 font-medium">{courseData.courseName || courseData.courseCode || `Course ${courseId}`}</p>
-                 </div>
-                                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Code</label>
-                   <p className="text-gray-900 font-medium">{courseData.courseCode || courseData.id}</p>
-                 </div>
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                   <p className="text-gray-900 font-medium">{courseData.department || "Computer Science & Engineering"}</p>
-                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Credits</label>
-                  <p className="text-gray-900">{courseData.credits || "Not specified"}</p>
-                </div>
-                                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Instructor</label>
-                   <p className="text-gray-900">{courseData.instructorName || courseData.instructor || "Not assigned"}</p>
-                 </div>
-                                 <div className="md:col-span-2">
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                   <p className="text-gray-900">{courseData.description || courseData.courseDescription || `Course ${courseId} - ${facultyData?.name || 'Faculty'}`}</p>
-                 </div>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <Link
+            to={`/attendance/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`}
+            className="bg-surface border border-border-theme rounded-md p-6 hover:shadow transition cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faUsers} className="text-white text-sm" />
               </div>
+              <h3 className="text-lg font-semibold text-primary">Take Attendance</h3>
             </div>
-
-            {/* Course Details */}
-            <div className="bg-white border rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FontAwesomeIcon icon={faFileAlt} className="text-green-600" />
-                Course Details
-              </h2>
-              
-                             <div className="grid gap-4 md:grid-cols-2">
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                   <p className="text-gray-900">{courseData.year}</p>
-                 </div>
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
-                   <p className="text-gray-900">{courseData.section}</p>
-                 </div>
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                   <p className="text-gray-900">{courseData.semester}</p>
-                 </div>
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                   <p className="text-gray-900">{courseData.department || "Computer Science & Engineering"}</p>
-                 </div>
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Semester Key</label>
-                   <p className="text-gray-900">{courseData.semesterKey || "Not specified"}</p>
-                 </div>
-                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Total Students</label>
-                   <p className="text-gray-900">{enrolledStudents.length}</p>
-                 </div>
-                 <div className="md:col-span-2">
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Path</label>
-                   <p className="text-gray-900 text-sm font-mono bg-gray-100 p-2 rounded">
-                     {courseData.masterCoursePath || `/courses/CSE_DS/year_sem/${courseData.semesterKey}/courseDetails/${courseId}/sections/${courseData.section}`}
-                   </p>
-                 </div>
-               </div>
+            <p className="text-secondary mb-4">
+              Mark attendance for students enrolled in this course.
+            </p>
+            <div className="inline-flex items-center gap-2 w-full justify-center px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary/90">
+              <FontAwesomeIcon icon={faClipboardCheck} />
+              Take Attendance
             </div>
+          </Link>
 
-                         {/* Enrolled Students */}
-             <div className="bg-white border rounded-lg p-6">
-               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                 <FontAwesomeIcon icon={faUsers} className="text-purple-600" />
-                 Enrolled Students ({enrolledStudents.length})
-               </h2>
-               
-               {enrolledStudents.length > 0 ? (
-                 <div className="overflow-x-auto">
-                   <table className="min-w-full divide-y divide-gray-200">
-                     <thead className="bg-gray-50">
-                       <tr>
-                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Student ID
-                         </th>
-                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Name
-                         </th>
-                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Roll No
-                         </th>
-                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                           Section
-                         </th>
-                       </tr>
-                     </thead>
-                     <tbody className="bg-white divide-y divide-gray-200">
-                       {enrolledStudents.map((student, index) => (
-                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                             {student.id}
-                           </td>
-                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                             {student.name || student.studentName || `Student ${student.id}`}
-                           </td>
-                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                             {student.rollNo || student.rollNumber || student.id}
-                           </td>
-                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                             {student.section || 'A'}
-                           </td>
-                         </tr>
-                       ))}
-                     </tbody>
-                   </table>
-                 </div>
-               ) : (
-                 <div className="text-center py-8">
-                   <FontAwesomeIcon icon={faUsers} className="text-gray-400 text-4xl mb-4" />
-                   <p className="text-gray-600">No students enrolled in this course yet.</p>
-                 </div>
-               )}
-             </div>
+          <Link
+            to={`/grades/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`}
+            className="bg-surface border border-border-theme rounded-md p-6 hover:shadow transition cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faGraduationCap} className="text-white text-sm" />
+              </div>
+              <h3 className="text-lg font-semibold text-primary">Manage Grades</h3>
+            </div>
+            <p className="text-secondary mb-4">
+              Update and manage student grades for this course.
+            </p>
+            <div className="inline-flex items-center gap-2 w-full justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
+              <FontAwesomeIcon icon={faEdit} />
+              Manage Grades
+            </div>
+          </Link>
+        </div>
+
+        {/* Course Statistics */}
+        <div className="bg-surface border border-border-theme rounded-md p-6 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+              <FontAwesomeIcon icon={faChartBar} className="text-sm" />
+            </div>
+            <h2 className="text-lg font-semibold text-primary">Course Statistics</h2>
           </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Course Stats */}
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Statistics</h3>
-              <div className="space-y-4">
-                                 <div className="flex items-center justify-between">
-                   <span className="text-gray-600">Total Students</span>
-                   <span className="font-semibold text-gray-900">{enrolledStudents.length}</span>
-                 </div>
-                 <div className="flex items-center justify-between">
-                   <span className="text-gray-600">Sections</span>
-                   <span className="font-semibold text-gray-900">
-                     {courseData.studentsBySection ? Object.keys(courseData.studentsBySection).length : 0}
-                   </span>
-                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Credits</span>
-                  <span className="font-semibold text-gray-900">{courseData.credits || "N/A"}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Year</span>
-                  <span className="font-semibold text-gray-900">{courseData.year}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Section</span>
-                  <span className="font-semibold text-gray-900">{courseData.section}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Semester</span>
-                  <span className="font-semibold text-gray-900">{courseData.semester}</span>
-                </div>
-              </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-accent">{enrolledStudents.length || 0}</div>
+              <div className="text-sm text-secondary">Enrolled Students</div>
             </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => navigate(`/attendance/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  <FontAwesomeIcon icon={faCheckCircle} />
-                  Mark Attendance
-                </button>
-                <button
-                  onClick={() => navigate(`/grades/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                >
-                  <FontAwesomeIcon icon={faGraduationCap} />
-                  Manage Grades
-                </button>
-                <button
-                  onClick={() => navigate(`/exam/${courseData.year}/${courseData.section}/${courseData.semester}/${courseData.id}`)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-                >
-                  <FontAwesomeIcon icon={faFileAlt} />
-                  Create Exam
-                </button>
-              </div>
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-secondary">85%</div>
+              <div className="text-sm text-secondary">Average Attendance</div>
             </div>
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-primary">78%</div>
+              <div className="text-sm text-secondary">Average Grade</div>
+            </div>
+            <div className="bg-background rounded-md p-4 text-center border border-border-theme">
+              <div className="text-2xl font-bold text-accent">12</div>
+              <div className="text-sm text-secondary">Assignments</div>
+            </div>
+          </div>
+        </div>
 
-            {/* Course Information */}
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Information</h3>
-              <div className="space-y-3 text-sm">
-                                 <div className="flex items-center gap-2">
-                   <FontAwesomeIcon icon={faChalkboardTeacher} className="text-blue-600 w-4" />
-                   <span className="text-gray-600">Instructor:</span>
-                   <span className="font-medium">{courseData.instructorName || courseData.instructor || "Not assigned"}</span>
-                 </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faBuilding} className="text-green-600 w-4" />
-                  <span className="text-gray-600">Department:</span>
-                  <span className="font-medium">{courseData.department || "CSE"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faCalendarAlt} className="text-purple-600 w-4" />
-                  <span className="text-gray-600">Semester:</span>
-                  <span className="font-medium">{courseData.semester}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faClock} className="text-orange-600 w-4" />
-                  <span className="text-gray-600">Credits:</span>
-                  <span className="font-medium">{courseData.credits || "N/A"}</span>
-                </div>
+        {/* Recent Activity */}
+        <div className="bg-surface border border-border-theme rounded-md p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
+              <FontAwesomeIcon icon={faClock} className="text-sm" />
+            </div>
+            <h2 className="text-lg font-semibold text-primary">Recent Activity</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 p-3 bg-background rounded-md border border-border-theme">
+              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faBuilding} className="text-white text-xs" />
               </div>
+              <div className="flex-1">
+                <h4 className="font-medium text-primary text-sm">Attendance marked for today</h4>
+                <p className="text-xs text-secondary">32 students present, 3 absent</p>
+              </div>
+              <div className="text-xs text-secondary">2 hours ago</div>
+            </div>
+            
+            <div className="flex items-center gap-4 p-3 bg-background rounded-md border border-border-theme">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faCalendarAlt} className="text-white text-xs" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium text-primary text-sm">Assignment deadline updated</h4>
+                <p className="text-xs text-secondary">Project submission due next week</p>
+              </div>
+              <div className="text-xs text-secondary">1 day ago</div>
+            </div>
+            
+            <div className="flex items-center gap-4 p-3 bg-background rounded-md border border-border-theme">
+              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                <FontAwesomeIcon icon={faGraduationCap} className="text-white text-xs" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium text-primary text-sm">Grades updated</h4>
+                <p className="text-xs text-secondary">Mid-term exam grades posted</p>
+              </div>
+              <div className="text-xs text-secondary">3 days ago</div>
             </div>
           </div>
         </div>

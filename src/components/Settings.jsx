@@ -449,7 +449,7 @@ const Settings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 animate-fade-in">
             <div className="h-12 shimmer rounded-lg mb-4"></div>
@@ -457,7 +457,7 @@ const Settings = () => {
           </div>
           <div className="grid gap-6 lg:grid-cols-4">
             <div className="lg:col-span-1">
-              <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
+              <div className="bg-surface border border-border-theme rounded-xl shadow-lg p-6 animate-fade-in">
                 <div className="space-y-4">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="h-12 shimmer rounded-lg"></div>
@@ -466,7 +466,7 @@ const Settings = () => {
               </div>
             </div>
             <div className="lg:col-span-3">
-              <div className="glass rounded-xl shadow-lg p-6 animate-fade-in">
+              <div className="bg-surface border border-border-theme rounded-xl shadow-lg p-6 animate-fade-in">
                 <div className="space-y-6">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="space-y-2">
@@ -485,10 +485,10 @@ const Settings = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="text-center">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 text-6xl mb-4 animate-bounce" />
-          <div className="text-red-600 text-xl font-semibold">{error}</div>
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-accent text-6xl mb-4 animate-bounce" />
+          <div className="text-primary text-xl font-semibold">{error}</div>
         </div>
       </div>
     );
@@ -502,25 +502,25 @@ const Settings = () => {
   ];
 
   return (
-    <div className="compact-ui min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="compact-ui min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b">
+      <header className="bg-surface border-b border-border-theme">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-accent to-accent/80 rounded-full flex items-center justify-center">
                 <FontAwesomeIcon icon={faCog} className="text-white text-xl" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="text-xl font-semibold text-primary">
                   Settings
                 </h1>
-                <p className="text-gray-600 text-sm">Manage your account preferences and settings</p>
+                <p className="text-secondary text-sm">Manage your account preferences and settings</p>
               </div>
             </div>
             <Link 
               to="/home"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+              className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm"
             >
               <FontAwesomeIcon icon={faHome} />
               Back to Dashboard
@@ -533,7 +533,7 @@ const Settings = () => {
         <div className="grid gap-6 lg:grid-cols-4">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
-            <div className="bg-white border rounded-md p-4">
+            <div className="bg-surface border border-border-theme rounded-md p-4">
               <div className="space-y-2">
                 {tabs.map((tab) => (
                   <button
@@ -541,8 +541,8 @@ const Settings = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm ${
                       activeTab === tab.id
-                        ? 'bg-indigo-600 text-white'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-accent text-white'
+                        : 'text-secondary hover:bg-background'
                     }`}
                   >
                     <FontAwesomeIcon icon={tab.icon} className="w-5 h-5" />
@@ -555,20 +555,20 @@ const Settings = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="bg-white border rounded-md p-4">
+            <div className="bg-surface border border-border-theme rounded-md p-4">
               {activeTab === 'profile' && (
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-accent to-accent/80 rounded-full flex items-center justify-center">
                       <FontAwesomeIcon icon={faUser} className="text-white" />
                     </div>
-                    <h2 className="text-lg font-semibold text-gray-900">Profile Settings</h2>
+                    <h2 className="text-lg font-semibold text-primary">Profile Settings</h2>
                   </div>
 
                   {/* Profile Picture */}
-                  <div className="flex items-center gap-4 p-4 bg-white border rounded-md">
+                  <div className="flex items-center gap-4 p-4 bg-background border border-border-theme rounded-md">
                     <div className="relative">
-                      <div className="w-24 h-24 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center overflow-hidden">
+                      <div className="w-24 h-24 bg-gradient-to-r from-accent to-accent/80 rounded-full flex items-center justify-center overflow-hidden">
                         {settings.profile.profilePicture ? (
                           <img 
                             src={settings.profile.profilePicture} 
@@ -579,7 +579,7 @@ const Settings = () => {
                           <FontAwesomeIcon icon={faUser} className="text-white text-3xl" />
                         )}
                       </div>
-                      <label className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300">
+                      <label className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-r from-secondary to-secondary/80 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300">
                         <FontAwesomeIcon icon={faCamera} className="text-white text-sm" />
                         <input
                           type="file"
@@ -591,76 +591,76 @@ const Settings = () => {
                       </label>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-gray-800">Profile Picture</h3>
-                      <p className="text-gray-600 text-xs">Upload a new profile picture</p>
-                      {saving && <p className="text-blue-600 text-xs">Uploading...</p>}
+                      <h3 className="text-sm font-medium text-primary">Profile Picture</h3>
+                      <p className="text-secondary text-xs">Upload a new profile picture</p>
+                      {saving && <p className="text-accent text-xs">Uploading...</p>}
                     </div>
                   </div>
 
                   {/* Profile Form */}
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Display Name</label>
+                      <label className="block text-sm font-medium text-secondary">Display Name</label>
                       <input
                         type="text"
                         value={settings.profile.displayName}
                         onChange={(e) => handleInputChange('profile', 'displayName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter your display name"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                      <label className="block text-sm font-medium text-secondary">Email Address</label>
                       <input
                         type="email"
                         value={settings.profile.email}
                         onChange={(e) => handleInputChange('profile', 'email', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter your email"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                      <label className="block text-sm font-medium text-secondary">Phone Number</label>
                       <input
                         type="tel"
                         value={settings.profile.phone}
                         onChange={(e) => handleInputChange('profile', 'phone', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter your phone number"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Department</label>
+                      <label className="block text-sm font-medium text-secondary">Department</label>
                       <input
                         type="text"
                         value={settings.profile.department}
                         onChange={(e) => handleInputChange('profile', 'department', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter your department"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Designation</label>
+                      <label className="block text-sm font-medium text-secondary">Designation</label>
                       <input
                         type="text"
                         value={settings.profile.designation}
                         onChange={(e) => handleInputChange('profile', 'designation', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter your designation"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">Office Location</label>
+                      <label className="block text-sm font-medium text-secondary">Office Location</label>
                       <input
                         type="text"
                         value={settings.profile.officeLocation}
                         onChange={(e) => handleInputChange('profile', 'officeLocation', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter your office location"
                       />
                     </div>
@@ -671,35 +671,35 @@ const Settings = () => {
               {activeTab === 'preferences' && (
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-secondary to-secondary/80 rounded-full flex items-center justify-center">
                       <FontAwesomeIcon icon={faPalette} className="text-white" />
                     </div>
-                    <h2 className="text-lg font-semibold text-gray-900">Preferences</h2>
+                    <h2 className="text-lg font-semibold text-primary">Preferences</h2>
                   </div>
 
                   {/* Theme Settings */}
-                  <div className="p-4 bg-white border rounded-md">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">Theme Settings</h3>
+                  <div className="p-4 bg-background border border-border-theme rounded-md">
+                    <h3 className="text-sm font-semibold text-primary mb-3">Theme Settings</h3>
                     <div className="grid gap-4 md:grid-cols-3">
                       {[
-                        { id: 'light', name: 'Light', icon: faSun, color: 'from-yellow-400 to-orange-500' },
-                        { id: 'dark', name: 'Dark', icon: faMoon, color: 'from-gray-600 to-gray-800' },
-                        { id: 'auto', name: 'Auto', icon: faDesktop, color: 'from-blue-500 to-purple-500' }
+                        { id: 'light', name: 'Light', icon: faSun, color: 'from-accent to-accent/80' },
+                        { id: 'dark', name: 'Dark', icon: faMoon, color: 'from-primary to-primary/80' },
+                        { id: 'auto', name: 'Auto', icon: faDesktop, color: 'from-secondary to-secondary/80' }
                       ].map((theme) => (
                         <button
                           key={theme.id}
                           onClick={() => handleThemeChange(theme.id)}
                           className={`p-3 rounded-md border text-sm ${
-                            settings.preferences.theme === theme.id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
+                            settings.preferences.theme === theme.id ? 'border-accent bg-accent/10' : 'border-border-theme hover:border-accent'
                           }`}
                         >
                           <div className={`w-12 h-12 bg-gradient-to-r ${theme.color} rounded-full flex items-center justify-center mx-auto mb-3`}>
                             <FontAwesomeIcon icon={theme.icon} className="text-white text-xl" />
                           </div>
                           <div className="text-center">
-                            <div className="font-medium text-gray-800">{theme.name}</div>
+                            <div className="font-medium text-primary">{theme.name}</div>
                             {settings.preferences.theme === theme.id && (
-                              <FontAwesomeIcon icon={faCheckCircle} className="text-indigo-500 mt-1" />
+                              <FontAwesomeIcon icon={faCheckCircle} className="text-accent mt-1" />
                             )}
                           </div>
                         </button>
@@ -708,8 +708,8 @@ const Settings = () => {
                   </div>
 
                   {/* Language Settings */}
-                  <div className="p-4 bg-white border rounded-md">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">Language Settings</h3>
+                  <div className="p-4 bg-background border border-border-theme rounded-md">
+                    <h3 className="text-sm font-semibold text-primary mb-3">Language Settings</h3>
                     <div className="grid gap-4 md:grid-cols-2">
                       {[
                         { id: 'en', name: 'English', flag: '🇺🇸' },
@@ -721,14 +721,14 @@ const Settings = () => {
                           key={lang.id}
                           onClick={() => handleLanguageChange(lang.id)}
                           className={`p-3 rounded-md border text-sm ${
-                            settings.preferences.language === lang.id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
+                            settings.preferences.language === lang.id ? 'border-accent bg-accent/10' : 'border-border-theme hover:border-accent'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">{lang.flag}</span>
-                            <span className="font-medium text-gray-800">{lang.name}</span>
+                            <span className="font-medium text-primary">{lang.name}</span>
                             {settings.preferences.language === lang.id && (
-                              <FontAwesomeIcon icon={faCheckCircle} className="text-indigo-500 ml-auto" />
+                              <FontAwesomeIcon icon={faCheckCircle} className="text-accent ml-auto" />
                             )}
                           </div>
                         </button>
@@ -737,18 +737,18 @@ const Settings = () => {
                   </div>
 
                   {/* Privacy Settings */}
-                  <div className="p-4 bg-white border rounded-md">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">Privacy Settings</h3>
+                  <div className="p-4 bg-background border border-border-theme rounded-md">
+                    <h3 className="text-sm font-semibold text-primary mb-3">Privacy Settings</h3>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">Profile Visibility</div>
-                          <div className="text-sm text-gray-600">Control who can see your profile</div>
+                          <div className="font-medium text-primary">Profile Visibility</div>
+                          <div className="text-sm text-secondary">Control who can see your profile</div>
                         </div>
                         <select
                           value={settings.preferences.privacy.profileVisibility}
                           onChange={(e) => handlePrivacyToggle('profileVisibility', e.target.value)}
-                          className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                          className="px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary focus:ring-2 focus:ring-accent"
                         >
                           <option value="public">Public</option>
                           <option value="private">Private</option>
@@ -758,13 +758,13 @@ const Settings = () => {
                       
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">Show Email Address</div>
-                          <div className="text-sm text-gray-600">Display email in your profile</div>
+                          <div className="font-medium text-primary">Show Email Address</div>
+                          <div className="text-sm text-secondary">Display email in your profile</div>
                         </div>
                         <button
                           onClick={() => handlePrivacyToggle('showEmail', !settings.preferences.privacy.showEmail)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
-                            settings.preferences.privacy.showEmail ? 'bg-indigo-500' : 'bg-gray-300'
+                            settings.preferences.privacy.showEmail ? 'bg-accent' : 'bg-border-theme'
                           }`}
                         >
                           <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
@@ -775,13 +775,13 @@ const Settings = () => {
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">Show Phone Number</div>
-                          <div className="text-sm text-gray-600">Display phone in your profile</div>
+                          <div className="font-medium text-primary">Show Phone Number</div>
+                          <div className="text-sm text-secondary">Display phone in your profile</div>
                         </div>
                         <button
                           onClick={() => handlePrivacyToggle('showPhone', !settings.preferences.privacy.showPhone)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
-                            settings.preferences.privacy.showPhone ? 'bg-indigo-500' : 'bg-gray-300'
+                            settings.preferences.privacy.showPhone ? 'bg-accent' : 'bg-border-theme'
                           }`}
                         >
                           <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
@@ -797,29 +797,29 @@ const Settings = () => {
               {activeTab === 'security' && (
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-accent to-accent/80 rounded-full flex items-center justify-center">
                       <FontAwesomeIcon icon={faShieldAlt} className="text-white" />
                     </div>
-                    <h2 className="text-lg font-semibold text-gray-900">Security Settings</h2>
+                    <h2 className="text-lg font-semibold text-primary">Security Settings</h2>
                   </div>
 
                   {/* Password Settings */}
-                  <div className="p-4 bg-white border rounded-md">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">Password Settings</h3>
+                  <div className="p-4 bg-background border border-border-theme rounded-md">
+                    <h3 className="text-sm font-semibold text-primary mb-3">Password Settings</h3>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Current Password</label>
+                        <label className="block text-sm font-medium text-secondary">Current Password</label>
                         <div className="relative">
                           <input
                             type={showPassword ? 'text' : 'password'}
                             value={passwordData.currentPassword}
                             onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                            className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-3 py-2 pr-10 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                             placeholder="Enter current password"
                           />
                           <button
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary"
                           >
                             <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                           </button>
@@ -827,23 +827,23 @@ const Settings = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">New Password</label>
+                        <label className="block text-sm font-medium text-secondary">New Password</label>
                         <input
                           type="password"
                           value={passwordData.newPassword}
                           onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                           placeholder="Enter new password"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                        <label className="block text-sm font-medium text-secondary">Confirm New Password</label>
                         <input
                           type="password"
                           value={passwordData.confirmPassword}
                           onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                           placeholder="Confirm new password"
                         />
                       </div>
@@ -851,7 +851,7 @@ const Settings = () => {
                       <button 
                         onClick={handleChangePassword}
                         disabled={saving || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <FontAwesomeIcon icon={faKey} />
                         {saving ? 'Changing Password...' : 'Change Password'}
@@ -860,16 +860,16 @@ const Settings = () => {
                   </div>
 
                   {/* Two-Factor Authentication */}
-                  <div className="p-4 bg-white border rounded-md">
+                  <div className="p-4 bg-background border border-border-theme rounded-md">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-800">Two-Factor Authentication</h3>
-                        <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                        <h3 className="text-lg font-semibold text-primary">Two-Factor Authentication</h3>
+                        <p className="text-sm text-secondary">Add an extra layer of security to your account</p>
                       </div>
                       <button
                         onClick={() => handleSecurityToggle('twoFactorAuth', !settings.security.twoFactorAuth)}
                         className={`w-12 h-6 rounded-full transition-colors duration-300 ${
-                          settings.security.twoFactorAuth ? 'bg-indigo-500' : 'bg-gray-300'
+                          settings.security.twoFactorAuth ? 'bg-accent' : 'bg-border-theme'
                         }`}
                       >
                         <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
@@ -880,18 +880,18 @@ const Settings = () => {
                   </div>
 
                   {/* Session Settings */}
-                  <div className="p-4 bg-white border rounded-md">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">Session Settings</h3>
+                  <div className="p-4 bg-background border border-border-theme rounded-md">
+                    <h3 className="text-sm font-semibold text-primary mb-3">Session Settings</h3>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">Session Timeout</div>
-                          <div className="text-sm text-gray-600">Auto-logout after inactivity</div>
+                          <div className="font-medium text-primary">Session Timeout</div>
+                          <div className="text-sm text-secondary">Auto-logout after inactivity</div>
                         </div>
                         <select
                           value={settings.security.sessionTimeout}
                           onChange={(e) => handleSecurityToggle('sessionTimeout', parseInt(e.target.value))}
-                          className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                          className="px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary focus:ring-2 focus:ring-accent"
                         >
                           <option value={15}>15 minutes</option>
                           <option value={30}>30 minutes</option>
@@ -902,13 +902,13 @@ const Settings = () => {
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">Password Expiry</div>
-                          <div className="text-sm text-gray-600">Days until password expires</div>
+                          <div className="font-medium text-primary">Password Expiry</div>
+                          <div className="text-sm text-secondary">Days until password expires</div>
                         </div>
                         <select
                           value={settings.security.passwordExpiry}
                           onChange={(e) => handleSecurityToggle('passwordExpiry', parseInt(e.target.value))}
-                          className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500"
+                          className="px-3 py-2 border border-border-theme rounded-md text-sm bg-background text-primary focus:ring-2 focus:ring-accent"
                         >
                           <option value={30}>30 days</option>
                           <option value={60}>60 days</option>
@@ -924,25 +924,25 @@ const Settings = () => {
               {activeTab === 'notifications' && (
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-accent to-accent/80 rounded-full flex items-center justify-center">
                       <FontAwesomeIcon icon={faBell} className="text-white" />
                     </div>
-                    <h2 className="text-lg font-semibold text-gray-900">Notification Settings</h2>
+                    <h2 className="text-lg font-semibold text-primary">Notification Settings</h2>
                   </div>
 
                   {/* Notification Channels */}
-                  <div className="p-4 bg-white border rounded-md">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">Notification Channels</h3>
+                  <div className="p-4 bg-background border border-border-theme rounded-md">
+                    <h3 className="text-sm font-semibold text-primary mb-3">Notification Channels</h3>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">Email Notifications</div>
-                          <div className="text-sm text-gray-600">Receive notifications via email</div>
+                          <div className="font-medium text-primary">Email Notifications</div>
+                          <div className="text-sm text-secondary">Receive notifications via email</div>
                         </div>
                         <button
                           onClick={() => handleNotificationToggle('email', !settings.preferences.notifications.email)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
-                            settings.preferences.notifications.email ? 'bg-indigo-500' : 'bg-gray-300'
+                            settings.preferences.notifications.email ? 'bg-accent' : 'bg-border-theme'
                           }`}
                         >
                           <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
@@ -953,13 +953,13 @@ const Settings = () => {
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">Push Notifications</div>
-                          <div className="text-sm text-gray-600">Receive push notifications</div>
+                          <div className="font-medium text-primary">Push Notifications</div>
+                          <div className="text-sm text-secondary">Receive push notifications</div>
                         </div>
                         <button
                           onClick={() => handleNotificationToggle('push', !settings.preferences.notifications.push)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
-                            settings.preferences.notifications.push ? 'bg-indigo-500' : 'bg-gray-300'
+                            settings.preferences.notifications.push ? 'bg-accent' : 'bg-border-theme'
                           }`}
                         >
                           <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
@@ -970,13 +970,13 @@ const Settings = () => {
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-gray-800">SMS Notifications</div>
-                          <div className="text-sm text-gray-600">Receive SMS notifications</div>
+                          <div className="font-medium text-primary">SMS Notifications</div>
+                          <div className="text-sm text-secondary">Receive SMS notifications</div>
                         </div>
                         <button
                           onClick={() => handleNotificationToggle('sms', !settings.preferences.notifications.sms)}
                           className={`w-12 h-6 rounded-full transition-colors duration-300 ${
-                            settings.preferences.notifications.sms ? 'bg-indigo-500' : 'bg-gray-300'
+                            settings.preferences.notifications.sms ? 'bg-accent' : 'bg-border-theme'
                           }`}
                         >
                           <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
@@ -990,11 +990,11 @@ const Settings = () => {
               )}
 
               {/* Save Button */}
-              <div className="flex justify-end pt-4 border-t border-gray-200">
+              <div className="flex justify-end pt-4 border-t border-border-theme">
                 <button
                   onClick={handleSaveSettings}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-secondary inline-flex items-center gap-2 px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FontAwesomeIcon icon={saving ? faSync : faSave} className={saving ? 'animate-spin' : ''} />
                   {saving ? 'Saving...' : 'Save Settings'}

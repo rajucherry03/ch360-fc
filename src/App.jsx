@@ -9,6 +9,7 @@ import { AuthProvider } from './auth.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import { initPerformanceMonitoring } from './utils/performance.js';
 import { preloadCriticalComponents } from './utils/preload.js';
+import { ThemeProvider } from './ThemeContext.jsx';
 
 // Lazy load components for better performance
 const Home = lazy(() => import('./components/Home.jsx'));
@@ -50,20 +51,20 @@ const queryClient = new QueryClient({
 
 // Subtle loading component for route transitions
 const RouteLoadingSpinner = () => (
-  <div className="flex items-center justify-center py-8">
-    <div className="flex items-center space-x-2">
-      <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"></div>
-      <span className="text-sm text-gray-500">Loading...</span>
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface border-t-primary mx-auto mb-4"></div>
+      <p className="text-secondary">Loading CampusHub360...</p>
     </div>
   </div>
 );
 
 // Full screen loading for initial app load
 const FullScreenLoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <div className="flex flex-col items-center space-y-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p className="text-gray-600">Loading CampusHub360...</p>
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-6 w-6 border-2 border-surface border-t-primary mx-auto mb-4"></div>
+      <span className="text-sm text-secondary">Loading...</span>
     </div>
   </div>
 );
@@ -78,12 +79,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <ToastContainer />
-          <Suspense fallback={<FullScreenLoadingSpinner />}>
-            <MainLayout />
-          </Suspense>
-        </Router>
+        <ThemeProvider>
+          <Router>
+            <ToastContainer />
+            <Suspense fallback={<FullScreenLoadingSpinner />}>
+              <MainLayout />
+            </Suspense>
+          </Router>
+        </ThemeProvider>
       </AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
@@ -156,9 +159,9 @@ const MainLayout = () => {
 
 const AppLayout = () => {
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-background dark:bg-background">
       <Navbar />
-      <div className="flex-1 overflow-auto bg-white compact-ui pt-16 md:pt-0">
+      <div className="flex-1 overflow-auto bg-background compact-ui pt-16 md:pt-0">
         <Suspense fallback={<RouteLoadingSpinner />}>
           <Outlet />
         </Suspense>

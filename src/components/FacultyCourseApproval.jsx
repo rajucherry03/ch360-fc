@@ -352,13 +352,13 @@ const FacultyCourseApproval = () => {
         <div className="mt-4">
           <button
             onClick={() => handleAction("Accepted")}
-            className="px-6 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+            className="px-6 py-2 text-white bg-secondary rounded-md hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-opacity-50"
           >
             Accept
           </button>
           <button
             onClick={() => handleAction("Rejected")}
-            className="ml-4 px-6 py-2 text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+            className="ml-4 px-6 py-2 text-white bg-accent rounded-md hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-50"
           >
             Reject
           </button>

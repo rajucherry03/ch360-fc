@@ -38,19 +38,19 @@ const RequestPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-background p-6">
             <div className="page-container">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-4">Submit a Request to HOD</h1>
+            <h1 className="text-2xl font-semibold text-primary mb-4">Submit a Request to HOD</h1>
 
             {/* Request Form */}
             <form onSubmit={handleSubmit} className="compact-card mb-6">
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Request Type</label>
+                    <label className="block text-sm font-medium text-secondary mb-1">Request Type</label>
                     <select
                         name="requestType"
                         value={formData.requestType}
                         onChange={handleChange}
-                        className="border rounded-md w-full p-2 text-sm"
+                        className="border border-border-theme rounded-md w-full p-2 text-sm bg-background text-primary focus:ring-2 focus:ring-accent"
                     >
                         <option value="">Select a request type</option>
                         <option value="Leave Request">Leave Request</option>
@@ -61,31 +61,31 @@ const RequestPage = () => {
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Details</label>
+                    <label className="block text-sm font-medium text-secondary mb-1">Details</label>
                     <textarea
                         name="details"
                         value={formData.details}
                         onChange={handleChange}
-                        className="border rounded-md w-full p-2 text-sm"
+                        className="border border-border-theme rounded-md w-full p-2 text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter the details of your request"
                     ></textarea>
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Requested By</label>
+                    <label className="block text-sm font-medium text-secondary mb-1">Requested By</label>
                     <input
                         type="text"
                         name="requestedBy"
                         value={formData.requestedBy}
                         onChange={handleChange}
-                        className="border rounded-md w-full p-2 text-sm"
+                        className="border border-border-theme rounded-md w-full p-2 text-sm bg-background text-primary placeholder:text-secondary focus:ring-2 focus:ring-accent"
                         placeholder="Enter your name"
                     />
                 </div>
 
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
+                    className="btn-primary px-4 py-2 rounded-md text-sm"
                 >
                     Submit Request
                 </button>
@@ -94,25 +94,25 @@ const RequestPage = () => {
             {/* Submitted Requests Table */}
             {submittedRequests.length > 0 && (
                 <div className="compact-card">
-                    <h2 className="text-sm font-semibold text-gray-900 mb-3">Submitted Requests</h2>
-                    <table className="w-full border-collapse border border-gray-200 text-sm">
-                        <thead className="bg-gray-100 text-gray-700">
+                    <h2 className="text-sm font-semibold text-primary mb-3">Submitted Requests</h2>
+                    <table className="w-full border-collapse border border-border-theme text-sm">
+                        <thead className="bg-surface text-secondary">
                         <tr>
-                            <th className="border border-gray-300 p-2">Request ID</th>
-                            <th className="border border-gray-300 p-2">Type</th>
-                            <th className="border border-gray-300 p-2">Details</th>
-                            <th className="border border-gray-300 p-2">Requested By</th>
-                            <th className="border border-gray-300 p-2">Status</th>
+                            <th className="border border-border-theme p-2">Request ID</th>
+                            <th className="border border-border-theme p-2">Type</th>
+                            <th className="border border-border-theme p-2">Details</th>
+                            <th className="border border-border-theme p-2">Requested By</th>
+                            <th className="border border-border-theme p-2">Status</th>
                         </tr>
                         </thead>
                         <tbody>
                         {submittedRequests.map((req) => (
-                            <tr key={req.id} className="hover:bg-gray-100">
-                                <td className="border border-gray-300 p-2">{req.id}</td>
-                                <td className="border border-gray-300 p-2">{req.requestType}</td>
-                                <td className="border border-gray-300 p-2">{req.details}</td>
-                                <td className="border border-gray-300 p-2">{req.requestedBy}</td>
-                                <td className="border border-gray-300 p-2">{req.status}</td>
+                            <tr key={req.id} className="hover:bg-surface/50">
+                                <td className="border border-border-theme p-2 text-primary">{req.id}</td>
+                                <td className="border border-border-theme p-2 text-primary">{req.requestType}</td>
+                                <td className="border border-border-theme p-2 text-primary">{req.details}</td>
+                                <td className="border border-border-theme p-2 text-primary">{req.requestedBy}</td>
+                                <td className="border border-border-theme p-2 text-primary">{req.status}</td>
                             </tr>
                         ))}
                         </tbody>

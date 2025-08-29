@@ -17,7 +17,8 @@ import {
   faClipboardList,
   faArrowRight,
   faHome,
-  faBookOpen
+  faBookOpen,
+  faUser
 } from "@fortawesome/free-solid-svg-icons";
 import { auth, db } from "../firebase";
 import { collection, doc, getDoc, getDocs, addDoc, query, where, orderBy, startAt, endAt, collectionGroup, documentId } from "firebase/firestore";
@@ -347,28 +348,28 @@ const AttendanceList = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-blue-600 text-6xl mb-6 animate-bounce" />
-          <div className="text-gray-800 text-xl font-semibold">{error}</div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-8">
+        <div className="bg-surface rounded-2xl shadow-xl p-12 text-center border border-border-theme">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-accent text-6xl mb-6 animate-bounce" />
+          <div className="text-primary text-xl font-semibold">{error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="page-container">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-gray-900">Attendance Management</h1>
-            <p className="text-xs text-gray-500 hidden sm:block">Track and manage student attendance for your courses</p>
+            <h1 className="text-2xl font-semibold text-primary">Attendance Management</h1>
+            <p className="text-xs text-secondary hidden sm:block">Track and manage student attendance for your courses</p>
           </div>
           <div className="compact-card py-2 px-3">
             <div className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faUsers} className="text-blue-600 text-sm"/>
-              <span className="text-sm text-gray-700">Today's Classes:</span>
-              <span className="text-base font-semibold text-gray-900">{classSchedules.length}</span>
+              <FontAwesomeIcon icon={faUsers} className="text-accent text-sm"/>
+              <span className="text-sm text-secondary">Today's Classes:</span>
+              <span className="text-base font-semibold text-primary">{classSchedules.length}</span>
             </div>
           </div>
         </div>
@@ -377,7 +378,7 @@ const AttendanceList = () => {
         <div className="compact-card mb-6">
           <div className="flex flex-wrap gap-2">
             {[{key:'schedule',label:'Schedule'},{key:'take',label:'Take Attendance'},{key:'reports',label:'Reports'}].map(tab => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab===tab.key?'bg-blue-600 text-white':'text-gray-700 hover:bg-gray-100'}`}>
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab===tab.key?'bg-accent text-white':'text-secondary hover:bg-surface'}`}>
                 {tab.label}
               </button>
             ))}
@@ -387,62 +388,62 @@ const AttendanceList = () => {
         {/* Date Selection */}
         <div className="compact-card mb-6">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-md bg-accent/10 text-accent flex items-center justify-center">
               <FontAwesomeIcon icon={faCalendarAlt} className="text-sm" />
             </div>
-            <h2 className="text-sm font-semibold text-gray-900">Select Date</h2>
+            <h2 className="text-sm font-semibold text-primary">Select Date</h2>
         </div>
         <DatePicker
           selected={selectedDate}
           onChange={handleDateChange}
             dateFormat="MMMM dd, yyyy"
-            className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 text-sm"
+            className="w-full p-2 border border-border-theme rounded-md focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 bg-background text-primary text-sm"
             placeholderText="Select date for attendance"
           />
         </div>
 
         {/* Today's Schedule */}
         {activeTab==='schedule' && (
-        <div className="bg-white border rounded-md p-4 mb-6 animate-fade-in">
+        <div className="bg-surface border border-border-theme rounded-md p-4 mb-6 animate-fade-in">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
               <FontAwesomeIcon icon={faClock} className="text-white text-xs" />
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Today's Class Schedule ({todayDay})</h2>
+            <h2 className="text-lg font-semibold text-primary">Today's Class Schedule ({todayDay})</h2>
           </div>
           
           {classSchedules.length === 0 ? (
             <div className="text-center py-8">
-              <FontAwesomeIcon icon={faBookOpen} className="text-gray-300 text-4xl mb-4" />
-              <p className="text-gray-500">No classes scheduled for today</p>
+              <FontAwesomeIcon icon={faBookOpen} className="text-secondary text-4xl mb-4" />
+              <p className="text-secondary">No classes scheduled for today</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {classSchedules.map((schedule, index) => (
                 <div 
                   key={schedule.id} 
-                  className="bg-white border rounded-md p-4 hover:shadow cursor-pointer transition"
+                  className="bg-surface border border-border-theme rounded-md p-4 hover:shadow cursor-pointer transition"
                   style={{ animationDelay: `${index * 100}ms` }}
                   onClick={() => handleCourseSelect(schedule)}
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                       <FontAwesomeIcon icon={faChalkboardTeacher} className="text-white text-xs" />
                     </div>
-                    <FontAwesomeIcon icon={faArrowRight} className="text-indigo-400"/>
+                    <FontAwesomeIcon icon={faArrowRight} className="text-accent"/>
                   </div>
                   
-                  <h3 className="text-base font-semibold text-gray-900 mb-2">
+                  <h3 className="text-base font-semibold text-primary mb-2">
                     {schedule.courseName || "Unnamed Course"}
                   </h3>
                   
-                  <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
-                    <FontAwesomeIcon icon={faClock} className="text-indigo-400"/>
+                  <div className="flex items-center gap-2 text-secondary text-sm mb-2">
+                    <FontAwesomeIcon icon={faClock} className="text-accent"/>
                     <span>{schedule.startTime || "N/A"} - {schedule.endTime || "N/A"}</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-gray-600 text-sm">
-                    <FontAwesomeIcon icon={faUsers} className="text-indigo-400"/>
+                  <div className="flex items-center gap-2 text-secondary text-sm">
+                    <FontAwesomeIcon icon={faUsers} className="text-accent"/>
                     <span>{schedule.enrolledStudents?.length || 0} Students</span>
                   </div>
                 </div>
@@ -454,50 +455,49 @@ const AttendanceList = () => {
 
         {/* Attendance Taking Section */}
         {(activeTab==='take') && (
-          <div className="bg-white border rounded-md p-4 mb-6 animate-fade-in">
+          <div className="bg-surface border border-border-theme rounded-md p-4 mb-6 animate-fade-in">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
                   <FontAwesomeIcon icon={faUserGraduate} className="text-white text-xs" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900">Attendance {selectedCourse?`for ${selectedCourse.courseName}`:''}</h2>
+                <h2 className="text-lg font-semibold text-primary">Attendance {selectedCourse?`for ${selectedCourse.courseName}`:''}</h2>
               </div>
               <button
                 onClick={saveAttendance}
                 disabled={savingAttendance}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 disabled:opacity-50"
+                className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm disabled:opacity-50"
               >
-                <FontAwesomeIcon icon={savingAttendance ? faClock : faSave} className={savingAttendance ? "animate-spin" : ""} />
-                {savingAttendance ? "Saving..." : "Save Attendance"}
+                <FontAwesomeIcon icon={faSave} />
+                {savingAttendance ? 'Saving...' : 'Save Attendance'}
               </button>
             </div>
 
             {/* Bulk actions */}
             <div className="flex flex-wrap items-center gap-3 mb-6">
-              <span className="text-sm text-gray-600">Mark all as:</span>
-              <button onClick={() => setBulkStatus('present')} className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200">Present</button>
-              <button onClick={() => setBulkStatus('late')} className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium hover:bg-yellow-200">Late</button>
-              <button onClick={() => setBulkStatus('excused')} className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium hover:bg-blue-200">Excused</button>
-              <button onClick={() => setBulkStatus('absent')} className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium hover:bg-red-200">Absent</button>
+              <span className="text-sm text-secondary">Mark all as:</span>
+              <button onClick={() => setBulkStatus('present')} className="px-3 py-1 rounded-full bg-secondary/10 text-secondary text-xs font-medium hover:bg-secondary/20">Present</button>
+              <button onClick={() => setBulkStatus('late')} className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20">Late</button>
+              <button onClick={() => setBulkStatus('absent')} className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20">Absent</button>
             </div>
 
-            {/* Attendance Statistics */}
+            {/* Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
-              <div className="bg-white/50 rounded-md p-3 text-center">
-                <div className="text-lg font-semibold text-indigo-600">{attendanceStats.total || 0}</div>
-                <div className="text-xs text-gray-600">Total Students</div>
+              <div className="bg-background rounded-md p-3 text-center">
+                <div className="text-lg font-semibold text-accent">{attendanceStats.total || 0}</div>
+                <div className="text-xs text-secondary">Total Students</div>
               </div>
-              <div className="bg-green-50 rounded-md p-3 text-center border border-green-200">
-                <div className="text-lg font-semibold text-green-600">{attendanceStats.present || 0}</div>
-                <div className="text-xs text-gray-600">Present ({attendanceStats.presentPercentage || 0}%)</div>
+              <div className="bg-background rounded-md p-3 text-center border border-border-theme">
+                <div className="text-lg font-semibold text-secondary">{attendanceStats.present || 0}</div>
+                <div className="text-xs text-secondary">Present ({attendanceStats.presentPercentage || 0}%)</div>
               </div>
-              <div className="bg-yellow-50 rounded-md p-3 text-center border border-yellow-200">
-                <div className="text-lg font-semibold text-yellow-600">{attendanceStats.late || 0}</div>
-                <div className="text-xs text-gray-600">Late ({attendanceStats.latePercentage || 0}%)</div>
+              <div className="bg-background rounded-md p-3 text-center border border-border-theme">
+                <div className="text-lg font-semibold text-accent">{attendanceStats.late || 0}</div>
+                <div className="text-xs text-secondary">Late ({attendanceStats.latePercentage || 0}%)</div>
               </div>
-              <div className="bg-red-50 rounded-md p-3 text-center border border-red-200">
-                <div className="text-lg font-semibold text-red-600">{attendanceStats.absent || 0}</div>
-                <div className="text-xs text-gray-600">Absent ({attendanceStats.absentPercentage || 0}%)</div>
+              <div className="bg-background rounded-md p-3 text-center border border-border-theme">
+                <div className="text-lg font-semibold text-accent">{attendanceStats.absent || 0}</div>
+                <div className="text-xs text-secondary">Absent ({attendanceStats.absentPercentage || 0}%)</div>
               </div>
             </div>
 
@@ -506,78 +506,51 @@ const AttendanceList = () => {
               {enrolledStudents.map((student, index) => (
                 <div 
                   key={student.id} 
-                  className="bg-white rounded-md border p-3 animate-fade-in"
+                  className="bg-background rounded-md border border-border-theme p-3 animate-fade-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <img 
-                        src={student.profilePicture || "https://via.placeholder.com/40"} 
-                        alt={student.name}
-                        className="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-100"
-                      />
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUser} className="text-accent text-sm" />
+                      </div>
                       <div>
-                        <h4 className="font-medium text-gray-800 text-sm">{student.name}</h4>
-                        <p className="text-xs text-gray-600">{student.rollNo || student.email}</p>
+                        <h4 className="font-medium text-primary text-sm">{student.name}</h4>
+                        <p className="text-xs text-secondary">{student.rollNo || student.email}</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      {/* Attendance Buttons */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleAttendanceChange(student.id, 'present')}
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium transition ${
-                            attendanceData[student.id]?.present
-                              ? 'bg-green-500 text-white shadow-lg'
-                              : 'bg-gray-100 text-gray-600 hover:bg-green-100'
-                          }`}
-                        >
-                          <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                          Present
-                        </button>
-                        <button
-                          onClick={() => handleAttendanceChange(student.id, 'late')}
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium transition ${
-                            attendanceData[student.id]?.late
-                              ? 'bg-yellow-500 text-white shadow-lg'
-                              : 'bg-gray-100 text-gray-600 hover:bg-yellow-100'
-                          }`}
-                        >
-                          <FontAwesomeIcon icon={faClock} className="mr-1" />
-                          Late
-                        </button>
-                        <button
-                          onClick={() => handleAttendanceChange(student.id, 'excused')}
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium transition ${
-                            attendanceData[student.id]?.excused
-                              ? 'bg-blue-500 text-white shadow-lg'
-                              : 'bg-gray-100 text-gray-600 hover:bg-blue-100'
-                          }`}
-                        >
-                          Excused
-                        </button>
-                        <button
-                          onClick={() => handleAttendanceChange(student.id, 'absent')}
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium transition ${
-                            attendanceData[student.id]?.absent
-                              ? 'bg-red-500 text-white shadow-lg'
-                              : 'bg-gray-100 text-gray-600 hover:bg-red-100'
-                          }`}
-                        >
-                          <FontAwesomeIcon icon={faTimesCircle} className="mr-1" />
-                          Absent
-                        </button>
-                      </div>
-                      
-                      {/* Note Input */}
-                      <input
-                        type="text"
-                        placeholder="Add note..."
-                        value={attendanceData[student.id]?.note || ""}
-                        onChange={(e) => handleNoteChange(student.id, e.target.value)}
-                        className="px-2 py-1 border border-gray-200 rounded-md text-xs focus:ring-2 focus:ring-indigo-500"
-                      />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleAttendanceChange(student.id, 'present')}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                          attendanceData[student.id]?.present
+                            ? 'bg-secondary text-white shadow-lg'
+                            : 'bg-surface text-secondary hover:bg-secondary/10'
+                        }`}
+                      >
+                        Present
+                      </button>
+                      <button
+                        onClick={() => handleAttendanceChange(student.id, 'late')}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                          attendanceData[student.id]?.late
+                            ? 'bg-accent text-white shadow-lg'
+                            : 'bg-surface text-secondary hover:bg-accent/10'
+                        }`}
+                      >
+                        Late
+                      </button>
+                      <button
+                        onClick={() => handleAttendanceChange(student.id, 'absent')}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                          attendanceData[student.id]?.absent
+                            ? 'bg-accent text-white shadow-lg'
+                            : 'bg-surface text-secondary hover:bg-accent/10'
+                        }`}
+                      >
+                        Absent
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -588,35 +561,35 @@ const AttendanceList = () => {
 
         {/* Reports/Actions */}
         {activeTab==='reports' && (
-        <div className="bg-white border rounded-md p-4 animate-fade-in">
+        <div className="bg-surface border border-border-theme rounded-md p-4 animate-fade-in">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
               <FontAwesomeIcon icon={faChartBar} className="text-white text-xs" />
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
+            <h2 className="text-lg font-semibold text-primary">Quick Actions</h2>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
+          <div className="bg-background rounded-xl p-4 border border-border-theme mb-6">
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-600"/>
+                <FontAwesomeIcon icon={faCalendarAlt} className="text-accent"/>
                 <DatePicker
                   selected={reportDate}
                   onChange={(d) => setReportDate(d)}
                   dateFormat="MMMM dd, yyyy"
-                  className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-4 py-2 rounded-lg border border-border-theme focus:ring-2 focus:ring-accent focus:border-accent bg-background text-primary"
                 />
               </div>
-              <button onClick={fetchAttendanceForDate} className="btn-campus-primary px-6 py-2 rounded-xl">Load Records</button>
-              <button onClick={() => exportReportCSV(reportRecords)} className="px-6 py-2 rounded-xl border border-gray-300 hover:bg-gray-100">Export CSV</button>
+              <button onClick={fetchAttendanceForDate} className="btn-primary px-6 py-2 rounded-xl">Load Records</button>
+              <button onClick={() => exportReportCSV(reportRecords)} className="btn-surface px-6 py-2 rounded-xl">Export CSV</button>
             </div>
           </div>
 
           {reportRecords.length === 0 ? (
-            <div className="text-center text-gray-600">No records for the selected date.</div>
+            <div className="text-center text-secondary">No records for the selected date.</div>
           ) : (
             <div className="overflow-auto">
-              <table className="min-w-full bg-white rounded-xl overflow-hidden">
-                <thead className="bg-gray-50 text-left text-sm text-gray-600">
+              <table className="min-w-full bg-surface rounded-xl overflow-hidden border border-border-theme">
+                <thead className="bg-background text-left text-sm text-secondary border-b border-border-theme">
                   <tr>
                     <th className="px-4 py-3">Course</th>
                     <th className="px-4 py-3">Date</th>
@@ -627,12 +600,12 @@ const AttendanceList = () => {
                 </thead>
                 <tbody>
                   {reportRecords.map(r => (
-                    <tr key={r.id} className="border-t border-gray-100 text-sm">
-                      <td className="px-4 py-3">{r.courseName || r.courseId}</td>
-                      <td className="px-4 py-3">{new Date(r.date).toLocaleString()}</td>
-                      <td className="px-4 py-3">{r.presentCount ?? 0}</td>
-                      <td className="px-4 py-3">{r.lateCount ?? 0}</td>
-                      <td className="px-4 py-3">{r.absentCount ?? 0}</td>
+                    <tr key={r.id} className="border-t border-border-theme text-sm">
+                      <td className="px-4 py-3 text-primary">{r.courseName || r.courseId}</td>
+                      <td className="px-4 py-3 text-primary">{new Date(r.date).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-primary">{r.presentCount ?? 0}</td>
+                      <td className="px-4 py-3 text-primary">{r.lateCount ?? 0}</td>
+                      <td className="px-4 py-3 text-primary">{r.absentCount ?? 0}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -643,35 +616,35 @@ const AttendanceList = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
             <Link 
               to="/attendance-reports" 
-              className="group glass rounded-xl shadow-lg p-6 hover-lift animate-fade-in text-center"
+              className="group compact-card rounded-xl shadow-lg p-6 hover-lift animate-fade-in text-center"
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-12 h-12 bg-gradient-to-r from-accent to-accent/80 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <FontAwesomeIcon icon={faChartBar} className="text-white text-xl" />
               </div>
-              <h3 className="text-lg font-bold gradient-text">View Reports</h3>
-              <p className="text-gray-600">Generate attendance reports</p>
+              <h3 className="text-lg font-bold text-primary">View Reports</h3>
+              <p className="text-secondary">Generate attendance reports</p>
             </Link>
             
             <Link 
               to="/courses" 
-              className="group glass rounded-xl shadow-lg p-6 hover-lift animate-fade-in text-center"
+              className="group compact-card rounded-xl shadow-lg p-6 hover-lift animate-fade-in text-center"
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-12 h-12 bg-gradient-to-r from-secondary to-secondary/80 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <FontAwesomeIcon icon={faBookOpen} className="text-white text-xl" />
               </div>
-              <h3 className="text-lg font-bold gradient-text">My Courses</h3>
-              <p className="text-gray-600">Manage your courses</p>
+              <h3 className="text-lg font-bold text-primary">My Courses</h3>
+              <p className="text-secondary">Manage your courses</p>
             </Link>
             
             <Link 
               to="/home" 
-              className="group glass rounded-xl shadow-lg p-6 hover-lift animate-fade-in text-center"
+              className="group compact-card rounded-xl shadow-lg p-6 hover-lift animate-fade-in text-center"
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-12 h-12 bg-gradient-to-r from-primary to-primary/80 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <FontAwesomeIcon icon={faHome} className="text-white text-xl" />
               </div>
-              <h3 className="text-lg font-bold gradient-text">Dashboard</h3>
-              <p className="text-gray-600">Return to dashboard</p>
+              <h3 className="text-lg font-bold text-primary">Dashboard</h3>
+              <p className="text-secondary">Return to dashboard</p>
             </Link>
           </div>
         </div>

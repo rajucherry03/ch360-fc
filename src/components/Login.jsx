@@ -82,18 +82,18 @@ const Login = () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-campus-dark">
-      <div className="glass rounded-xl shadow-lg p-8 w-full max-w-md border border-orange-400">
-        <h2 className="text-2xl font-bold text-center gradient-text mb-6">Login to CampusHub360</h2>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="rounded-xl shadow-lg p-8 w-full max-w-md border border-theme bg-surface">
+        <h2 className="text-2xl font-bold text-center text-primary mb-6">Login to CampusHub360</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label className="block text-gray-300 mb-2" htmlFor="email">
+            <label className="block text-secondary mb-2" htmlFor="email">
               Email Address
             </label>
             <input
               type="email"
               id="email"
-              className="input-campus w-full p-3 rounded-lg"
+              className="w-full p-3 rounded-lg bg-surface border border-theme text-primary placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)]"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -101,13 +101,13 @@ const Login = () => {
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-300 mb-2" htmlFor="password">
+            <label className="block text-secondary mb-2" htmlFor="password">
               Password
             </label>
             <input
               type="password"
               id="password"
-              className="input-campus w-full p-3 rounded-lg"
+              className="w-full p-3 rounded-lg bg-surface border border-theme text-primary placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)]"
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -118,8 +118,8 @@ const Login = () => {
             type="submit"
             className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
               loading
-                ? 'bg-gray-600 cursor-not-allowed'
-                : 'btn-campus-primary'
+                ? 'opacity-70 cursor-not-allowed btn-primary'
+                : 'btn-primary'
             }`}
             disabled={loading}
           >
@@ -130,15 +130,15 @@ const Login = () => {
         <div className="mt-4 text-center">
           <button
             onClick={handleForgetPassword}
-            className="text-orange-400 hover:text-orange-300 hover:underline"
+            className="text-[var(--color-accent)] hover:underline"
           >
             Forgot Password?
           </button>
         </div>
         <div className="mt-6 text-center">
-          <p className="text-gray-400">
+          <p className="text-secondary">
             Don't have an account?{' '}
-            <a href="/signup" className="text-orange-400 hover:text-orange-300 hover:underline">
+            <a href="/signup" className="text-[var(--color-accent)] hover:underline">
               Sign up
             </a>
           </p>

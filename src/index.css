@@ -9,39 +9,108 @@
 
 /* CampusHub360 Professional Theme Colors */
 :root {
-  --primary-blue: #2563eb;
-  --primary-purple: #7c3aed;
-  --secondary-blue: #3b82f6;
-  --secondary-purple: #8b5cf6;
-  --accent-teal: #06b6d4;
-  --accent-emerald: #10b981;
-  --dark-bg: #1a1a2e;
-  --dark-card: #16213e;
-  --gradient-purple: #0f3460;
-  --gradient-blue: #533483;
-  --text-white: #ffffff;
-  --text-gray: #a0a0a0;
-  --card-green: #10b981;
-  --card-blue: #3b82f6;
-  --card-purple: #8b5cf6;
-  --card-teal: #06b6d4;
-  --border-color: #2d3748;
+  /* Light Mode Colors */
+  --color-primary: #1E3A8A; /* Dark Blue */
+  --color-secondary: #0D9488; /* Teal */
+  --color-accent: #F97316; /* Orange */
+  --color-background: #FFFFFF; /* White */
+  --color-surface: #F3F4F6; /* Light Gray */
+  --color-text-primary: #111827; /* Almost Black */
+  --color-text-secondary: #6B7280; /* Gray */
+  --color-border-theme: #E5E7EB; /* Light Gray for borders */
 }
 
-html, body, #root { 
-  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; 
+.dark {
+  /* Dark Mode Colors */
+  --color-primary: #1E40AF; /* Deep Blue */
+  --color-secondary: #14B8A6; /* Teal */
+  --color-accent: #FB923C; /* Orange */
+  --color-background: #000000; /* Pure Black */
+  --color-surface: #1F2937; /* Dark Gray */
+  --color-text-primary: #F9FAFB; /* White */
+  --color-text-secondary: #9CA3AF; /* Gray */
+  --color-border-theme: #374151; /* Darker Gray for borders */
+}
+
+html, body, #root {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Compact UI globals to standardize spacing/typography across pages */
-.compact-ui { background-color: #f9fafb; }
-.compact-ui .page-container { max-width: 80rem; margin-left: auto; margin-right: auto; padding: 1rem; } /* Adjusted padding */
-.compact-ui h1 { font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; color: #111827; } /* Adjusted font size */
-.compact-ui h2 { font-size: 1rem; line-height: 1.5rem; font-weight: 600; color: #111827; }
-.compact-ui p, .compact-ui li, .compact-ui span, .compact-ui label { font-size: 0.875rem; line-height: 1.25rem; color: #374151; }
-.compact-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; } /* Adjusted padding and border-radius */
-.compact-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 0.75rem; } /* Adjusted gap */
-.compact-kpi { display: flex; align-items: center; gap: 0.5rem; } /* Adjusted gap */
-.compact-kpi .icon { width: 1.75rem; height: 1.75rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: #eff6ff; color: #2563eb; } /* Adjusted width/height */
+.compact-ui { background-color: var(--color-background); }
+.compact-ui .page-container { max-width: 80rem; margin-left: auto; margin-right: auto; padding: 1rem; }
+.compact-ui h1 { font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; color: var(--color-text-primary); }
+.compact-ui h2 { font-size: 1rem; line-height: 1.5rem; font-weight: 600; color: var(--color-text-primary); }
+.compact-ui p, .compact-ui li, .compact-ui span, .compact-ui label { font-size: 0.875rem; line-height: 1.25rem; color: var(--color-text-secondary); }
+.compact-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-theme);
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+}
+
+/* Professional Button Styling */
+.btn-primary {
+  background-color: var(--color-accent);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-surface {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-theme);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+.btn-surface:hover {
+  background-color: rgba(243, 244, 246, 0.8);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* CampusHub360 Professional Button styling */
+.btn-campus-primary {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-campus-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
+}
 
 /* Custom animations for StudentList */
 @keyframes fadeInUp {
@@ -84,222 +153,58 @@ html, body, #root {
   }
 }
 
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(37, 99, 235, 0.8);
-  }
-}
-
 .animate-fade-in {
-  animation: fadeInUp 0.6s ease-out forwards;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .animate-slide-in {
-  animation: slideInFromLeft 0.5s ease-out forwards;
+  animation: slideInFromLeft 0.6s ease-out;
 }
 
-.animate-pulse-slow {
+.animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
-/* Unified light shimmer for loading states */
-.shimmer, .loading-campus {
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* CampusHub360 Dark Theme Glass morphism effect (retained for specific uses or removed in components) */
-.glass {
-  background: rgba(26, 26, 46, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 107, 53, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+/* Responsive design utilities */
+@media (max-width: 768px) {
+  .compact-ui .page-container {
+    padding: 0.5rem;
+  }
+  
+  .compact-ui h1 {
+    font-size: 1.125rem;
+  }
+  
+  .compact-ui h2 {
+    font-size: 0.875rem;
+  }
 }
 
-/* CampusHub360 Professional gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Focus states for accessibility */
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-surface:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
-/* CampusHub360 Professional hover effects */
-.hover-lift {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-lift:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-  border-color: rgba(37, 99, 235, 0.5);
-}
-
-/* CampusHub360 Professional Card colors */
-.card-green {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.card-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-}
-
-.card-purple {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-}
-
-.card-teal {
-  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-}
-
-/* CampusHub360 Dark theme backgrounds */
-.bg-campus-dark {
-  background: linear-gradient(135deg, var(--dark-bg) 0%, var(--gradient-purple) 50%, var(--gradient-blue) 100%);
-}
-
-.bg-campus-card {
-  background: var(--dark-card);
-  border: 1px solid var(--border-color);
-}
-
-/* CampusHub360 Professional Navigation styling */
-.nav-campus {
-  background: var(--dark-card);
-  border-bottom: 2px solid var(--primary-blue);
-}
-
-.nav-campus-link {
-  color: var(--text-white);
-  transition: all 0.3s ease;
-}
-
-.nav-campus-link:hover {
-  color: var(--primary-blue);
-  background: rgba(37, 99, 235, 0.1);
-}
-
-.nav-campus-link.active {
-  color: var(--primary-blue);
-  border-bottom: 2px solid var(--primary-blue);
-}
-
-/* CampusHub360 Professional Button styling */
-.btn-campus-primary {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
-  color: var(--text-white);
-  border: none;
-  transition: all 0.3s ease;
-}
-
-.btn-campus-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-}
-
-.btn-campus-secondary {
-  background: var(--dark-card);
-  color: var(--text-white);
-  border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
-}
-
-.btn-campus-secondary:hover {
-  border-color: var(--primary-orange);
-  color: var(--primary-orange);
-}
-
-/* CampusHub360 Professional Input styling */
-.input-campus {
-  background: var(--dark-card);
-  border: 1px solid var(--border-color);
-  color: var(--text-white);
-  transition: all 0.3s ease;
-}
-
-.input-campus:focus {
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.input-campus::placeholder {
-  color: var(--text-gray);
-}
-
-/* CampusHub360 Status indicators */
-.status-active {
-  background: var(--card-green);
-  color: var(--text-white);
-}
-
-.status-pending {
-  background: var(--card-pink);
-  color: var(--text-white);
-}
-
-.status-completed {
-  background: var(--card-blue);
-  color: var(--text-white);
-}
-
-/* Staggered animation delays */
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
-
-/* CampusHub360 Professional Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--dark-card);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--primary-blue);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-purple);
-}
-
-/* CampusHub360 Professional Glow effects */
-.glow-blue {
-  box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
-}
-
-.glow-blue:hover {
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
-}
-
-/* Smooth route transitions */
-.route-transition {
-  transition: opacity 0.2s ease-in-out;
-}
-
-.route-transition-enter {
-  opacity: 0;
-}
-
-.route-transition-enter-active {
-  opacity: 1;
-}
-
-.route-transition-exit {
-  opacity: 1;
-}
-
-.route-transition-exit-active {
-  opacity: 0;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-text-primary: #000000;
+    --color-text-secondary: #333333;
+    --color-border-theme: #000000;
+  }
+  
+  .dark {
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #CCCCCC;
+    --color-border-theme: #FFFFFF;
+  }
 }

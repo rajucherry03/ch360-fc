@@ -305,14 +305,14 @@ const MentorApproval = () => {
                       <td className="px-2 py-2 border">{mentor.rollNo}</td>
                       <td className="px-2 py-2 border">{mentor.studentName}</td>
                       <td className="px-2 py-2 border">{mentor.mentorName}</td>
-                      <td className="px-2 py-2 border">
+                      <td className="px-2 py-2 border border-gray-300">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs text-white ${
-                            mentor.status === "Accepted"
-                              ? "bg-green-500"
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            mentor.status === "Approved"
+                              ? "bg-secondary text-white"
                               : mentor.status === "Rejected"
-                              ? "bg-red-500"
-                              : "bg-yellow-500"
+                              ? "bg-accent text-white"
+                              : "bg-accent/10 text-accent"
                           }`}
                         >
                           {mentor.status}
@@ -325,10 +325,10 @@ const MentorApproval = () => {
                               key={i}
                               className={`inline-block px-2 py-1 rounded-full text-[11px] font-medium text-white ${
                                 coordinator.status === "Accepted"
-                                  ? "bg-green-500"
+                                  ? "bg-secondary"
                                   : coordinator.status === "Rejected"
-                                  ? "bg-red-500"
-                                  : "bg-yellow-500"
+                                  ? "bg-accent"
+                                  : "bg-accent/80"
                               } mr-1`}
                             >
                               {coordinator.name}
@@ -345,10 +345,10 @@ const MentorApproval = () => {
                               key={i}
                               className={`inline-block px-2 py-1 rounded-full text-[11px] font-medium text-white ${
                                 courseFaculty.status === "Accepted"
-                                  ? "bg-green-500"
+                                  ? "bg-secondary"
                                   : courseFaculty.status === "Rejected"
-                                  ? "bg-red-500"
-                                  : "bg-yellow-500"
+                                  ? "bg-accent"
+                                  : "bg-accent/80"
                               } mr-1`}
                             >
                               {courseFaculty.facultyName}
@@ -360,7 +360,7 @@ const MentorApproval = () => {
                       </td>
                       <td className="px-2 py-2 border">
                         <button
-                          className={`bg-green-600 text-white px-3 py-1 rounded-md mr-2 text-sm ${
+                          className={`bg-secondary text-white px-3 py-1 rounded-md mr-2 text-sm ${
                             !allAccepted ? "opacity-50 cursor-not-allowed" : ""
                           }`}
                           onClick={() =>
@@ -371,7 +371,7 @@ const MentorApproval = () => {
                           Accept
                         </button>
                         <button
-                          className={`bg-red-600 text-white px-3 py-1 rounded-md text-sm ${
+                          className={`bg-accent text-white px-3 py-1 rounded-md text-sm ${
                             !allAccepted ? "opacity-50 cursor-not-allowed" : ""
                           }`}
                           onClick={() =>
