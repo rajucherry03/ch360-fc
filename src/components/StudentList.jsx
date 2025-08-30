@@ -29,7 +29,8 @@ import {
   faSync,
   faRocket,
   faArrowLeft,
-  faBuilding
+  faBuilding,
+  faBookOpen
 } from '@fortawesome/free-solid-svg-icons';
 
 // Ultra-fast cache management
@@ -370,32 +371,32 @@ const StudentList = () => {
 
   if (loading && students.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 animate-fade-in">
-            <div className="h-16 bg-gray-200 rounded-2xl mb-6 animate-pulse"></div>
-            <div className="h-8 bg-gray-200 rounded-xl w-1/3 animate-pulse"></div>
+            <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-6 animate-pulse"></div>
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-1/3 animate-pulse"></div>
           </div>
           <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="bg-surface rounded-2xl shadow-xl p-8 animate-fade-in border border-theme" style={{ animationDelay: `${i * 50}ms` }}>
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 animate-fade-in border border-gray-200 dark:border-gray-700" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="flex items-center mb-6">
-                  <div className="w-20 h-20 bg-surface rounded-full mr-6 animate-pulse"></div>
+                  <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full mr-6 animate-pulse"></div>
                   <div className="flex-1">
-                    <div className="h-6 bg-surface rounded w-3/4 mb-3 animate-pulse"></div>
-                    <div className="h-4 bg-surface rounded w-1/2 animate-pulse"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
                   </div>
                 </div>
                 <div className="space-y-3 mb-6">
-                  <div className="h-4 bg-surface rounded animate-pulse"></div>
-                  <div className="h-4 bg-surface rounded w-2/3 animate-pulse"></div>
-                  <div className="h-4 bg-surface rounded w-1/2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
                 </div>
                 <div className="flex gap-3 mb-6">
-                  <div className="h-8 w-20 bg-surface rounded-full animate-pulse"></div>
-                  <div className="h-8 w-24 bg-surface rounded-full animate-pulse"></div>
+                  <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                  <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
                 </div>
-                <div className="h-6 w-24 bg-surface rounded animate-pulse"></div>
+                <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
               </div>
             ))}
           </div>
@@ -406,13 +407,13 @@ const StudentList = () => {
 
   if (error && students.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-8">
-        <div className="bg-surface rounded-2xl shadow-xl p-12 text-center border border-theme">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-[var(--color-primary)] text-6xl mb-6 animate-bounce" />
-          <div className="text-primary text-xl font-semibold mb-6">{error}</div>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center border border-gray-200 dark:border-gray-700">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-600 dark:text-red-400 text-6xl mb-6 animate-bounce" />
+          <div className="text-gray-950 dark:text-white text-xl font-semibold mb-6">{error}</div>
           <button
             onClick={handleRefresh}
-            className="btn-campus-primary inline-flex items-center gap-3 px-8 py-4 rounded-xl shadow-lg transition-all duration-300 text-lg font-medium"
+            className="bg-primary hover:bg-secondary text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300 text-lg font-medium inline-flex items-center gap-3"
           >
             <FontAwesomeIcon icon={faSync} />
             Try Again
@@ -423,49 +424,51 @@ const StudentList = () => {
   }
 
     return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="page-container">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
         
-        {/* Instructor Summary Section */}
+        {/* Instructor Summary Card */}
         {facultyData && (
-          <div className="compact-card mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-surface rounded-full flex items-center justify-center">
-                  <FontAwesomeIcon icon={faChalkboardTeacher} className="text-[var(--color-primary)] text-xl" />
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white">
+                  <FontAwesomeIcon icon={faChalkboardTeacher} className="text-xl" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-primary">{facultyData.name}</h2>
-                  <p className="text-sm text-secondary">{facultyData.designation} • {facultyData.department}</p>
+                  <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-1">{facultyData.name}</h2>
+                  <p className="text-gray-800 dark:text-gray-200 mb-2">{facultyData.designation} • {facultyData.department}</p>
                   {instructorCourses.length > 0 ? (
-                    <p className="text-xs text-secondary">Teaching {instructorCourses.length} course{instructorCourses.length !== 1 ? 's' : ''}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-200">Teaching {instructorCourses.length} course{instructorCourses.length !== 1 ? 's' : ''}</p>
                   ) : (
-                    <p className="text-xs text-orange-600">No instructor courses found for this semester</p>
+                    <p className="text-sm text-orange-600 dark:text-orange-400">No instructor courses found for this semester</p>
                   )}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary">{instructorCourses.length}</div>
-                <div className="text-xs text-secondary">Active Courses</div>
+                <div className="text-2xl font-bold text-gray-950 dark:text-white">{instructorCourses.length}</div>
+                <div className="text-sm text-gray-800 dark:text-gray-200">Active Courses</div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Instructor Course Details Section */}
+        {/* Instructor Course Details Card */}
         {instructorCourses.length > 0 ? (
-          <div className="compact-card mb-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faChalkboardTeacher} className="text-[var(--color-primary)] text-xl" />
-                <h2 className="text-lg font-semibold text-primary">Your Teaching Courses</h2>
-                <span className="bg-surface text-primary text-xs font-medium px-2.5 py-0.5 rounded-full">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+                  <FontAwesomeIcon icon={faChalkboardTeacher} className="text-white text-sm" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-950 dark:text-white">Your Teaching Courses</h2>
+                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-700">
                   {instructorCourses.length} course{instructorCourses.length !== 1 ? 's' : ''}
                 </span>
               </div>
               <button
                 onClick={() => setShowCourseDetails(!showCourseDetails)}
-                className="text-[var(--color-secondary)] hover:underline text-sm font-medium flex items-center gap-2"
+                className="text-gray-800 dark:text-gray-200 hover:text-primary transition-colors text-sm font-medium flex items-center gap-2"
               >
                 {showCourseDetails ? 'Hide Details' : 'Show Details'}
                 <FontAwesomeIcon icon={showCourseDetails ? faArrowLeft : faArrowRight} className="text-xs" />
@@ -473,32 +476,41 @@ const StudentList = () => {
             </div>
             
             {showCourseDetails && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {instructorCourses.map((course, index) => (
                   <div
                     key={course.id}
-                    className="bg-background rounded-lg border border-theme p-4 hover:shadow-md transition-all duration-200"
+                    className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:bg-gray-100 dark:hover:bg-gray-600"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-primary text-sm mb-1">{course.courseName}</h3>
-                        <p className="text-xs text-secondary mb-2">{course.courseCode}</p>
-                        <div className="flex items-center gap-2 text-xs text-secondary">
-                          <FontAwesomeIcon icon={faGraduationCap} className="text-[var(--color-primary)]" />
-                          <span>{course.year} Year - {course.section} Section</span>
-                        </div>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <FontAwesomeIcon icon={faBookOpen} className="text-lg" />
                       </div>
-                      <div className="text-right">
-                        <span className="bg-surface text-primary text-xs font-medium px-2 py-1 rounded-full">
-                          {course.credits || 3} Credits
-                        </span>
+                      <div className="flex items-center gap-2">
+                        <FontAwesomeIcon icon={faArrowRight} className="text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors"/>
                       </div>
                     </div>
                     
-                    <div className="space-y-2 mb-3">
-                      <div className="flex items-center gap-2 text-xs text-secondary">
-                        <FontAwesomeIcon icon={faUsers} className="text-[var(--color-primary)]" />
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-3 group-hover:text-secondary transition-colors">{course.courseName}</h3>
+                      <p className="text-gray-800 dark:text-gray-200 mb-4 text-sm leading-relaxed">{course.courseCode}</p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                        <FontAwesomeIcon icon={faGraduationCap} className="mr-2"/>
+                        {course.year} Year - {course.section} Section
+                      </span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700">
+                        <FontAwesomeIcon icon={faClock} className="mr-2"/>
+                        {course.credits || 3} Credits
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-xs text-gray-800 dark:text-gray-200">
+                        <FontAwesomeIcon icon={faUsers} className="text-primary"/>
                         <span>
                           {course.students && Array.isArray(course.students) 
                             ? course.students.length 
@@ -507,22 +519,22 @@ const StudentList = () => {
                               : 0)} students
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-secondary">
-                        <FontAwesomeIcon icon={faBuilding} className="text-[var(--color-primary)]" />
+                      <div className="flex items-center gap-2 text-xs text-gray-800 dark:text-gray-200">
+                        <FontAwesomeIcon icon={faBuilding} className="text-primary"/>
                         <span>{course.displayDepartment || 'Computer Science & Engineering (Data Science)'}</span>
                       </div>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <button
                         onClick={() => navigate(`/courses/${course.year}/${course.section}/${course.semester}/${course.courseId}`)}
-                        className="flex-1 btn-secondary text-xs font-medium px-3 py-2 rounded-md transition-colors duration-200"
+                        className="flex-1 bg-primary hover:bg-secondary text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all duration-300 hover:shadow-md"
                       >
                         View Course
                       </button>
                       <button
                         onClick={() => navigate(`/attendance/${course.courseId}`)}
-                        className="btn-primary text-xs font-medium px-3 py-2 rounded-md transition-colors duration-200"
+                        className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold px-4 py-2 rounded-xl text-sm transition-all duration-300 border border-gray-200 dark:border-gray-600"
                       >
                         Attendance
                       </button>
@@ -533,14 +545,14 @@ const StudentList = () => {
             )}
           </div>
         ) : (
-          <div className="compact-card mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
             <div className="text-center py-8">
-              <FontAwesomeIcon icon={faChalkboardTeacher} className="text-secondary text-4xl mb-4" />
-              <h3 className="text-lg font-semibold text-primary mb-2">No Instructor Courses Found</h3>
-              <p className="text-secondary mb-4">
+              <FontAwesomeIcon icon={faChalkboardTeacher} className="text-blue-600 dark:text-blue-400 text-4xl mb-4" />
+              <h3 className="text-lg font-semibold text-gray-950 dark:text-white mb-2">No Instructor Courses Found</h3>
+              <p className="text-gray-800 dark:text-gray-200 mb-4">
                 You are not currently assigned as an instructor for any courses this semester.
               </p>
-              <div className="bg-background rounded-lg p-4 text-sm text-primary">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 text-sm text-gray-800 dark:text-gray-200">
                 <p className="mb-2"><strong>Debug Information:</strong></p>
                 <p>• Faculty AuthUid: {facultyData?.authUid || 'Not found'}</p>
                 <p>• Department: {facultyData?.department || 'Not found'}</p>
@@ -551,55 +563,61 @@ const StudentList = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-primary">
-              {instructorCourses.length > 0 ? 'Your Students' : 'All Students'}
-            </h1>
-            <span className="text-xs text-secondary">{loadTime > 0 ? `Loaded in ${loadTime}ms` : 'Loading...'}</span>
-            {isRefreshing && (
-              <span className="flex items-center gap-1 text-xs text-[var(--color-secondary)]">
-                <FontAwesomeIcon icon={faSync} className="animate-spin" />
-                Refreshing
-              </span>
-            )}
-            {instructorCourses.length === 0 && (
-              <span className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-medium px-2 py-1 rounded-full">
-                Fallback Data
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-xl font-semibold text-primary">{filteredStudents.length}</div>
-              <div className="text-xs text-secondary">
-                {instructorCourses.length > 0 ? 'Students in Your Courses' : 'Total Students'}
-              </div>
+        {/* Student Header Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-4 lg:mb-0">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-950 dark:text-white flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                  <FontAwesomeIcon icon={faUsers} className="text-white text-lg"/>
+                </div>
+                {instructorCourses.length > 0 ? 'Your Students' : 'All Students'}
+              </h1>
+              <p className="text-gray-800 dark:text-gray-200 text-base flex items-center gap-2">
+                <FontAwesomeIcon icon={faUserGraduate} className="text-gray-800 dark:text-gray-200"/>
+                {loadTime > 0 ? `Loaded in ${loadTime}ms` : 'Loading...'} • {filteredStudents.length} students found
+                {isRefreshing && (
+                  <span className="flex items-center gap-1 text-xs text-primary">
+                    <FontAwesomeIcon icon={faSync} className="animate-spin" />
+                    Refreshing
+                  </span>
+                )}
+                {instructorCourses.length === 0 && (
+                  <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium px-2 py-1 rounded-full border border-blue-200 dark:border-blue-700">
+                    Fallback Data
+                  </span>
+                )}
+              </p>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="btn-secondary inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm disabled:opacity-50"
-            >
-              <FontAwesomeIcon icon={faSync} className={isRefreshing ? 'animate-spin' : ''} />
-              Refresh
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-sm text-gray-800 dark:text-gray-200">Total Students</p>
+                <p className="text-lg font-semibold text-gray-950 dark:text-white">{filteredStudents.length}</p>
+              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold px-4 py-2 rounded-xl text-sm transition-all duration-300 border border-gray-200 dark:border-gray-600 disabled:opacity-50 inline-flex items-center gap-2"
+              >
+                <FontAwesomeIcon icon={faSync} className={isRefreshing ? 'animate-spin' : ''} />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
 
-
-
-        <div className="compact-card mb-6">
-          <div className="grid gap-3 md:grid-cols-2">
+        {/* Search and Filter Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
+          <div className="grid gap-6 md:grid-cols-2">
             <div>
               <div className="relative">
-                <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary text-sm" />
+                <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 dark:text-gray-200 text-sm" />
                 <input
                   type="text"
                   placeholder="Search students by name, email, or roll number..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 rounded-md border border-theme focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-[var(--color-secondary)] transition-all duration-200 text-sm bg-background text-primary placeholder:text-secondary"
+                  className="w-full pl-10 pr-3 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm bg-gray-50 dark:bg-gray-700 text-gray-950 dark:text-white placeholder:text-gray-800 dark:placeholder:text-gray-200"
                 />
               </div>
             </div>
@@ -607,7 +625,7 @@ const StudentList = () => {
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
-                className="w-full px-3 py-2 rounded-md border border-theme focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-[var(--color-secondary)] transition-all duration-200 text-sm bg-background text-primary"
+                className="w-full px-3 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm bg-gray-50 dark:bg-gray-700 text-gray-950 dark:text-white"
               >
                 <option value="name">Sort by Name</option>
                 <option value="rollNo">Sort by Roll No</option>
@@ -616,41 +634,40 @@ const StudentList = () => {
           </div>
         </div>
 
-        <section className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {/* Student Cards Grid */}
+        <section className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {filteredStudents.map((student, index) => (
             <div
               key={student.id}
-              className="group bg-surface rounded-lg border border-theme p-4 hover:shadow-md animate-fade-in cursor-pointer transition-all"
+              className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in cursor-pointer hover:-translate-y-1"
               style={{ animationDelay: `${index * 50}ms` }}
               onClick={() => navigate(`/students/${student.year || 'II'}/${student.section || 'A'}/${student.id}`)}
             >
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 rounded-full bg-surface text-[var(--color-primary)] flex items-center justify-center mr-3">
-                  <FontAwesomeIcon icon={faUserGraduate} className="text-sm" />
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FontAwesomeIcon icon={faUserGraduate} className="text-lg" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-primary truncate">{student.name || 'Unknown'}</h3>
-                  <p className="text-xs text-secondary">{student.rollNo || 'N/A'}</p>
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className="w-2.5 h-2.5 bg-[var(--color-secondary)] rounded-full mb-1"></div>
-                  <span className="bg-surface text-primary text-xs font-medium px-2 py-1 rounded-full">
-                    {student.totalCourses || 0} course{student.totalCourses !== 1 ? 's' : ''}
-                  </span>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faArrowRight} className="text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors"/>
                 </div>
               </div>
               
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-xs text-secondary">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-[var(--color-primary)] text-sm" />
+              <div>
+                <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-3 group-hover:text-secondary transition-colors truncate">{student.name || 'Unknown'}</h3>
+                <p className="text-gray-800 dark:text-gray-200 mb-4 text-sm leading-relaxed">{student.rollNo || 'N/A'}</p>
+              </div>
+              
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+                  <FontAwesomeIcon icon={faEnvelope} className="text-primary text-sm" />
                   <span className="truncate">{student.email || 'No email'}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-secondary">
-                  <FontAwesomeIcon icon={faIdCard} className="text-[var(--color-primary)] text-sm" />
+                <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+                  <FontAwesomeIcon icon={faIdCard} className="text-primary text-sm" />
                   <span>{student.rollNo || 'No Roll No'}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-secondary">
-                  <FontAwesomeIcon icon={faGraduationCap} className="text-[var(--color-primary)] text-sm" />
+                <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+                  <FontAwesomeIcon icon={faGraduationCap} className="text-primary text-sm" />
                   <span>{student.year || 'N/A'}-{student.section || 'N/A'}</span>
                 </div>
               </div>
@@ -659,20 +676,20 @@ const StudentList = () => {
               {student.enrolledCourses && student.enrolledCourses.length > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <FontAwesomeIcon icon={faChalkboardTeacher} className="text-blue-600 text-xs" />
-                    <span className="text-xs font-medium text-gray-700">Enrolled in Your Courses:</span>
+                    <FontAwesomeIcon icon={faChalkboardTeacher} className="text-blue-600 dark:text-blue-400 text-xs" />
+                    <span className="text-xs font-medium text-gray-800 dark:text-gray-200">Enrolled in Your Courses:</span>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {student.enrolledCourses.slice(0, 2).map((course, courseIndex) => (
-                      <div key={courseIndex} className="bg-blue-50 rounded px-2 py-1">
-                        <div className="text-xs font-medium text-blue-800">{course.courseName}</div>
-                        <div className="text-xs text-blue-600">
+                      <div key={courseIndex} className="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2 border border-blue-200 dark:border-blue-700">
+                        <div className="text-xs font-medium text-blue-800 dark:text-blue-300">{course.courseName}</div>
+                        <div className="text-xs text-blue-600 dark:text-blue-400">
                           {course.courseCode} • {course.section} • {course.semester} sem
                         </div>
                       </div>
                     ))}
                     {student.enrolledCourses.length > 2 && (
-                      <div className="text-xs text-gray-500 text-center">
+                      <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
                         +{student.enrolledCourses.length - 2} more course{student.enrolledCourses.length - 2 !== 1 ? 's' : ''}
                       </div>
                     )}
@@ -680,12 +697,12 @@ const StudentList = () => {
                 </div>
               )}
 
-              <div className="flex gap-2 mb-4">
-                <span className="status-active inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
-                  <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700">
+                  <FontAwesomeIcon icon={faCheckCircle} className="mr-2"/>
                   Active
                 </span>
-                <span className="status-completed inline-flex items-center px-2 py-1 rounded-full text-xs font-medium">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700">
                   {student.year || 'N/A'}-{student.section || 'N/A'}
                 </span>
               </div>
@@ -694,7 +711,7 @@ const StudentList = () => {
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); navigate(`/students/${student.year || 'II'}/${student.section || 'A'}/${student.id}`); }}
-                  className="inline-flex items-center gap-1.5 text-[var(--color-secondary)] hover:underline font-medium transition-all text-sm"
+                  className="inline-flex items-center gap-1.5 text-primary hover:text-secondary font-medium transition-all text-sm"
                 >
                   View Details
                   <FontAwesomeIcon icon={faArrowRight} className="transition-transform group-hover:translate-x-1" />
@@ -704,15 +721,15 @@ const StudentList = () => {
           ))}
         </section>
 
-                      {filteredStudents.length === 0 && !loading && (
-                <div className="text-center py-16">
-                  <div className="bg-surface rounded-2xl shadow-xl p-12 border border-theme">
-                    <FontAwesomeIcon icon={faUsers} className="text-secondary text-6xl mb-6" />
-                    <h3 className="text-2xl font-semibold text-primary mb-3">No students found</h3>
-                    <p className="text-secondary text-lg">Try adjusting your search or filter criteria.</p>
-                  </div>
-                </div>
-              )}
+        {filteredStudents.length === 0 && !loading && (
+          <div className="text-center py-16">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 border border-gray-200 dark:border-gray-700">
+              <FontAwesomeIcon icon={faUsers} className="text-blue-600 dark:text-blue-400 text-6xl mb-6" />
+              <h3 className="text-2xl font-semibold text-gray-950 dark:text-white mb-3">No students found</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-lg">Try adjusting your search or filter criteria.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -244,27 +244,27 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="compact-ui min-h-screen bg-background p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header Skeleton */}
-          <div className="bg-surface border border-border-theme rounded-lg p-6">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 shimmer rounded-full" />
+              <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
               <div className="flex-1">
-                <div className="h-6 shimmer rounded w-1/3 mb-2" />
-                <div className="h-4 shimmer rounded w-1/4 mb-1" />
-                <div className="h-4 shimmer rounded w-1/5" />
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2 animate-pulse" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-1 animate-pulse" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/5 animate-pulse" />
               </div>
             </div>
           </div>
           
           {/* KPI Cards Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-surface border border-border-theme rounded-lg p-4">
-                <div className="w-10 h-10 shimmer rounded-full mx-auto mb-3" />
-                <div className="h-4 shimmer rounded w-1/2 mx-auto mb-2" />
-                <div className="h-6 shimmer rounded w-1/3 mx-auto" />
+              <div key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+                <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl mx-auto mb-4 animate-pulse" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto mb-2 animate-pulse" />
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mx-auto animate-pulse" />
               </div>
             ))}
           </div>
@@ -272,13 +272,13 @@ const ProfilePage = () => {
           {/* Content Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-surface border border-border-theme rounded-lg p-6">
-                <div className="h-5 shimmer rounded w-1/4 mb-4" />
+              <div key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4 animate-pulse" />
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, j) => (
                     <div key={j} className="space-y-2">
-                      <div className="h-4 shimmer rounded w-1/3" />
-                      <div className="h-10 shimmer rounded" />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 animate-pulse" />
+                      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                     </div>
                   ))}
                 </div>
@@ -292,12 +292,12 @@ const ProfilePage = () => {
 
   if (!facultyData) {
     return (
-      <div className="compact-ui min-h-screen bg-background p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-surface border border-border-theme rounded-lg p-6 text-center">
-            <FontAwesomeIcon icon={faUser} className="text-secondary text-6xl mb-4" />
-            <h2 className="text-xl font-semibold text-primary mb-2">Profile Not Found</h2>
-            <p className="text-secondary">No faculty profile found for this user.</p>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-12 text-center shadow-lg">
+            <FontAwesomeIcon icon={faUser} className="text-blue-600 dark:text-blue-400 text-6xl mb-4" />
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-2">Profile Not Found</h2>
+            <p className="text-gray-800 dark:text-gray-200">No faculty profile found for this user.</p>
           </div>
         </div>
       </div>
@@ -305,36 +305,37 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="compact-ui min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-surface border border-border-theme rounded-lg p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Profile Header Card */}
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
           <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <div className="w-20 h-20 bg-gradient-to-r from-accent to-accent/80 rounded-full flex items-center justify-center">
-              <FontAwesomeIcon icon={faUser} className="text-white text-2xl" />
+            <div className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-lg">
+              <FontAwesomeIcon icon={faUser} className="text-white text-3xl" />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-primary mb-2">{facultyData.name}</h1>
-              <p className="text-secondary mb-1">{facultyData.designation}</p>
-              <p className="text-secondary mb-3">{facultyData.department}</p>
-              <div className="flex flex-wrap gap-4 text-sm text-secondary">
-                <span className="flex items-center gap-1">
-                  <FontAwesomeIcon icon={faEnvelope} />
+              <h1 className="text-3xl font-bold text-gray-950 dark:text-white mb-2">{facultyData.name}</h1>
+              <p className="text-gray-800 dark:text-gray-200 mb-1 text-lg">{facultyData.designation}</p>
+              <p className="text-gray-800 dark:text-gray-200 mb-4">{facultyData.department}</p>
+              <div className="flex flex-wrap gap-6 text-sm text-gray-800 dark:text-gray-200">
+                <span className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faEnvelope} className="text-primary"/>
                   {facultyData.emailID}
                 </span>
-                <span className="flex items-center gap-1">
-                  <FontAwesomeIcon icon={faPhone} />
+                <span className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faPhone} className="text-primary"/>
                   {facultyData.contactNo}
                 </span>
-                <span className="flex items-center gap-1">
-                  <FontAwesomeIcon icon={faIdCard} />
+                <span className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faIdCard} className="text-primary"/>
                   {facultyData.empID}
                 </span>
               </div>
             </div>
             <button
               onClick={() => setEditMode(!editMode)}
-              className="btn-primary inline-flex items-center gap-2 px-4 py-2"
+              className="px-6 py-3 bg-primary hover:bg-secondary text-white rounded-xl text-sm font-semibold transition-all duration-300 hover:shadow-md inline-flex items-center gap-2"
             >
               <FontAwesomeIcon icon={editMode ? faSave : faEdit} />
               {editMode ? 'Save' : 'Edit Profile'}
@@ -343,269 +344,283 @@ const ProfilePage = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-surface border border-border-theme rounded-lg p-4 text-center">
-            <div className="w-10 h-10 bg-accent/10 text-accent rounded-full flex items-center justify-center mx-auto mb-3">
-              <FontAwesomeIcon icon={faChalkboardTeacher} />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center shadow-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <FontAwesomeIcon icon={faChalkboardTeacher} className="text-white text-lg" />
             </div>
-            <div className="text-2xl font-bold text-primary">{coursesData.length}</div>
-            <div className="text-sm text-secondary">Courses Teaching</div>
+            <div className="text-3xl font-bold text-gray-950 dark:text-white">{coursesData.length}</div>
+            <div className="text-sm text-gray-800 dark:text-gray-200">Courses Teaching</div>
           </div>
           
-          <div className="bg-surface border border-border-theme rounded-lg p-4 text-center">
-            <div className="w-10 h-10 bg-secondary/10 text-secondary rounded-full flex items-center justify-center mx-auto mb-3">
-              <FontAwesomeIcon icon={faClock} />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center shadow-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <FontAwesomeIcon icon={faClock} className="text-white text-lg" />
             </div>
-            <div className="text-2xl font-bold text-primary">{facultyData.experience}</div>
-            <div className="text-sm text-secondary">Experience</div>
+            <div className="text-3xl font-bold text-gray-950 dark:text-white">{facultyData.experience}</div>
+            <div className="text-sm text-gray-800 dark:text-gray-200">Experience</div>
           </div>
           
-          <div className="bg-surface border border-border-theme rounded-lg p-4 text-center">
-            <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-3">
-              <FontAwesomeIcon icon={faAward} />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center shadow-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <FontAwesomeIcon icon={faAward} className="text-white text-lg" />
             </div>
-            <div className="text-2xl font-bold text-primary">{facultyData.qualifications}</div>
-            <div className="text-sm text-secondary">Qualification</div>
+            <div className="text-3xl font-bold text-gray-950 dark:text-white">{facultyData.qualifications}</div>
+            <div className="text-sm text-gray-800 dark:text-gray-200">Qualification</div>
           </div>
           
-          <div className="bg-surface border border-border-theme rounded-lg p-4 text-center">
-            <div className="w-10 h-10 bg-accent/10 text-accent rounded-full flex items-center justify-center mx-auto mb-3">
-              <FontAwesomeIcon icon={faStar} />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center shadow-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <FontAwesomeIcon icon={faStar} className="text-white text-lg" />
             </div>
-            <div className="text-2xl font-bold text-primary">{facultyData.acadExperience}</div>
-            <div className="text-sm text-secondary">Academic Exp.</div>
+            <div className="text-3xl font-bold text-gray-950 dark:text-white">{facultyData.acadExperience}</div>
+            <div className="text-sm text-gray-800 dark:text-gray-200">Academic Exp.</div>
           </div>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Personal Information */}
-          <div className="bg-surface border border-border-theme rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-              <FontAwesomeIcon icon={faUser} className="text-accent" />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faUser} className="text-white text-sm" />
+              </div>
               Personal Information
             </h2>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Date of Birth</label>
-                  <p className="text-primary">{facultyData.dob}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Date of Birth</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.dob}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Blood Group</label>
-                  <p className="text-primary">{facultyData.bloodGroup}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Blood Group</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.bloodGroup}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Religion</label>
-                  <p className="text-primary">{facultyData.religion}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Religion</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.religion}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Caste</label>
-                  <p className="text-primary">{facultyData.caste}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Caste</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.caste}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Sub Caste</label>
-                  <p className="text-primary">{facultyData.subCaste}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Sub Caste</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.subCaste}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Origin</label>
-                  <p className="text-primary">{facultyData.origin}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Origin</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.origin}</p>
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Local Address</label>
-                <p className="text-primary">{facultyData.localAddress}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Local Address</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.localAddress}</p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Permanent Address</label>
-                <p className="text-primary">{facultyData.permAddress}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Permanent Address</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.permAddress}</p>
               </div>
             </div>
           </div>
 
           {/* Family Information */}
-          <div className="bg-surface border border-border-theme rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-              <FontAwesomeIcon icon={faUsers} className="text-secondary" />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faUsers} className="text-white text-sm" />
+              </div>
               Family Information
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Father's Name</label>
-                <p className="text-primary">{facultyData.fatherName}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Father's Name</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.fatherName}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Mother's Name</label>
-                <p className="text-primary">{facultyData.motherName}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Mother's Name</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.motherName}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Spouse Name</label>
-                <p className="text-primary">{facultyData.spouseName}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Spouse Name</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.spouseName}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Relationship with Spouse</label>
-                <p className="text-primary">{facultyData.relationshipWithSpouse}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Relationship with Spouse</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.relationshipWithSpouse}</p>
               </div>
             </div>
           </div>
 
           {/* Professional Information */}
-          <div className="bg-surface border border-border-theme rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-              <FontAwesomeIcon icon={faBriefcase} className="text-primary" />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faBriefcase} className="text-white text-sm" />
+              </div>
               Professional Information
             </h2>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Employee ID</label>
-                  <p className="text-primary">{facultyData.empID}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Employee ID</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.empID}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Date of Joining</label>
-                  <p className="text-primary">{facultyData.dateOfJoining}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Date of Joining</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.dateOfJoining}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Department</label>
-                  <p className="text-primary">{facultyData.department}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Department</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.department}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Designation</label>
-                  <p className="text-primary">{facultyData.designation}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Designation</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.designation}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Department Role</label>
-                  <p className="text-primary">{facultyData.depRole}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Department Role</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.depRole}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-1">Role Level</label>
-                  <p className="text-primary">{facultyData.roleLevel}</p>
+                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Role Level</label>
+                  <p className="text-gray-950 dark:text-white font-semibold">{facultyData.roleLevel}</p>
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Area of Specialization</label>
-                <p className="text-primary">{facultyData.areaOfSpecialization}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Area of Specialization</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.areaOfSpecialization}</p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Specialization</label>
-                <p className="text-primary">{facultyData.specialization}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Specialization</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.specialization}</p>
               </div>
             </div>
           </div>
 
           {/* Educational Information */}
-          <div className="bg-surface border border-border-theme rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-              <FontAwesomeIcon icon={faGraduationCap} className="text-accent" />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faGraduationCap} className="text-white text-sm" />
+              </div>
               Educational Information
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Qualification</label>
-                <p className="text-primary">{facultyData.qualifications}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Qualification</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.qualifications}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Degree</label>
-                <p className="text-primary">{facultyData.degr}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Degree</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.degr}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Degree Date</label>
-                <p className="text-primary">{facultyData.degrDate}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Degree Date</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.degrDate}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Academic Experience</label>
-                <p className="text-primary">{facultyData.acadExperience}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Academic Experience</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.acadExperience}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Industry Experience</label>
-                <p className="text-primary">{facultyData.industryExperience} years</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Industry Experience</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.industryExperience} years</p>
               </div>
             </div>
           </div>
 
           {/* Banking Information */}
-          <div className="bg-surface border border-border-theme rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-              <FontAwesomeIcon icon={faBank} className="text-secondary" />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faBank} className="text-white text-sm" />
+              </div>
               Banking Information
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Bank Name</label>
-                <p className="text-primary">{facultyData.bankName}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Bank Name</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.bankName}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Branch</label>
-                <p className="text-primary">{facultyData.branch}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Branch</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.branch}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Account Number</label>
-                <p className="text-primary">{facultyData.bankAccountNumber}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Account Number</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.bankAccountNumber}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">IFSC Code</label>
-                <p className="text-primary">{facultyData.ifsc}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">IFSC Code</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.ifsc}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Bank Address</label>
-                <p className="text-primary text-sm">{facultyData.bankAddr}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Bank Address</label>
+                <p className="text-gray-950 dark:text-white font-semibold text-sm">{facultyData.bankAddr}</p>
               </div>
             </div>
           </div>
 
           {/* Government Documents */}
-          <div className="bg-surface border border-border-theme rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-              <FontAwesomeIcon icon={faIdCard} className="text-accent" />
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faIdCard} className="text-white text-sm" />
+              </div>
               Government Documents
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Aadhaar Number</label>
-                <p className="text-primary">{facultyData.aadhaar}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Aadhaar Number</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.aadhaar}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-secondary mb-1">PAN Number</label>
-                <p className="text-primary">{facultyData.pan}</p>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">PAN Number</label>
+                <p className="text-gray-950 dark:text-white font-semibold">{facultyData.pan}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Courses Teaching */}
-        <div className="bg-surface border border-border-theme rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-            <FontAwesomeIcon icon={faChalkboardTeacher} className="text-accent" />
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faChalkboardTeacher} className="text-white text-sm" />
+            </div>
             Courses Currently Teaching
           </h2>
           {coursesData.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {coursesData.map((course, index) => (
-                <div key={course.id} className="border border-border-theme rounded-lg p-4 hover:shadow-md transition-shadow bg-background">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-accent/10 text-accent rounded-full flex items-center justify-center">
-                      <FontAwesomeIcon icon={faBookOpen} />
+                <div key={course.id} className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <FontAwesomeIcon icon={faBookOpen} className="text-white text-sm" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-primary">{course.courseName || `Course ${index + 1}`}</h3>
-                      <p className="text-sm text-secondary">{course.courseCode || course.id}</p>
+                      <h3 className="font-bold text-gray-950 dark:text-white">{course.courseName || `Course ${index + 1}`}</h3>
+                      <p className="text-sm text-gray-800 dark:text-gray-200">{course.courseCode || course.id}</p>
                     </div>
                   </div>
                   {course.description && (
-                    <p className="text-sm text-secondary mb-2">{course.description}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mb-4">{course.description}</p>
                   )}
                   <div className="flex flex-wrap gap-2">
                     {course.credits && (
-                      <span className="px-2 py-1 bg-secondary/10 text-secondary text-xs rounded">
+                      <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs rounded-full border border-green-200 dark:border-green-700">
                         {course.credits} Credits
                       </span>
                     )}
                     {course.semester && (
-                      <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">
+                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs rounded-full border border-blue-200 dark:border-blue-700">
                         Semester {course.semester}
                       </span>
                     )}
@@ -614,39 +629,41 @@ const ProfilePage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <FontAwesomeIcon icon={faBookOpen} className="text-secondary text-4xl mb-4" />
-              <p className="text-secondary">No courses assigned yet.</p>
+            <div className="text-center py-12">
+              <FontAwesomeIcon icon={faBookOpen} className="text-blue-600 dark:text-blue-400 text-6xl mb-4" />
+              <p className="text-gray-800 dark:text-gray-200 text-lg">No courses assigned yet.</p>
             </div>
           )}
         </div>
 
         {/* System Information */}
-        <div className="bg-surface border border-border-theme rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-            <FontAwesomeIcon icon={faShieldAlt} className="text-secondary" />
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-gray-950 dark:text-white mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faShieldAlt} className="text-white text-sm" />
+            </div>
             System Information
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-secondary mb-1">Status</label>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                facultyData.status === 'Active' ? 'bg-secondary/10 text-secondary' : 'bg-accent/10 text-accent'
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Status</label>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                facultyData.status === 'Active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-700'
               }`}>
                 {facultyData.status}
               </span>
             </div>
             <div>
-              <label className="block text-sm font-medium text-secondary mb-1">Profile Complete</label>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                facultyData.profileComplete ? 'bg-secondary/10 text-secondary' : 'bg-accent/10 text-accent'
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Profile Complete</label>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                facultyData.profileComplete ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-700'
               }`}>
                 {facultyData.profileComplete ? 'Complete' : 'Incomplete'}
               </span>
             </div>
             <div>
-              <label className="block text-sm font-medium text-secondary mb-1">Department Key</label>
-              <p className="text-primary">{facultyData.departmentKey}</p>
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Department Key</label>
+              <p className="text-gray-950 dark:text-white font-semibold">{facultyData.departmentKey}</p>
             </div>
           </div>
         </div>

@@ -162,25 +162,25 @@ const Grades = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="page-container">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
           <div className="mb-8 animate-fade-in">
-            <div className="h-12 shimmer rounded-lg mb-4"></div>
-            <div className="h-6 shimmer rounded w-1/3"></div>
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 animate-pulse"></div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 animate-pulse"></div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-surface border border-theme rounded-md p-4 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+              <div key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
                 <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 shimmer rounded-full mr-3"></div>
+                  <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full mr-3 animate-pulse"></div>
                   <div className="flex-1">
-                    <div className="h-4 shimmer rounded w-2/3 mb-2"></div>
-                    <div className="h-3 shimmer rounded w-1/3"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3 animate-pulse"></div>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <div className="h-5 w-14 shimmer rounded"></div>
-                  <div className="h-5 w-20 shimmer rounded"></div>
+                  <div className="h-5 w-14 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                 </div>
               </div>
             ))}
@@ -192,152 +192,159 @@ const Grades = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-6">
         <div className="text-center">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-[var(--color-accent)] text-6xl mb-4 animate-bounce" />
-          <div className="text-primary text-xl font-semibold">{error}</div>
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-600 dark:text-red-400 text-6xl mb-4 animate-bounce" />
+          <div className="text-gray-950 dark:text-white text-xl font-semibold">{error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="page-container">
-        <header className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-primary flex items-center gap-2">
-              <FontAwesomeIcon icon={faGraduationCap} className="text-[var(--color-primary)]"/>
-              Grade Management
-            </h1>
-            <p className="text-xs text-secondary mt-1 flex items-center gap-1">
-              <FontAwesomeIcon icon={faChartBar} className="text-[var(--color-primary)]"/>
-              Manage and track student grades across your courses
-            </p>
-          </div>
-          <div className="compact-card py-2 px-3">
-            <div className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faBookOpen} className="text-[var(--color-primary)]"/>
-              <span className="text-sm text-primary">Total Courses:</span>
-              <span className="text-base font-semibold text-primary">{courses.length}</span>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Grades Header Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-4 lg:mb-0">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-950 dark:text-white flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                  <FontAwesomeIcon icon={faGraduationCap} className="text-white text-lg"/>
+                </div>
+                Grade Management
+              </h1>
+              <p className="text-gray-800 dark:text-gray-200 text-base flex items-center gap-2">
+                <FontAwesomeIcon icon={faChartBar} className="text-gray-800 dark:text-gray-200"/>
+                Manage and track student grades across your courses
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-sm text-gray-800 dark:text-gray-200">Total Courses</p>
+                <p className="text-lg font-semibold text-gray-950 dark:text-white">{courses.length}</p>
+              </div>
             </div>
           </div>
-        </header>
+        </div>
 
-        {/* Grade Statistics Overview */}
-        <div className="compact-card mb-6">
+        {/* Grade Statistics Overview Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-md bg-surface text-[var(--color-primary)] flex items-center justify-center">
-              <FontAwesomeIcon icon={faChartBar} className="text-sm" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faChartBar} className="text-white text-sm" />
             </div>
-            <h2 className="text-sm font-semibold text-primary">Grade Statistics Overview</h2>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Grade Statistics Overview</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="bg-background rounded-md p-3 text-center">
-              <div className="text-lg font-semibold text-[var(--color-primary)]">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-2xl font-bold text-gray-950 dark:text-white">
                 {courses.reduce((sum, course) => sum + (course.totalStudents || 0), 0)}
               </div>
-              <div className="text-xs text-secondary">Total Students</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Total Students</div>
             </div>
-            <div className="bg-background rounded-md p-3 text-center border border-theme">
-              <div className="text-lg font-semibold text-[var(--color-secondary)]">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center border border-green-200 dark:border-green-700">
+              <div className="text-2xl font-bold text-green-800 dark:text-green-300">
                 {Math.round(courses.reduce((sum, course) => sum + (course.averageGrade || 0), 0) / courses.length)}%
               </div>
-              <div className="text-xs text-secondary">Average Grade</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Average Grade</div>
             </div>
-            <div className="bg-background rounded-md p-3 text-center border border-theme">
-              <div className="text-lg font-semibold text-[var(--color-primary)]">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center border border-blue-200 dark:border-blue-700">
+              <div className="text-2xl font-bold text-blue-800 dark:text-blue-300">
                 {courses.reduce((sum, course) => sum + (course.assignments || 0), 0)}
               </div>
-              <div className="text-xs text-secondary">Total Assignments</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Total Assignments</div>
             </div>
-            <div className="bg-background rounded-md p-3 text-center border border-theme">
-              <div className="text-lg font-semibold text-[var(--color-accent)]">
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center border border-purple-200 dark:border-purple-700">
+              <div className="text-2xl font-bold text-purple-800 dark:text-purple-300">
                 {courses.reduce((sum, course) => sum + (course.exams || 0), 0)}
               </div>
-              <div className="text-xs text-secondary">Total Exams</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Total Exams</div>
             </div>
           </div>
         </div>
 
         {/* Courses Grid */}
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course, index) => {
             const gradeInfo = getGradeColor(course.averageGrade || 0);
             return (
               <div 
                 key={course.id} 
-                className="group bg-surface rounded-lg border border-theme p-4 hover:shadow-sm animate-fade-in cursor-pointer"
+                className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in hover:-translate-y-1"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-md bg-surface text-[var(--color-primary)] flex items-center justify-center">
-                    <FontAwesomeIcon icon={faBookOpen} className="text-sm" />
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <FontAwesomeIcon icon={faBookOpen} className="text-lg" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium bg-surface text-primary border border-theme flex items-center gap-1`}>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700 flex items-center gap-1">
                       <FontAwesomeIcon icon={gradeInfo.icon} />
                       {getGradeLetter(course.averageGrade || 0)}
                     </span>
-                    <FontAwesomeIcon icon={faArrowRight} className="text-[var(--color-secondary)] text-sm"/>
+                    <FontAwesomeIcon icon={faArrowRight} className="text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors"/>
                   </div>
                 </div>
                 
-                <h3 className="text-base font-semibold text-primary mb-1">
-                  {course.courseName}
-                </h3>
-                
-                <p className="text-secondary text-sm mb-3">Course Code: {course.courseCode}</p>
-                
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-secondary flex items-center gap-2">
-                      <FontAwesomeIcon icon={faUsers} className="text-[var(--color-primary)]"/>
-                      Students
-                    </span>
-                    <span className="font-semibold text-primary">{course.totalStudents || 0}</span>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-3 group-hover:text-secondary transition-colors">
+                    {course.courseName}
+                  </h3>
+                  
+                  <p className="text-gray-800 dark:text-gray-200 text-sm mb-4">Course Code: {course.courseCode}</p>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                        <FontAwesomeIcon icon={faUsers} className="text-primary"/>
+                        Students
+                      </span>
+                      <span className="font-bold text-gray-950 dark:text-white">{course.totalStudents || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                        <FontAwesomeIcon icon={faChartBar} className="text-primary"/>
+                        Average Grade
+                      </span>
+                      <span className="font-bold text-green-600 dark:text-green-400">{course.averageGrade || 0}%</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                        <FontAwesomeIcon icon={faFileAlt} className="text-primary"/>
+                        Assignments
+                      </span>
+                      <span className="font-bold text-gray-950 dark:text-white">{course.assignments || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                        <FontAwesomeIcon icon={faClipboardList} className="text-primary"/>
+                        Exams
+                      </span>
+                      <span className="font-bold text-gray-950 dark:text-white">{course.exams || 0}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-secondary flex items-center gap-2">
-                      <FontAwesomeIcon icon={faChartBar} className="text-[var(--color-primary)]"/>
-                      Average Grade
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-800 dark:text-gray-200 mb-4">
+                    <span className="flex items-center gap-1">
+                      <FontAwesomeIcon icon={faClock} className="text-primary"/>
+                      Last Updated
                     </span>
-                    <span className={`font-semibold text-[var(--color-secondary)]`}>{course.averageGrade || 0}%</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-secondary flex items-center gap-2">
-                      <FontAwesomeIcon icon={faFileAlt} className="text-[var(--color-primary)]"/>
-                      Assignments
-                    </span>
-                    <span className="font-semibold text-primary">{course.assignments || 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-secondary flex items-center gap-2">
-                      <FontAwesomeIcon icon={faClipboardList} className="text-[var(--color-primary)]"/>
-                      Exams
-                    </span>
-                    <span className="font-semibold text-primary">{course.exams || 0}</span>
+                    <span>{course.lastUpdated || 'N/A'}</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between text-[11px] text-secondary mb-3">
-                  <span className="flex items-center gap-1">
-                    <FontAwesomeIcon icon={faClock} className="text-[var(--color-primary)]"/>
-                    Last Updated
-                  </span>
-                  <span>{course.lastUpdated || 'N/A'}</span>
-                </div>
-                
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Link 
                     to={`/grades/${course.id}`}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[var(--color-secondary)] text-white rounded-md hover:bg-[var(--color-secondary)]/90 text-sm"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 bg-primary hover:bg-secondary text-white rounded-xl transition-all duration-300 hover:shadow-md text-sm font-semibold"
                   >
                     <FontAwesomeIcon icon={faEye} />
                     View Grades
                   </Link>
-                  <button className="px-3 py-2 bg-[var(--color-accent)] text-white rounded-md hover:bg-[var(--color-accent)]/90 text-sm">
+                  <button className="px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-xl transition-all duration-300 border border-gray-200 dark:border-gray-600">
                     <FontAwesomeIcon icon={faEdit} />
                   </button>
                 </div>
@@ -346,80 +353,80 @@ const Grades = () => {
           })}
         </div>
 
-        {/* Quick Actions */}
-        <div className="compact-card mt-6">
+        {/* Quick Actions Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mt-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-md bg-surface text-[var(--color-accent)] flex items-center justify-center">
-              <FontAwesomeIcon icon={faClipboardList} className="text-sm" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faClipboardList} className="text-white text-sm" />
             </div>
-            <h2 className="text-sm font-semibold text-primary">Quick Actions</h2>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Quick Actions</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <button className="group compact-card text-center">
-              <div className="w-10 h-10 bg-surface text-[var(--color-primary)] rounded-md flex items-center justify-center mx-auto mb-2">
-                <FontAwesomeIcon icon={faUpload} className="text-sm" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <button className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faUpload} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-semibold text-primary">Upload Grades</h3>
-              <p className="text-xs text-secondary">Bulk upload student grades</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Upload Grades</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">Bulk upload student grades</p>
             </button>
             
-            <button className="group compact-card text-center">
-              <div className="w-10 h-10 bg-surface text-[var(--color-secondary)] rounded-md flex items-center justify-center mx-auto mb-2">
-                <FontAwesomeIcon icon={faDownload} className="text-sm" />
+            <button className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faDownload} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-semibold text-primary">Export Report</h3>
-              <p className="text-xs text-secondary">Download grade reports</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Export Report</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">Download grade reports</p>
             </button>
             
             <Link 
               to="/exams" 
-              className="group compact-card text-center"
+              className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="w-10 h-10 bg-surface text-[var(--color-accent)] rounded-md flex items-center justify-center mx-auto mb-2">
-                <FontAwesomeIcon icon={faFileAlt} className="text-sm" />
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faFileAlt} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-semibold text-primary">Exam Management</h3>
-              <p className="text-xs text-secondary">Manage course exams</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Exam Management</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">Manage course exams</p>
             </Link>
             
             <Link 
               to="/home" 
-              className="group compact-card text-center"
+              className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="w-10 h-10 bg-surface text-[var(--color-primary)] rounded-md flex items-center justify-center mx-auto mb-2">
-                <FontAwesomeIcon icon={faHome} className="text-sm" />
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faHome} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-semibold text-primary">Dashboard</h3>
-              <p className="text-xs text-secondary">Return to dashboard</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Dashboard</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">Return to dashboard</p>
             </Link>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="compact-card mt-6">
+        {/* Recent Activity Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mt-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-md bg-surface text-[var(--color-primary)] flex items-center justify-center">
-              <FontAwesomeIcon icon={faClock} className="text-sm" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faClock} className="text-white text-sm" />
             </div>
-            <h2 className="text-sm font-semibold text-primary">Recent Grade Activities</h2>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Recent Grade Activities</h2>
           </div>
           
           <div className="space-y-4">
             {courses.slice(0, 3).map((course, index) => (
               <div 
                 key={course.id} 
-                className="flex items-center gap-3 p-3 bg-background rounded-md animate-fade-in"
+                className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl animate-fade-in hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="w-8 h-8 bg-surface text-[var(--color-secondary)] rounded-md flex items-center justify-center">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-sm" />
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-white text-sm" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-primary">Grades updated for {course.courseName}</h4>
-                  <p className="text-xs text-secondary">Average grade: {course.averageGrade || 0}%</p>
+                  <h4 className="text-sm font-bold text-gray-950 dark:text-white">Grades updated for {course.courseName}</h4>
+                  <p className="text-xs text-gray-800 dark:text-gray-200">Average grade: {course.averageGrade || 0}%</p>
                 </div>
-                <div className="text-xs text-secondary">
+                <div className="text-xs text-gray-800 dark:text-gray-200">
                   <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
                   {course.lastUpdated || 'N/A'}
                 </div>

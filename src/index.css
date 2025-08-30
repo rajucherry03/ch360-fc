@@ -10,11 +10,23 @@
 /* CampusHub360 Professional Theme Colors */
 :root {
   /* Light Mode Colors */
-  --color-primary: #1E3A8A; /* Dark Blue */
-  --color-secondary: #0D9488; /* Teal */
-  --color-accent: #F97316; /* Orange */
-  --color-background: #FFFFFF; /* White */
-  --color-surface: #F3F4F6; /* Light Gray */
+  --color-primary: #001d6d; /* Sidebar/Nav main base */
+  --color-secondary: #090088; /* Branding, highlights, and key CTAs */
+  --color-accent: #090088; /* Branding, highlights, and key CTAs */
+  --color-background: #fafbff; /* Content areas and section backgrounds */
+  --color-surface: #fefefe; /* Content areas and section backgrounds */
+  --color-text-primary: #111827; /* Almost Black */
+  --color-text-secondary: #6B7280; /* Gray */
+  --color-border-theme: #E5E7EB; /* Light Gray for borders */
+}
+
+.light {
+  /* Light Mode Colors */
+  --color-primary: #001d6d; /* Sidebar/Nav main base */
+  --color-secondary: #090088; /* Branding, highlights, and key CTAs */
+  --color-accent: #090088; /* Branding, highlights, and key CTAs */
+  --color-background: #fafbff; /* Content areas and section backgrounds */
+  --color-surface: #fefefe; /* Content areas and section backgrounds */
   --color-text-primary: #111827; /* Almost Black */
   --color-text-secondary: #6B7280; /* Gray */
   --color-border-theme: #E5E7EB; /* Light Gray for borders */
@@ -22,21 +34,20 @@
 
 .dark {
   /* Dark Mode Colors */
-  --color-primary: #1E40AF; /* Deep Blue */
-  --color-secondary: #14B8A6; /* Teal */
-  --color-accent: #FB923C; /* Orange */
-  --color-background: #000000; /* Pure Black */
-  --color-surface: #1F2937; /* Dark Gray */
-  --color-text-primary: #F9FAFB; /* White */
-  --color-text-secondary: #9CA3AF; /* Gray */
-  --color-border-theme: #374151; /* Darker Gray for borders */
+  --color-primary: #0f172a; /* Dark sidebar background */
+  --color-secondary: #1e293b; /* Dark secondary */
+  --color-accent: #3b82f6; /* Blue accent for dark mode */
+  --color-background: #0f172a; /* Dark background for main content */
+  --color-surface: #1e293b; /* Dark surface for cards */
+  --color-text-primary: #f8fafc; /* Light text for main content */
+  --color-text-secondary: #cbd5e1; /* Light gray text for main content */
+  --color-border-theme: #334155; /* Dark borders for main content */
 }
 
 html, body, #root {
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
   background-color: var(--color-background);
   color: var(--color-text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Compact UI globals to standardize spacing/typography across pages */
@@ -59,13 +70,23 @@ html, body, #root {
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
-  transition: all 0.3s ease-in-out;
   border: none;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
+
 .btn-primary:hover {
-  opacity: 0.9;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: #F59E0B; /* Orange/amber hover color */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+  border: 2px solid #F59E0B;
+}
+
+/* Dark mode button adjustments */
+.dark .btn-primary:hover {
+  background-color: #3b82f6; /* Blue hover for dark mode */
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
 .btn-secondary {
@@ -74,13 +95,23 @@ html, body, #root {
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
-  transition: all 0.3s ease-in-out;
   border: none;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
+
 .btn-secondary:hover {
-  opacity: 0.9;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: #F59E0B; /* Orange/amber hover color */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+  border: 2px solid #F59E0B;
+}
+
+/* Dark mode secondary button adjustments */
+.dark .btn-secondary:hover {
+  background-color: #3b82f6; /* Blue hover for dark mode */
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
 .btn-surface {
@@ -90,12 +121,15 @@ html, body, #root {
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
-  transition: all 0.3s ease-in-out;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
+
 .btn-surface:hover {
-  background-color: rgba(243, 244, 246, 0.8);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  background-color: #FEF3C7; /* Light orange/amber background */
+  border: 2px solid #F59E0B;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
 }
 
 /* CampusHub360 Professional Button styling */
@@ -103,13 +137,22 @@ html, body, #root {
   background: var(--color-accent);
   color: white;
   border: none;
-  transition: all 0.3s ease;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-campus-primary:hover {
+  background-color: #F59E0B; /* Orange/amber hover color */
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 6px 12px rgba(245, 158, 11, 0.4);
+  border: 2px solid #F59E0B;
+}
+
+/* Dark mode campus primary button adjustments */
+.dark .btn-campus-primary:hover {
+  background-color: #3b82f6; /* Blue hover for dark mode */
+  border: 2px solid #3b82f6;
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
 }
 
 /* Custom animations for StudentList */
@@ -189,8 +232,12 @@ html, body, #root {
 /* Focus states for accessibility */
 .btn-primary:focus,
 .btn-secondary:focus,
-.btn-surface:focus {
-  outline: 2px solid var(--color-accent);
+.btn-surface:focus,
+.nav-link:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--color-accent); /* #090088 for focus ring */
   outline-offset: 2px;
 }
 
@@ -208,3 +255,342 @@ html, body, #root {
     --color-border-theme: #FFFFFF;
   }
 }
+
+/* Navigation Link States */
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: white;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  margin: 0.125rem 0;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+.nav-link:hover:not(.active) {
+  background-color: #D97706; /* Darker orange background for hover state */
+  color: white;
+  transform: none;
+}
+
+.nav-link.active {
+  background-color: #D97706; /* Darker orange background for active state */
+  color: white;
+}
+
+/* Ensure active state takes precedence over hover */
+.nav-link.active:hover {
+  background-color: #D97706; /* Keep active state even on hover */
+  color: white;
+}
+
+/* Dark mode navigation adjustments */
+.dark .nav-link {
+  color: #f8fafc; /* Light text for dark mode */
+}
+
+.dark .nav-link:hover {
+  background-color: #3b82f6; /* Blue hover for dark mode */
+  color: white;
+}
+
+.dark .nav-link.active {
+  background-color: #3b82f6; /* Blue active for dark mode */
+  color: white;
+}
+
+/* Dark mode sidebar specific styling */
+.dark aside {
+  background-color: #020617 !important; /* Darker sidebar background */
+  border-color: #334155 !important; /* Dark border */
+}
+
+.dark aside h2,
+.dark aside h3 {
+  color: #f8fafc !important; /* Light text for sidebar headings */
+}
+
+.dark aside button {
+  color: #f8fafc !important; /* Light text for sidebar buttons */
+}
+
+.dark aside button:hover {
+  background-color: rgba(59, 130, 246, 0.1) !important; /* Light blue hover */
+}
+
+/* Desktop header elegant styling */
+aside .hidden.md\:flex {
+  background: var(--color-primary);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Desktop header brand icon */
+aside .hidden.md\:flex .w-8.h-8 {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+aside .hidden.md\:flex .w-8.h-8:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+/* Dark mode desktop header styling */
+.dark aside .hidden.md\:flex {
+  background: #020617;
+  border-bottom-color: #334155 !important;
+}
+
+.dark aside .hidden.md\:flex .w-8.h-8 {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.dark aside .hidden.md\:flex .w-8.h-8:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+/* Dark mode header section styling */
+.dark aside .py-4 {
+  background-color: #020617 !important; /* Dark header background */
+  border-bottom-color: #334155 !important; /* Dark border */
+}
+
+.dark aside .py-4 h2 {
+  color: #f8fafc !important; /* Light text for header title */
+}
+
+.dark aside .py-4 button {
+  color: #f8fafc !important; /* Light text for header buttons */
+}
+
+.dark aside .py-4 button:hover {
+  background-color: rgba(59, 130, 246, 0.1) !important; /* Light blue hover */
+}
+
+/* Dark mode mobile header styling */
+.dark .bg-primary {
+  background-color: #020617 !important; /* Dark mobile header background */
+  border-bottom-color: #334155 !important; /* Dark border */
+}
+
+.dark .bg-primary h2 {
+  color: #f8fafc !important; /* Light text for mobile header title */
+}
+
+.dark .bg-primary span {
+  color: rgba(248, 250, 252, 0.8) !important; /* Light text with opacity for subtitle */
+}
+
+.dark .bg-primary button {
+  color: #f8fafc !important; /* Light text for mobile header buttons */
+}
+
+.dark .bg-primary button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important; /* White hover for better contrast */
+}
+
+/* Theme toggle button specific styling */
+.bg-primary button[aria-label="Toggle theme"] {
+  color: white !important; /* Always white text */
+}
+
+.bg-primary button[aria-label="Toggle theme"]:hover {
+  color: white !important; /* Always white text on hover */
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Consistent hover background */
+}
+
+.bg-primary button[aria-label="Toggle theme"]:focus {
+  outline: none !important; /* Remove focus outline */
+  box-shadow: none !important; /* Remove focus box shadow */
+}
+
+/* Dark mode theme toggle button */
+.dark .bg-primary button[aria-label="Toggle theme"] {
+  color: white !important; /* Always white text in dark mode */
+}
+
+.dark .bg-primary button[aria-label="Toggle theme"]:hover {
+  color: white !important; /* Always white text on hover in dark mode */
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Consistent hover background */
+}
+
+.dark .bg-primary button[aria-label="Toggle theme"]:focus {
+  outline: none !important; /* Remove focus outline */
+  box-shadow: none !important; /* Remove focus box shadow */
+}
+
+/* Menu toggle button specific styling */
+.bg-primary button[aria-label="Toggle menu"] {
+  color: white !important; /* Always white text */
+}
+
+.bg-primary button[aria-label="Toggle menu"]:hover {
+  color: white !important; /* Always white text on hover */
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Consistent hover background */
+}
+
+.bg-primary button[aria-label="Toggle menu"]:focus {
+  outline: none !important; /* Remove focus outline */
+  box-shadow: none !important; /* Remove focus box shadow */
+}
+
+/* Dark mode menu toggle button */
+.dark .bg-primary button[aria-label="Toggle menu"] {
+  color: white !important; /* Always white text in dark mode */
+}
+
+.dark .bg-primary button[aria-label="Toggle menu"]:hover {
+  color: white !important; /* Always white text on hover in dark mode */
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Consistent hover background */
+}
+
+.dark .bg-primary button[aria-label="Toggle menu"]:focus {
+  outline: none !important; /* Remove focus outline */
+  box-shadow: none !important; /* Remove focus box shadow */
+}
+
+/* Mobile header professional styling */
+@media (max-width: 768px) {
+  .bg-primary {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .bg-primary button {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .bg-primary button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+  }
+  
+  .bg-primary button:hover::before {
+    left: 100%;
+  }
+}
+
+/* Content Area Styling */
+.page-container {
+  background-color: var(--color-background); /* #fafbff */
+}
+
+.main-content {
+  background-color: var(--color-background); /* #fafbff */
+}
+
+/* Card Styling */
+.card {
+  background-color: var(--color-surface); /* #fefefe */
+  border: 1px solid var(--color-border-theme);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  background-color: #FEF3C7; /* Light orange/amber background */
+  border: 2px solid #F59E0B; /* Thicker border for rectangular effect */
+  border-radius: 0.5rem; /* Slightly more rounded corners */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+/* Dark mode card adjustments */
+.dark .card:hover {
+  background-color: #1e40af; /* Dark blue background for dark mode */
+  border: 2px solid #3b82f6; /* Blue border for dark mode */
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+/* Quick Action Cards and Summary Cards */
+.summary-card:hover,
+.quick-action-card:hover,
+.activity-item:hover,
+.notification-item:hover {
+  background-color: #FEF3C7; /* Light orange/amber background */
+  border: 2px solid #F59E0B; /* Thicker border for rectangular effect */
+  border-radius: 0.5rem; /* Slightly more rounded corners */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  transition: all 0.2s ease;
+}
+
+/* Dark mode summary card adjustments */
+.dark .summary-card:hover,
+.dark .quick-action-card:hover,
+.dark .activity-item:hover,
+.dark .notification-item:hover {
+  background-color: #1e40af; /* Dark blue background for dark mode */
+  border: 2px solid #3b82f6; /* Blue border for dark mode */
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Form Input Styling */
+input, select, textarea {
+  background-color: var(--color-surface); /* #fefefe */
+  border: 1px solid var(--color-border-theme);
+  color: var(--color-text-primary);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-accent); /* #090088 for focus */
+  box-shadow: 0 0 0 2px rgba(9, 0, 136, 0.1);
+}
+
+/* Icon Colors */
+.icon-primary {
+  color: var(--color-accent); /* #090088 for primary icons */
+}
+
+.icon-secondary {
+  color: var(--color-text-secondary);
+}
+
+/* Status Colors with new palette */
+.status-success {
+  color: #10B981; /* Keep green for success */
+}
+
+.status-warning {
+  color: #F59E0B; /* Keep amber for warnings */
+}
+
+.status-error {
+  color: #EF4444; /* Keep red for errors */
+}
+
+.status-info {
+  color: var(--color-accent); /* #090088 for info */
+}
+
+/* Link Hover Effects */
+a:hover {
+  color: #F59E0B; /* Orange/amber hover color */
+  transition: color 0.2s ease;
+}
+
+/* Dark mode link adjustments */
+.dark a:hover {
+  color: #3b82f6; /* Blue hover for dark mode */
+}
+
+/* Additional Hover Effects for Interactive Elements */
+.summary-card,
+.quick-action-card,
+.activity-item,
+.notification-item {
+  transition: all 0.2s ease;
+}
+

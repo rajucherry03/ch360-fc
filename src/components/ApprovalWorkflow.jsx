@@ -28,7 +28,8 @@ import {
   faBell,
   faChartBar,
   faBookOpen,
-  faSignOutAlt
+  faSignOutAlt,
+  faUser
 } from '@fortawesome/free-solid-svg-icons';
 import { auth, db } from "../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -97,25 +98,25 @@ const ApprovalWorkflow = ({ username }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
           <div className="mb-8 animate-fade-in">
-            <div className="h-12 shimmer rounded-lg mb-4"></div>
-            <div className="h-6 shimmer rounded w-1/3"></div>
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 animate-pulse"></div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 animate-pulse"></div>
           </div>
           <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="glass rounded-xl shadow-lg p-6 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 animate-fade-in border border-gray-200 dark:border-gray-700" style={{ animationDelay: `${i * 100}ms` }}>
                 <div className="flex items-center">
-                  <div className="w-16 h-16 shimmer rounded-full mr-4"></div>
+                  <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mr-4 animate-pulse"></div>
                   <div className="flex-1">
-                    <div className="h-4 shimmer rounded w-3/4 mb-2"></div>
-                    <div className="h-3 shimmer rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <div className="h-5 w-16 shimmer rounded-full"></div>
-                  <div className="h-5 w-16 shimmer rounded-full"></div>
+                  <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                  <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
                 </div>
               </div>
             ))}
@@ -127,67 +128,67 @@ const ApprovalWorkflow = ({ username }) => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-6">
         <div className="text-center">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-accent text-6xl mb-4 animate-bounce" />
-          <div className="text-primary text-xl font-semibold">{error}</div>
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-600 dark:text-red-400 text-6xl mb-4 animate-bounce" />
+          <div className="text-gray-950 dark:text-white text-xl font-semibold">{error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-surface border-b border-border-theme">
-        <div className="max-w-6xl mx-auto px-6 py-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
-                <FontAwesomeIcon icon={faGraduationCap} className="text-sm" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-primary">Approval Workflow</h1>
-                <p className="text-secondary text-xs">Welcome back, {username || 'Faculty'}</p>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto py-8 px-6">
+        {/* Professional Header Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-lg mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-4 lg:mb-0">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-950 dark:text-white flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                  <FontAwesomeIcon icon={faGraduationCap} className="text-white text-lg"/>
+                </div>
+                Approval Workflow
+              </h1>
+              <p className="text-gray-800 dark:text-gray-200 text-base flex items-center gap-2">
+                <FontAwesomeIcon icon={faUser} className="text-gray-800 dark:text-gray-200"/>
+                Manage course, coordinator, and mentor approvals efficiently
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-sm text-gray-800 dark:text-gray-200">Pending Approvals</p>
+                <p className="text-lg font-semibold text-gray-950 dark:text-white">{approvalStats.pendingCourses + approvalStats.pendingCoordinators + approvalStats.pendingMentors}</p>
               </div>
             </div>
-        <button
-          onClick={handleLogout}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-accent text-white rounded-md hover:bg-accent/90 text-sm"
-        >
-              <FontAwesomeIcon icon={faSignOutAlt} />
-          Logout
-        </button>
           </div>
         </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Approval Statistics Overview */}
-        <div className="bg-surface rounded-md border border-border-theme p-4 mb-6 animate-fade-in">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-accent/10 text-accent rounded-md flex items-center justify-center">
-              <FontAwesomeIcon icon={faChartBar} className="text-sm" />
+        
+        {/* Approval Statistics Overview Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8 animate-fade-in">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faChartBar} className="text-white text-sm" />
             </div>
-            <h2 className="text-sm font-semibold text-primary">Approval Statistics Overview</h2>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Approval Statistics Overview</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="bg-background rounded-md p-3 text-center border border-border-theme">
-              <div className="text-lg font-semibold text-accent">{approvalStats.totalApprovals}</div>
-              <div className="text-xs text-secondary">Total Approvals</div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-2xl font-bold text-gray-950 dark:text-white">{approvalStats.totalApprovals}</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Total Approvals</div>
             </div>
-            <div className="bg-background rounded-md p-3 text-center border border-border-theme">
-              <div className="text-lg font-semibold text-accent">{approvalStats.pendingCourses}</div>
-              <div className="text-xs text-secondary">Pending Courses</div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center border border-blue-200 dark:border-blue-700">
+              <div className="text-2xl font-bold text-blue-800 dark:text-blue-300">{approvalStats.pendingCourses}</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Pending Courses</div>
             </div>
-            <div className="bg-background rounded-md p-3 text-center border border-border-theme">
-              <div className="text-lg font-semibold text-accent">{approvalStats.pendingCoordinators}</div>
-              <div className="text-xs text-secondary">Pending Coordinators</div>
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center border border-green-200 dark:border-green-700">
+              <div className="text-2xl font-bold text-green-800 dark:text-green-300">{approvalStats.pendingCoordinators}</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Pending Coordinators</div>
             </div>
-            <div className="bg-background rounded-md p-3 text-center border border-border-theme">
-              <div className="text-lg font-semibold text-accent">{approvalStats.pendingMentors}</div>
-              <div className="text-xs text-secondary">Pending Mentors</div>
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center border border-purple-200 dark:border-purple-700">
+              <div className="text-2xl font-bold text-purple-800 dark:text-purple-300">{approvalStats.pendingMentors}</div>
+              <div className="text-sm text-gray-800 dark:text-gray-200">Pending Mentors</div>
             </div>
           </div>
         </div>
@@ -197,53 +198,55 @@ const ApprovalWorkflow = ({ username }) => {
           {/* Courses Approval Card */}
           <Link
             to="/courses-approval"
-            className="bg-surface border border-border-theme rounded-md p-4 hover:shadow transition cursor-pointer"
+            className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in hover:-translate-y-1"
             style={{ animationDelay: '0ms' }}
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={faBookOpen} className="text-white text-sm" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <FontAwesomeIcon icon={faBookOpen} className="text-lg" />
               </div>
               <div className="flex items-center gap-2">
                 {(() => {
                   const status = getApprovalStatus(approvalStats.pendingCourses);
                   return (
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color} flex items-center gap-1`}>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700 flex items-center gap-1">
                       <FontAwesomeIcon icon={status.icon} />
                       {approvalStats.pendingCourses}
                     </span>
                   );
                 })()}
-                <FontAwesomeIcon icon={faArrowRight} className="text-accent group-hover:translate-x-1 transition-transform duration-300"/>
+                <FontAwesomeIcon icon={faArrowRight} className="text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors"/>
               </div>
             </div>
             
-            <h3 className="text-base font-semibold text-primary mb-2">
-              Course Approvals
-            </h3>
-            
-            <p className="text-secondary mb-4">
-              Review and approve course proposals, curriculum changes, and course materials.
-            </p>
-            
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-secondary flex items-center gap-2">
-                  <FontAwesomeIcon icon={faClock} className="text-accent"/>
-                  Pending Reviews
-                </span>
-                <span className="font-semibold text-primary">{approvalStats.pendingCourses}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-secondary flex items-center gap-2">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-accent"/>
-                  Completed This Month
-                </span>
-                <span className="font-semibold text-primary">{Math.floor(approvalStats.totalApprovals * 0.4)}</span>
+            <div>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-3 group-hover:text-secondary transition-colors">
+                Course Approvals
+              </h3>
+              
+              <p className="text-gray-800 dark:text-gray-200 mb-4 text-sm leading-relaxed">
+                Review and approve course proposals, curriculum changes, and course materials.
+              </p>
+              
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faClock} className="text-primary"/>
+                    Pending Reviews
+                  </span>
+                  <span className="font-bold text-gray-950 dark:text-white">{approvalStats.pendingCourses}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faCheckCircle} className="text-primary"/>
+                    Completed This Month
+                  </span>
+                  <span className="font-bold text-gray-950 dark:text-white">{Math.floor(approvalStats.totalApprovals * 0.4)}</span>
+                </div>
               </div>
             </div>
             
-            <div className="inline-flex items-center gap-2 w-full justify-center px-3 py-2 bg-accent text-white rounded-md text-sm hover:bg-accent/90">
+            <div className="inline-flex items-center gap-2 w-full justify-center px-4 py-3 bg-primary hover:bg-secondary text-white rounded-xl text-sm transition-all duration-300 hover:shadow-md font-semibold">
               <FontAwesomeIcon icon={faEye} />
               Manage Courses
             </div>
@@ -252,53 +255,55 @@ const ApprovalWorkflow = ({ username }) => {
           {/* Coordinators Approval Card */}
           <Link
             to="/coordinators-approval"
-            className="bg-surface border border-border-theme rounded-md p-4 hover:shadow transition cursor-pointer"
+            className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in hover:-translate-y-1"
             style={{ animationDelay: '100ms' }}
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={faUsers} className="text-white text-sm" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <FontAwesomeIcon icon={faUsers} className="text-lg" />
               </div>
               <div className="flex items-center gap-2">
                 {(() => {
                   const status = getApprovalStatus(approvalStats.pendingCoordinators);
                   return (
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color} flex items-center gap-1`}>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700 flex items-center gap-1">
                       <FontAwesomeIcon icon={status.icon} />
                       {approvalStats.pendingCoordinators}
                     </span>
                   );
                 })()}
-                <FontAwesomeIcon icon={faArrowRight} className="text-accent group-hover:translate-x-1 transition-transform duration-300"/>
+                <FontAwesomeIcon icon={faArrowRight} className="text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors"/>
               </div>
             </div>
             
-            <h3 className="text-base font-semibold text-primary mb-2">
-              Coordinator Approvals
-            </h3>
-            
-            <p className="text-secondary mb-4">
-              Manage coordinator assignments, review applications, and oversee academic sections.
-            </p>
-            
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-secondary flex items-center gap-2">
-                  <FontAwesomeIcon icon={faClock} className="text-accent"/>
-                  Pending Reviews
-                </span>
-                <span className="font-semibold text-primary">{approvalStats.pendingCoordinators}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-secondary flex items-center gap-2">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-accent"/>
-                  Active Coordinators
-                </span>
-                <span className="font-semibold text-primary">{Math.floor(approvalStats.totalApprovals * 0.3)}</span>
+            <div>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-3 group-hover:text-secondary transition-colors">
+                Coordinator Approvals
+              </h3>
+              
+              <p className="text-gray-800 dark:text-gray-200 mb-4 text-sm leading-relaxed">
+                Manage coordinator assignments, review applications, and oversee academic sections.
+              </p>
+              
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faClock} className="text-primary"/>
+                    Pending Reviews
+                  </span>
+                  <span className="font-bold text-gray-950 dark:text-white">{approvalStats.pendingCoordinators}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faCheckCircle} className="text-primary"/>
+                    Active Coordinators
+                  </span>
+                  <span className="font-bold text-gray-950 dark:text-white">{Math.floor(approvalStats.totalApprovals * 0.3)}</span>
+                </div>
               </div>
             </div>
             
-            <div className="inline-flex items-center gap-2 w-full justify-center px-3 py-2 bg-secondary text-white rounded-md text-sm hover:bg-secondary/90">
+            <div className="inline-flex items-center gap-2 w-full justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm transition-all duration-300 hover:shadow-md font-semibold">
               <FontAwesomeIcon icon={faEye} />
               Manage Coordinators
             </div>
@@ -307,151 +312,153 @@ const ApprovalWorkflow = ({ username }) => {
           {/* Mentors Approval Card */}
           <Link
             to="/mentors-approval"
-            className="bg-surface border border-border-theme rounded-md p-4 hover:shadow transition cursor-pointer"
+            className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in hover:-translate-y-1"
             style={{ animationDelay: '200ms' }}
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={faUserGraduate} className="text-white text-sm" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <FontAwesomeIcon icon={faUserGraduate} className="text-lg" />
               </div>
               <div className="flex items-center gap-2">
                 {(() => {
                   const status = getApprovalStatus(approvalStats.pendingMentors);
                   return (
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color} flex items-center gap-1`}>
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700 flex items-center gap-1">
                       <FontAwesomeIcon icon={status.icon} />
                       {approvalStats.pendingMentors}
                     </span>
                   );
                 })()}
-                <FontAwesomeIcon icon={faArrowRight} className="text-accent group-hover:translate-x-1 transition-transform duration-300"/>
+                <FontAwesomeIcon icon={faArrowRight} className="text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors"/>
               </div>
             </div>
             
-            <h3 className="text-base font-semibold text-primary mb-2">
-              Mentor Approvals
-            </h3>
-            
-            <p className="text-secondary mb-4">
-              Review mentor applications, manage mentorship programs, and track student-mentor relationships.
-            </p>
-            
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-secondary flex items-center gap-2">
-                  <FontAwesomeIcon icon={faClock} className="text-accent"/>
-                  Pending Reviews
-                </span>
-                <span className="font-semibold text-primary">{approvalStats.pendingMentors}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-secondary flex items-center gap-2">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-accent"/>
-                  Active Mentors
-                </span>
-                <span className="font-semibold text-primary">{Math.floor(approvalStats.totalApprovals * 0.3)}</span>
+            <div>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-3 group-hover:text-secondary transition-colors">
+                Mentor Approvals
+              </h3>
+              
+              <p className="text-gray-800 dark:text-gray-200 mb-4 text-sm leading-relaxed">
+                Review mentor applications, manage mentorship programs, and track student-mentor relationships.
+              </p>
+              
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faClock} className="text-primary"/>
+                    Pending Reviews
+                  </span>
+                  <span className="font-bold text-gray-950 dark:text-white">{approvalStats.pendingMentors}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faCheckCircle} className="text-primary"/>
+                    Active Mentors
+                  </span>
+                  <span className="font-bold text-gray-950 dark:text-white">{Math.floor(approvalStats.totalApprovals * 0.3)}</span>
+                </div>
               </div>
             </div>
             
-            <div className="inline-flex items-center gap-2 w-full justify-center px-3 py-2 bg-primary text-white rounded-md text-sm hover:bg-primary/90">
+            <div className="inline-flex items-center gap-2 w-full justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm transition-all duration-300 hover:shadow-md font-semibold">
               <FontAwesomeIcon icon={faEye} />
               Manage Mentors
             </div>
           </Link>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-surface border border-border-theme rounded-md p-4 mb-6">
+        {/* Quick Actions Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-              <FontAwesomeIcon icon={faClipboardList} className="text-white text-xs" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faClipboardList} className="text-white text-sm" />
             </div>
-            <h2 className="text-lg font-semibold text-primary">Quick Actions</h2>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Quick Actions</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button className="bg-surface border border-border-theme rounded-md p-4 text-center hover:shadow transition">
-              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center mx-auto mb-3">
-                <FontAwesomeIcon icon={faBell} className="text-white text-sm" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <button className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faBell} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-medium text-primary">Notifications</h3>
-              <p className="text-secondary text-sm">View pending approvals</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Notifications</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">View pending approvals</p>
             </button>
             
-            <button className="bg-surface border border-border-theme rounded-md p-4 text-center hover:shadow transition">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
-                <FontAwesomeIcon icon={faDownload} className="text-white text-sm" />
+            <button className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faDownload} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-medium text-primary">Export Reports</h3>
-              <p className="text-secondary text-sm">Download approval reports</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Export Reports</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">Download approval reports</p>
             </button>
             
             <Link 
               to="/home" 
-              className="bg-surface border border-border-theme rounded-md p-4 text-center hover:shadow transition"
+              className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center mx-auto mb-3">
-                <FontAwesomeIcon icon={faHome} className="text-white text-sm" />
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faHome} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-medium text-primary">Main Dashboard</h3>
-              <p className="text-secondary text-sm">Return to dashboard</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Main Dashboard</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">Return to dashboard</p>
             </Link>
             
-            <button className="bg-surface border border-border-theme rounded-md p-4 text-center hover:shadow transition">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
-                <FontAwesomeIcon icon={faChartBar} className="text-white text-sm" />
+            <button className="group bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <FontAwesomeIcon icon={faChartBar} className="text-white text-lg" />
               </div>
-              <h3 className="text-sm font-medium text-primary">Analytics</h3>
-              <p className="text-secondary text-sm">View approval analytics</p>
+              <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-2">Analytics</h3>
+              <p className="text-gray-800 dark:text-gray-200 text-sm">View approval analytics</p>
             </button>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-surface border border-border-theme rounded-md p-4 animate-fade-in">
+        {/* Recent Activity Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg animate-fade-in">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-              <FontAwesomeIcon icon={faClock} className="text-white text-xs" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faClock} className="text-white text-sm" />
             </div>
-            <h2 className="text-lg font-semibold text-primary">Recent Approval Activities</h2>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Recent Approval Activities</h2>
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-center gap-4 p-3 bg-surface rounded-md border animate-fade-in">
-              <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={faCheckCircle} className="text-white text-xs" />
+            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 animate-fade-in hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faCheckCircle} className="text-white text-sm" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-primary text-sm">Course "Data Structures" approved</h4>
-                <p className="text-xs text-secondary">Course coordinator: Dr. Smith</p>
+                <h4 className="font-bold text-gray-950 dark:text-white text-sm">Course "Data Structures" approved</h4>
+                <p className="text-xs text-gray-800 dark:text-gray-200">Course coordinator: Dr. Smith</p>
               </div>
-              <div className="text-xs text-secondary">
+              <div className="text-xs text-gray-800 dark:text-gray-200">
                 2 hours ago
               </div>
             </div>
             
-            <div className="flex items-center gap-4 p-3 bg-surface rounded-md border animate-fade-in">
-              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={faUserCheck} className="text-white text-xs" />
+            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 animate-fade-in hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faUserCheck} className="text-white text-sm" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-primary text-sm">New coordinator assigned</h4>
-                <p className="text-xs text-secondary">Section A - Computer Science</p>
+                <h4 className="font-bold text-gray-950 dark:text-white text-sm">New coordinator assigned</h4>
+                <p className="text-xs text-gray-800 dark:text-gray-200">Section A - Computer Science</p>
               </div>
-              <div className="text-xs text-secondary">
+              <div className="text-xs text-gray-800 dark:text-gray-200">
                 1 day ago
               </div>
             </div>
             
-            <div className="flex items-center gap-4 p-3 bg-surface rounded-md border animate-fade-in">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={faUserGraduate} className="text-white text-xs" />
+            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 animate-fade-in hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faUserGraduate} className="text-white text-sm" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-primary text-sm">Mentor application received</h4>
-                <p className="text-xs text-secondary">Student: John Doe - CS101</p>
+                <h4 className="font-bold text-gray-950 dark:text-white text-sm">Mentor application received</h4>
+                <p className="text-xs text-gray-800 dark:text-gray-200">Student: John Doe - CS101</p>
               </div>
-              <div className="text-xs text-secondary">
+              <div className="text-xs text-gray-800 dark:text-gray-200">
                 3 days ago
               </div>
             </div>

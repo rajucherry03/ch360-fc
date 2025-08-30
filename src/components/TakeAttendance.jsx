@@ -225,11 +225,11 @@ const TakeAttendance = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 animate-fade-in">
-            <div className="h-16 bg-gray-200 rounded-2xl mb-6 animate-pulse"></div>
-            <div className="h-8 bg-gray-200 rounded-xl w-1/3 animate-pulse"></div>
+            <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-6 animate-pulse"></div>
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-1/3 animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -238,49 +238,75 @@ const TakeAttendance = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-8">
-        <div className="bg-surface rounded-2xl shadow-xl p-12 text-center border border-theme">
-          <div className="text-primary text-xl font-semibold">{error}</div>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center border border-gray-200 dark:border-gray-700">
+          <div className="text-gray-950 dark:text-white text-xl font-semibold">{error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="page-container">
-        <div className="mb-6 flex items-center gap-3">
-          <h1 className="text-2xl font-semibold text-primary">Take Attendance</h1>
-          <p className="text-xs text-secondary">
-            {course ? `${course?.courseName || courseId} • ${course?.year}-${course?.section} • ${course?.semester?.toUpperCase?.() || course?.semester}` : 'Select a course to begin'}
-          </p>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Take Attendance Header Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-4 lg:mb-0">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-950 dark:text-white flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                  <FontAwesomeIcon icon={faClipboardList} className="text-white text-lg"/>
+                </div>
+                Take Attendance
+              </h1>
+              <p className="text-gray-800 dark:text-gray-200 text-base flex items-center gap-2">
+                <FontAwesomeIcon icon={faCalendarAlt} className="text-gray-800 dark:text-gray-200"/>
+                {course ? `${course?.courseName || courseId} • ${course?.year}-${course?.section} • ${course?.semester?.toUpperCase?.() || course?.semester}` : 'Select a course to begin'}
+              </p>
+            </div>
+          </div>
         </div>
 
         {!course && (
           facultyCourses.length === 0 ? (
-            <div className="text-center text-primary bg-surface rounded-2xl shadow-xl p-12 border border-theme">No courses found for your account.</div>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center border border-gray-200 dark:border-gray-700">
+              <FontAwesomeIcon icon={faBookOpen} className="text-blue-600 dark:text-blue-400 text-4xl mb-4" />
+              <h3 className="text-xl font-semibold text-gray-950 dark:text-white mb-2">No courses found</h3>
+              <p className="text-gray-800 dark:text-gray-200">No courses found for your account.</p>
+            </div>
           ) : (
-            <section className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <section className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {facultyCourses.map((c, i) => (
-                <div key={c.id} className="group bg-surface rounded-lg border border-theme p-4 hover:shadow-sm animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 bg-surface text-[var(--color-primary)] rounded-md flex items-center justify-center">
-                      <FontAwesomeIcon icon={faBookOpen} className="text-sm" />
+                <div key={c.id} className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in hover:-translate-y-1" style={{ animationDelay: `${i * 100}ms` }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <FontAwesomeIcon icon={faBookOpen} className="text-lg" />
                     </div>
                   </div>
-                  <h3 className="text-base font-semibold text-primary mb-1">{c.courseName || c.id}</h3>
-                  <p className="text-sm text-secondary mb-2">{c.year}-{c.section} • {c.semester?.toUpperCase?.() || c.semester}</p>
-                  <div className="text-xs text-secondary mb-3">
-                    Enrolled Students: {coursePreview[c.id]?.count ?? 0}
+                  
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-3 group-hover:text-secondary transition-colors">{c.courseName || c.id}</h3>
+                    <p className="text-gray-800 dark:text-gray-200 mb-4 text-sm leading-relaxed">{c.year}-{c.section} • {c.semester?.toUpperCase?.() || c.semester}</p>
+                  </div>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+                      <FontAwesomeIcon icon={faUserGraduate} className="text-primary"/>
+                      <span>Enrolled Students: {coursePreview[c.id]?.count ?? 0}</span>
+                    </div>
                     {coursePreview[c.id]?.items?.length > 0 && (
-                      <ul className="mt-2 space-y-1">
+                      <div className="space-y-1">
                         {coursePreview[c.id].items.map((it, idx) => (
-                          <li key={idx} className="text-primary">• {it.name}{it.rollNo ? ` (${it.rollNo})` : ''}</li>
+                          <div key={idx} className="text-xs text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
+                            • {it.name}{it.rollNo ? ` (${it.rollNo})` : ''}
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </div>
-                  <button onClick={() => setCourse(c)} className="btn-secondary px-3 py-2 rounded-md text-sm">Start</button>
+                  
+                  <button onClick={() => setCourse(c)} className="bg-primary hover:bg-secondary text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all duration-300 hover:shadow-md">Start</button>
                 </div>
               ))}
             </section>
@@ -288,33 +314,65 @@ const TakeAttendance = () => {
         )}
 
         {course && (
-          <section className="compact-card">
+          <section className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
             <div className="flex flex-wrap items-center gap-3 mb-6">
-              <span className="text-xs text-secondary">Mark all as:</span>
-              <button onClick={() => bulk('present')} className="px-2.5 py-1 rounded-full bg-surface text-[var(--color-secondary)] text-xs font-medium hover:bg-background border border-theme">Present</button>
-              <button onClick={() => bulk('late')} className="px-2.5 py-1 rounded-full bg-surface text-[var(--color-accent)] text-xs font-medium hover:bg-background border border-theme">Late</button>
-              <button onClick={() => bulk('excused')} className="px-2.5 py-1 rounded-full bg-surface text-[var(--color-primary)] text-xs font-medium hover:bg-background border border-theme">Excused</button>
-              <button onClick={() => bulk('absent')} className="px-2.5 py-1 rounded-full bg-surface text-[var(--color-accent)] text-xs font-medium hover:bg-background border border-theme">Absent</button>
+              <span className="text-sm text-gray-800 dark:text-gray-200">Mark all as:</span>
+              <button onClick={() => bulk('present')} className="px-4 py-2 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-sm font-medium hover:bg-green-200 dark:hover:bg-green-900/50 border border-green-200 dark:border-green-700 transition-all duration-300">
+                <FontAwesomeIcon icon={faCheckCircle} className="mr-2"/>Present
+              </button>
+              <button onClick={() => bulk('late')} className="px-4 py-2 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 text-sm font-medium hover:bg-orange-200 dark:hover:bg-orange-900/50 border border-orange-200 dark:border-orange-700 transition-all duration-300">
+                <FontAwesomeIcon icon={faClock} className="mr-2"/>Late
+              </button>
+              <button onClick={() => bulk('excused')} className="px-4 py-2 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700 transition-all duration-300">
+                Excused
+              </button>
+              <button onClick={() => bulk('absent')} className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-700 transition-all duration-300">
+                <FontAwesomeIcon icon={faTimesCircle} className="mr-2"/>Absent
+              </button>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
               {students.map((s) => (
-                <div key={s.id} className="bg-background border border-theme rounded-md p-3">
+                <div key={s.id} className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-surface text-[var(--color-primary)] rounded-md flex items-center justify-center">
-                        <FontAwesomeIcon icon={faUserGraduate} className="text-xs" />
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
+                        <FontAwesomeIcon icon={faUserGraduate} className="text-white text-sm" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-primary">{s.name || s.id}</div>
-                        <div className="text-xs text-secondary">{s.rollNo || s.email}</div>
+                        <div className="text-sm font-bold text-gray-950 dark:text-white">{s.name || s.id}</div>
+                        <div className="text-xs text-gray-800 dark:text-gray-200">{s.rollNo || s.email}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => mark(s.id, 'present')} className={`px-2.5 py-1 rounded-full text-xs font-medium ${attendance[s.id]?.present ? 'bg-[var(--color-secondary)] text-white' : 'bg-surface text-secondary hover:bg-background border border-theme'}`}><FontAwesomeIcon icon={faCheckCircle} className="mr-1"/>Present</button>
-                      <button onClick={() => mark(s.id, 'late')} className={`px-2.5 py-1 rounded-full text-xs font-medium ${attendance[s.id]?.late ? 'bg-[var(--color-accent)] text-white' : 'bg-surface text-secondary hover:bg-background border border-theme'}`}><FontAwesomeIcon icon={faClock} className="mr-1"/>Late</button>
-                      <button onClick={() => mark(s.id, 'excused')} className={`px-2.5 py-1 rounded-full text-xs font-medium ${attendance[s.id]?.excused ? 'bg-[var(--color-primary)] text-white' : 'bg-surface text-secondary hover:bg-background border border-theme'}`}>Excused</button>
-                      <button onClick={() => mark(s.id, 'absent')} className={`px-2.5 py-1 rounded-full text-xs font-medium ${attendance[s.id]?.absent ? 'bg-[var(--color-accent)] text-white' : 'bg-surface text-secondary hover:bg-background border border-theme'}`}><FontAwesomeIcon icon={faTimesCircle} className="mr-1"/>Absent</button>
+                      <button onClick={() => mark(s.id, 'present')} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                        attendance[s.id]?.present 
+                          ? 'bg-green-600 text-white shadow-lg' 
+                          : 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-green-100 dark:hover:bg-green-900/30 border border-gray-200 dark:border-gray-600'
+                      }`}>
+                        <FontAwesomeIcon icon={faCheckCircle} className="mr-2"/>Present
+                      </button>
+                      <button onClick={() => mark(s.id, 'late')} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                        attendance[s.id]?.late 
+                          ? 'bg-orange-600 text-white shadow-lg' 
+                          : 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-orange-100 dark:hover:bg-orange-900/30 border border-gray-200 dark:border-gray-600'
+                      }`}>
+                        <FontAwesomeIcon icon={faClock} className="mr-2"/>Late
+                      </button>
+                      <button onClick={() => mark(s.id, 'excused')} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                        attendance[s.id]?.excused 
+                          ? 'bg-blue-600 text-white shadow-lg' 
+                          : 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-gray-200 dark:border-gray-600'
+                      }`}>
+                        Excused
+                      </button>
+                      <button onClick={() => mark(s.id, 'absent')} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                        attendance[s.id]?.absent 
+                          ? 'bg-red-600 text-white shadow-lg' 
+                          : 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-red-100 dark:hover:bg-red-900/30 border border-gray-200 dark:border-gray-600'
+                      }`}>
+                        <FontAwesomeIcon icon={faTimesCircle} className="mr-2"/>Absent
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -322,7 +380,7 @@ const TakeAttendance = () => {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <button onClick={save} disabled={saving} className="btn-primary px-4 py-2 rounded-md text-sm disabled:opacity-50">
+              <button onClick={save} disabled={saving} className="bg-primary hover:bg-secondary text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all duration-300 hover:shadow-md disabled:opacity-50">
                 {saving ? 'Saving...' : 'Save Attendance'}
               </button>
             </div>

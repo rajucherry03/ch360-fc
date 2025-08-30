@@ -1,2 +1,0 @@
-import{j as o}from"./query-_HUGc1jU.js";import{u as r,r as e}from"./router-CGnu6c2M.js";import{A as s}from"./firebase-CGo28arV.js";import{a}from"./index-C7a0D0cT.js";import"./vendor-Dazix4UH.js";import"./ui-ZG8wUPwK.js";const g=()=>{const t=r();return e.useEffect(()=>{(async()=>{try{await s(a)}finally{t("/",{replace:!0})}})()},[t]),o.jsx("div",{className:"min-h-screen flex items-center justify-center",children:o.jsx("p",{children:"Signing out..."})})};export{g as default};
-//# sourceMappingURL=Logout-BnVSTGUC.js.map
